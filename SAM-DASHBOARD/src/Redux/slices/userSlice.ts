@@ -114,13 +114,14 @@ export const getAllUser = createAsyncThunk<MultiUserResponse>(
 // Update User
 export const updateUser = createAsyncThunk<
   UserResponse,
-  { id: string; data: Partial<User> }
->("user/update", async ({ id, data }, { rejectWithValue }) => {
+  { userId: string; data: Partial<User> }
+>("user/update", async ({ userId, data }, { rejectWithValue }) => {
   try {
-    const token = getToken();
-    const response = await axios.put(`${uri}/api/v1/users/${id}`, data, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    // const token = getToken();
+    const response = await axios.put(
+      `${uri}/api/v1/update/user/${userId}`,
+      data
+    );
     return response.data;
   } catch (error: any) {
     return rejectWithValue(error.response?.data ?? error.message);
@@ -129,15 +130,10 @@ export const updateUser = createAsyncThunk<
 // Delete User
 export const deleteUser = createAsyncThunk(
   "history/deleteHistory",
-  async ({ data }: { data: string[] }, thunkAPI) => {
+  async ({ data }: { data: string }, thunkAPI) => {
     try {
-      const token = await localStorage.getItem("token");
-      const response = await axios.delete(`${uri}/api/v2/destroy`, {
-        data: { ids: data },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      // const token = await localStorage.getItem("token");
+      const response = await axios.delete(`${uri}/api/v1/delete/user/${data}`);
       return response.data;
     } catch (err: any) {
       return thunkAPI.rejectWithValue(err.response?.data || err.message);

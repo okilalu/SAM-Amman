@@ -1,53 +1,44 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import CustomTable from "../components/CustomTable";
 import Pagination from "../components/Pagination";
 import CustomButton from "../components/CustomButton";
 import CustomModal from "../components/CustomModal";
 import CustomFilter from "../components/CustomFilter";
+import { useUserData } from "../hooks/useUserHooks";
 
 export default function ManageUser() {
-  const dummyUsers = [
-    { id: 1, username: "admin1", password: "Admin", privilage: "Admin" },
-    { id: 2, username: "guest1", password: "Guest", privilage: "Guest" },
-    { id: 3, username: "admin2", password: "Admin", privilage: "Admin" },
-    { id: 4, username: "guest2", password: "Guest", privilage: "Guest" },
-    { id: 5, username: "admin", password: "Admin", privilage: "Admin" },
-  ];
-
-  const [users, setUsers] = useState(dummyUsers);
+  const { allUsers, validateAllUsers, registerUser, updateUsers, deleteUsers } =
+    useUserData({});
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [credential, setCredential] = useState("");
   const [filter, setFilter] = useState("");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
-  const [formData, setFormData] = useState({
-    id: 0,
-    username: "",
-    password: "",
-    privilage: "",
-  });
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const dataPerPage = 5;
   const totalPage = 5;
+  const [loading, setLoading] = useState<boolean>(false);
 
   // 🔍 Filter & Sort
-  const filteredUsers = users
-    .filter((user) =>
-      user.username.toLowerCase().includes(filter.toLowerCase())
+  const filteredUsers = (allUsers ?? [])
+    .filter((u) =>
+      (u.username ?? "").toLowerCase().includes(filter.toLowerCase())
     )
     .sort((a, b) =>
       sortDirection === "asc"
-        ? a.username.localeCompare(b.username)
-        : b.username.localeCompare(a.username)
+        ? (a.id ?? 0) - (b.id ?? 0)
+        : (b.id ?? 0) - (a.id ?? 0)
     );
 
+  const itemsPerPage = filteredUsers.slice(
+    (currentPage - 1) * dataPerPage,
+    currentPage * dataPerPage
+  );
   // 🔹 Modal control
-  const handleOpenModal = (id: string, user?: any) => {
+  const handleOpenModal = (id: string) => {
     const modal = document.getElementById(id) as HTMLDialogElement;
     modal?.showModal();
-
-    if (user) {
-      setFormData(user);
-    } else {
-      setFormData({ id: 0, username: "", password: "", privilage: "" });
-    }
   };
 
   const handleCloseModal = (id: string) => {
@@ -56,63 +47,121 @@ export default function ManageUser() {
   };
 
   // 🔸 Checkbox handler
-  const handleSelectUser = (id: number) => {
+  const handleSelectUser = (id: string) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
   };
 
   // Pagination
-  const handlePageCHange = (page) => {
+  const handlePageCHange = (page: number) => {
     setCurrentPage(page);
     console.log("Pindah ke halaman: ", page);
   };
 
   // 🟢 CREATE
-  const handleRegister = () => {
-    if (!formData.username || !formData.password || !formData.privilage) {
+  const handleRegister = async () => {
+    if (!username || !password || !credential) {
       alert("Lengkapi semua field!");
       return;
     }
 
-    const newUser = {
-      id: users.length + 1,
-      username: formData.username,
-      password: formData.password,
-      privilage: formData.privilage,
-    };
-    console.log(newUser);
+    if (password.length < 8) {
+      alert("Password Harus memiliki minimal 8 karakter");
+      return;
+    }
 
-    setUsers([...users, newUser]);
-    handleCloseModal("modal_register");
+    try {
+      setLoading(true);
+      await registerUser({
+        username,
+        password,
+        credential,
+      });
+      alert("User berhasil ditambahkan");
+      handleCloseModal("modal_register");
+
+      setUsername("");
+      setPassword("");
+      setCredential("");
+      validateAllUsers();
+    } catch (error) {
+      console.error("Gagal register user", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // 🟡 UPDATE
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     if (selectedIds.length !== 1) {
       alert("Pilih tepat satu user untuk diupdate!");
       return;
     }
+    const selectedId = selectedIds[0];
+    const selectedUser = allUsers?.find((u) => u.userId === selectedId);
 
-    const updatedUsers = users.map((user) =>
-      user.id === selectedIds[0] ? { ...user, ...formData } : user
-    );
-    setUsers(updatedUsers);
-    setSelectedIds([]);
-    handleCloseModal("modal_update");
+    if (!selectedUser) {
+      alert("User tidak ditemukan");
+      return;
+    }
+    console.log(selectedUser);
+
+    if (password.length < 8) {
+      alert("Password Harus memiliki minimal 8 karakter");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const payload = {
+        username,
+        password,
+        credential,
+      };
+      await updateUsers(String(selectedUser.userId!), payload);
+
+      handleCloseModal("modal_update");
+      validateAllUsers();
+      setSelectedIds([]);
+    } catch (error) {
+      alert("Gagal memperbarui user");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // 🔴 DELETE
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (selectedIds.length === 0) {
       alert("Pilih user yang ingin dihapus terlebih dahulu!");
       return;
     }
-    const deleteUsers = users.filter((user) => !selectedIds.includes(user.id));
-    setUsers(deleteUsers);
-    setSelectedIds([]);
-    handleCloseModal("modal_delete");
+    try {
+      setLoading(true);
+      await deleteUsers({ id: String(selectedIds) });
+
+      alert(`${selectedIds.length} user berhasil dihapus.`);
+      handleCloseModal("modal_delete");
+      setSelectedIds([]);
+      validateAllUsers();
+    } catch (error) {
+      alert("Gagal menghapus user");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      await validateAllUsers();
+      setLoading(false);
+    };
+    loadData();
+  }, []);
 
   return (
     <div className="p-16 flex gap-3 min-h-screen pt-7 pl-72 bg-gray-100">
@@ -143,163 +192,187 @@ export default function ManageUser() {
         />
 
         {/* TABLE */}
-        <div className="pt-5">
-          <CustomTable
-            headers={["Select", "UserId", "Username", "Password", "Privilage"]}
-          >
-            {filteredUsers.length > 0 ? (
-              filteredUsers.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50 text-center">
-                  <td>
-                    <input
-                      type="checkbox"
-                      className="checkbox checkbox-error"
-                      checked={selectedIds.includes(item.id)}
-                      onChange={() => handleSelectUser(item.id)}
-                    />
-                  </td>
-                  <td>{item.id}</td>
-                  <td>{item.username}</td>
-                  <td>{item.password}</td>
-                  <td>{item.privilage}</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={5} className="text-center text-gray-500 py-4">
-                  Tidak ada data ditemukan
-                </td>
-              </tr>
-            )}
-          </CustomTable>
-        </div>
-
-        <Pagination
-          currentPage={currentPage}
-          totalPage={totalPage}
-          onPageChange={handlePageCHange}
-        />
-
-        {/* BUTTON ACTION */}
-        <div className="pt-5 flex gap-3 justify-end">
-          <CustomButton
-            text="Add User"
-            onClick={() => handleOpenModal("modal_register")}
-            className="btn-success"
-          />
-          <CustomButton
-            text="Update"
-            onClick={() => {
-              const selectedUser = users.find((u) => u.id === selectedIds[0]);
-              if (selectedUser) handleOpenModal("modal_update", selectedUser);
-              else alert("Pilih user terlebih dahulu!");
-            }}
-            className="btn-info"
-          />
-          <CustomButton
-            text="Delete"
-            onClick={() => handleOpenModal("modal_delete")}
-            className="btn-error"
-          />
-        </div>
-
-        {/* MODALS */}
-        <div className="pt-5">
-          {/* REGISTER MODAL */}
-          <CustomModal
-            title="Register User"
-            id="modal_register"
-            confirmText="Register"
-            onSubmit={handleRegister}
-          >
-            <div className="flex flex-col">
-              <input
-                type="text"
-                placeholder="Enter Username"
-                className="mb-4 w-full bg-gray-200 rounded-md p-2"
-                value={formData.username}
-                onChange={(e) =>
-                  setFormData({ ...formData, username: e.target.value })
-                }
-              />
-              <input
-                type="text"
-                placeholder="Enter Password"
-                className="mb-4 w-full bg-gray-200 rounded-md p-2"
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
-              />
-              <select
-                className="w-full bg-gray-200 rounded-md p-2"
-                value={formData.privilage}
-                onChange={(e) =>
-                  setFormData({ ...formData, privilage: e.target.value })
-                }
+        {loading ? (
+          <div className="flex flex-col justify-center items-center h-64">
+            <span className="loading loading-bars loading-xl text-blue-400"></span>
+            <p className="ml-3 text-gray-700 text-lg">
+              Memuat data pengguna...
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="pt-5">
+              <CustomTable
+                headers={[
+                  "Select",
+                  "UserId",
+                  "Username",
+                  "Password",
+                  "Privilage",
+                ]}
               >
-                <option value="">Choose Role</option>
-                <option value="Admin">Admin</option>
-                <option value="Guest">Guest</option>
-              </select>
+                {itemsPerPage.length > 0 ? (
+                  itemsPerPage.map((item, index) => (
+                    <tr key={item.id} className="hover:bg-gray-50 text-center">
+                      <td>
+                        <input
+                          type="checkbox"
+                          className="checkbox checkbox-error"
+                          checked={selectedIds.includes(item.userId!)}
+                          onChange={() => handleSelectUser(item.userId!)}
+                        />
+                      </td>
+                      <td>{(currentPage - 1) * dataPerPage + item.id!}</td>
+                      <td>{item.username}</td>
+                      <td>{item.password}</td>
+                      <td>{item.credential}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="text-center text-gray-500 py-4">
+                      Tidak ada data ditemukan
+                    </td>
+                  </tr>
+                )}
+              </CustomTable>
             </div>
-          </CustomModal>
 
-          {/* UPDATE MODAL */}
-          <CustomModal
-            title="Update User"
-            id="modal_update"
-            confirmText="Update"
-            onSubmit={handleUpdate}
-          >
-            <div className="flex flex-col">
-              <input
-                type="text"
-                placeholder="Enter Username"
-                className="mb-4 w-full bg-gray-200 rounded-md p-2"
-                value={formData.username}
-                onChange={(e) =>
-                  setFormData({ ...formData, username: e.target.value })
-                }
+            <Pagination
+              currentPage={currentPage}
+              totalPage={totalPage}
+              onPageChange={handlePageCHange}
+            />
+
+            {/* BUTTON ACTION */}
+            <div className="pt-5 flex gap-3 justify-end">
+              <CustomButton
+                text="Add User"
+                onClick={() => handleOpenModal("modal_register")}
+                className="btn-success"
               />
-              <input
-                type="text"
-                placeholder="Enter Password"
-                className="mb-4 w-full bg-gray-200 rounded-md p-2"
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
+              <CustomButton
+                text="Update"
+                onClick={() => {
+                  const selectedUser = allUsers?.find(
+                    (u) => u.userId === selectedIds[0]
+                  );
+                  if (selectedUser) handleOpenModal("modal_update");
+                  else alert("Pilih user terlebih dahulu!");
+                }}
+                className="btn-info"
               />
-              <select
-                className="w-full bg-gray-200 rounded-md p-2"
-                value={formData.privilage}
-                onChange={(e) =>
-                  setFormData({ ...formData, privilage: e.target.value })
-                }
+              <CustomButton
+                text="Delete"
+                onClick={() => handleOpenModal("modal_delete")}
+                className="btn-error"
+              />
+            </div>
+
+            {/* MODALS */}
+            <div className="pt-5">
+              <CustomModal
+                title="Register User"
+                id="modal_register"
+                confirmText="Register"
+                onSubmit={handleRegister}
               >
-                <option value="">Choose Role</option>
-                <option value="Admin">Admin</option>
-                <option value="Guest">Guest</option>
-              </select>
-            </div>
-          </CustomModal>
+                <div className="flex flex-col">
+                  <input
+                    type="text"
+                    placeholder="Enter Username"
+                    className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                  />
+                  <input
+                    type="password"
+                    placeholder="Enter Password (min 8 karakter)"
+                    className={`mb-2 w-full rounded-md p-2 ${
+                      password.length > 0 && password.length < 8
+                        ? "bg-red-100 border border-red-500"
+                        : "bg-gray-200"
+                    }`}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  {password.length > 0 && password.length < 8 && (
+                    <span className="text-red-500 text-sm mb-2">
+                      Password harus memiliki minimal 8 karakter
+                    </span>
+                  )}
+                  <select
+                    className="w-full bg-gray-200 rounded-md p-2 mt-2"
+                    value={credential}
+                    onChange={(e) => setCredential(e.target.value)}
+                  >
+                    <option value="">Choose Role</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Guest">Guest</option>
+                  </select>
+                </div>
+              </CustomModal>
 
-          {/* DELETE MODAL */}
-          <CustomModal
-            title="Delete User"
-            id="modal_delete"
-            confirmText="Delete"
-            onSubmit={handleDelete}
-          >
-            <div className="flex flex-col text-center">
-              <p>
-                Apakah anda yakin ingin menghapus{" "}
-                <strong>{selectedIds.length}</strong> user?
-              </p>
+              {/* UPDATE MODAL */}
+              <CustomModal
+                title="Update User"
+                id="modal_update"
+                confirmText="Update"
+                onSubmit={handleUpdate}
+              >
+                <div className="flex flex-col">
+                  <input
+                    type="text"
+                    placeholder="Enter Username"
+                    className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                  />
+                  <input
+                    type="password"
+                    placeholder="Enter Password (min 8 karakter)"
+                    className={`mb-2 w-full rounded-md p-2 ${
+                      password.length > 0 && password.length < 8
+                        ? "bg-red-100 border border-red-500"
+                        : "bg-gray-200"
+                    }`}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  {password.length > 0 && password.length < 8 && (
+                    <span className="text-red-500 text-sm mb-2">
+                      Password harus memiliki minimal 8 karakter
+                    </span>
+                  )}
+                  <select
+                    className="w-full bg-gray-200 rounded-md p-2"
+                    value={credential}
+                    onChange={(e) => setCredential(e.target.value)}
+                  >
+                    <option value="">Choose Role</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Guest">Guest</option>
+                  </select>
+                </div>
+              </CustomModal>
+
+              {/* DELETE MODAL */}
+              <CustomModal
+                title="Delete User"
+                id="modal_delete"
+                confirmText="Delete"
+                onSubmit={handleDelete}
+              >
+                <div className="flex flex-col text-center">
+                  <p>
+                    Apakah anda yakin ingin menghapus{" "}
+                    <strong>{selectedIds.length}</strong> user?
+                  </p>
+                </div>
+              </CustomModal>
             </div>
-          </CustomModal>
-        </div>
+          </>
+        )}
       </div>
     </div>
   );

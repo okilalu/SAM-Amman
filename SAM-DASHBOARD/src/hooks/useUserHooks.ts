@@ -9,6 +9,8 @@ import {
   getAllUser,
   login,
   logout,
+  updateUser,
+  deleteUser,
 } from "../Redux/slices/userSlice";
 
 interface UserDataProps {
@@ -37,6 +39,35 @@ export function useUserData({ closeModal }: UserDataProps) {
       return res.data as User;
     } catch (error) {
       console.log("Failed to registered", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateUsers = async (userId: string, data: Partial<User>) => {
+    try {
+      const result = await dispatch(updateUser({ userId, data })).unwrap();
+      return result;
+    } catch (err) {
+      console.error("Failed to update user:", err);
+      throw err;
+    }
+  };
+
+  const deleteUsers = async ({ id }: { id: string }) => {
+    if (!id) {
+      alert("samId tidak tidak ditemukan");
+      return;
+    }
+    setIsLoading(true);
+
+    try {
+      await dispatch(deleteUser({ data: id })).unwrap();
+      alert("Berhasil Menghapus data");
+      await validateAllUsers();
+      closeModal?.();
+    } catch (err: any) {
+      console.log(err);
     } finally {
       setIsLoading(false);
     }
@@ -94,6 +125,8 @@ export function useUserData({ closeModal }: UserDataProps) {
     isLoading,
     handleLogout,
     registerUser,
+    updateUsers,
+    deleteUsers,
     loginUser,
   };
 }
