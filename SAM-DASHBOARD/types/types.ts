@@ -132,3 +132,50 @@ export interface ScheduleResponse {
   status: boolean;
   message: string | null;
 }
+
+// Email state
+export interface Email {
+  id?: number;
+  emailName?: string;
+}
+
+export interface EmailState {
+  data: Email[];
+  selectedEmail: Email | null;
+  loading: boolean;
+  error: string | null;
+}
+
+export interface EmailsResponse {
+  data: Email[];
+  status: boolean;
+  message: string;
+}
+
+// Logs State
+export interface Log {
+  id: number; // ID unik log
+  deviceId: string; // ID alat / SAM
+  filename: string; // Nama file log (jika ada)
+  speed: number; // Kecepatan kendaraan
+  date: string; // Tanggal log (format ISO)
+  time: string; // Waktu log
+  location?: string; // Lokasi kejadian (opsional)
+  category?: string; // Kategori pelanggaran (opsional)
+  createdAt?: string; // Waktu data dibuat
+  updatedAt?: string; // Waktu data diperbarui
+}
+
+export interface LogResponse {
+  status: boolean;
+  status_code: number;
+  message: string;
+  data: Log[]; // Data log yang dikembalikan oleh API
+}
+
+export interface LogState {
+  logs: Log[]; // Semua data log
+  loading: boolean; // Status loading saat fetch
+  error: string | null; // Menyimpan pesan error
+  selectedLog: Log | null; // Data log yang sedang dipilih (opsional)
+}
