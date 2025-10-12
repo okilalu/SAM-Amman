@@ -1,84 +1,51 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import CustomInput from "../components/CustomInput";
 import Pagination from "../components/Pagination";
 import CustomButton from "../components/CustomButton";
 import CustomModal from "../components/CustomModal";
 import CustomTable from "../components/CustomTable";
+import { useDeviceData } from "../hooks/useDeviceHooks";
 
 export default function ManageDevice() {
-  const dummyData = [
-    {
-      id: 1,
-      PortableDeviceId: "SAM01",
-      DeviceAddress: "192.168.9.10",
-      DeviceRootFolder: "/a",
-      Location: "Supra",
-    },
-    {
-      id: 2,
-      PortableDeviceId: "SAM02",
-      DeviceAddress: "192.168.8.10",
-      DeviceRootFolder: "/b",
-      Location: "Kuta",
-    },
-    {
-      id: 3,
-      PortableDeviceId: "SAM03",
-      DeviceAddress: "192.168.7.10",
-      DeviceRootFolder: "/c",
-      Location: "Mataram",
-    },
-    {
-      id: 4,
-      PortableDeviceId: "SAM04",
-      DeviceAddress: "192.168.10.10",
-      DeviceRootFolder: "/d",
-      Location: "KM01",
-    },
-  ];
-
-  const [portable, setPortable] = useState(dummyData);
+  const {
+    handleGenerateDevice,
+    fetchAllDevices,
+    devices,
+    handleUpdateDevice,
+    handleDeleteDevice,
+  } = useDeviceData({});
+  const [samId, setSamId] = useState("");
+  const [deviceIP, setDeviceIP] = useState("");
+  const [deviceUsername, setDeviceUsername] = useState("");
+  const [deviceRootFolder, setDeviceRootFolder] = useState("");
+  const [cameraIP, setCameraIP] = useState("");
+  const [cameraUsername, setCameraUsername] = useState("");
+  const [cameraPassword, setCameraPassword] = useState("");
+  const [cameraRootFolder, setCameraRootFolder] = useState("");
+  const [cameraType, setCameraType] = useState("");
+  const [location, setLocation] = useState("");
   const [filter, setFilter] = useState("");
   const [sort, setSort] = useState("");
   const [sortDirection, SetSortDirection] = useState<"asc" | "desc">("asc");
   const [perPage, setPerPage] = useState(10);
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
-  const [formData, setFormData] = useState({
-    PortableDeviceId: "",
-    DeviceAddress: "",
-    DeviceRootFolder: "",
-    Location: "",
-  });
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPage = 5;
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const filteredDevice = portable
+  const filteredDevice = (devices ?? [])
     .filter((item) =>
-      item.PortableDeviceId.toLowerCase().includes(filter.toLowerCase())
+      (item.samId ?? "").toLowerCase().includes(filter.toLowerCase())
     )
     .sort((a, b) =>
       sortDirection === "asc"
-        ? a.PortableDeviceId.localeCompare(b.PortableDeviceId)
-        : b.PortableDeviceId.localeCompare(a.PortableDeviceId)
+        ? (a.samId ?? "").localeCompare(b.samId ?? "")
+        : (b.samId ?? "").localeCompare(a.samId ?? "")
     );
 
-  const handleOpenModal = (id: string, portable?: any) => {
+  const handleOpenModal = (id: string) => {
     const modal = document.getElementById(id) as HTMLDialogElement;
     modal?.showModal();
-
-    if (portable) {
-      setFormData({
-        PortableDeviceId: portable.PortableDeviceId,
-        DeviceAddress: portable.DeviceAddress,
-        DeviceRootFolder: portable.DeviceRootFolder,
-        Location: portable.Location,
-      });
-    } else {
-      setFormData({
-        PortableDeviceId: "",
-        DeviceAddress: "",
-        DeviceRootFolder: "",
-        Location: "",
-      });
-    }
   };
 
   const handleCloseModal = (id: string) => {
@@ -86,64 +53,135 @@ export default function ManageDevice() {
     modal?.close();
   };
 
-  const handleSelectPortable = (id: number) => {
+  // Checkbox Handler
+  const handleSelectPortable = (id: string) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
+  }; // Pagination
+  const handlePageCHange = (page: number) => {
+    setCurrentPage(page);
+    console.log("Pindah ke halaman: ", page);
   };
 
   // 🟢 CREATE
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (
-      !formData.PortableDeviceId ||
-      !formData.DeviceAddress ||
-      !formData.DeviceRootFolder ||
-      !formData.Location
+      !samId ||
+      !deviceIP ||
+      !deviceUsername ||
+      !deviceRootFolder ||
+      !cameraIP ||
+      !cameraUsername ||
+      !cameraRootFolder ||
+      !cameraPassword ||
+      !cameraRootFolder ||
+      !cameraType ||
+      !location
     ) {
       alert("Lengkapi semua field!");
       return;
     }
+    try {
+      setLoading(true);
+      await handleGenerateDevice({
+        samId,
+        deviceIP,
+        deviceUsername,
+        deviceRootFolder,
+        cameraIP,
+        cameraUsername,
+        cameraPassword,
+        cameraRootFolder,
+        cameraType,
+        location,
+      });
+      handleCloseModal("modal_register");
 
-    const newPortable = {
-      id: portable.length + 1,
-      PortableDeviceId: formData.PortableDeviceId,
-      DeviceAddress: formData.DeviceAddress,
-      DeviceRootFolder: formData.DeviceRootFolder,
-      Location: formData.Location,
-    };
-
-    setPortable([...portable, newPortable]);
-    handleCloseModal("modal_register");
+      setSamId("");
+      setDeviceIP("");
+      setDeviceUsername("");
+      setDeviceRootFolder("");
+      setCameraIP("");
+      setCameraUsername("");
+      setCameraPassword("");
+      setCameraRootFolder("");
+      setCameraType("");
+      setLocation("");
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // 🟡 UPDATE
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     if (selectedIds.length !== 1) {
       alert("Pilih tepat satu user untuk diupdate!");
       return;
     }
 
-    const updated = portable.map((port) =>
-      port.id === selectedIds[0] ? { ...port, ...formData } : port
-    );
-    setPortable(updated);
-    setSelectedIds([]);
-    handleCloseModal("modal_update");
+    const selectedId = selectedIds[0];
+    const selectedDevice = devices?.find((d) => d.samId === selectedId);
+    console.log(selectedDevice);
+    console.log(selectedId);
+
+    try {
+      setLoading(true);
+      const payload = {
+        samId,
+        deviceIP,
+        deviceUsername,
+        deviceRootFolder,
+        cameraIP,
+        cameraUsername,
+        cameraPassword,
+        cameraRootFolder,
+        cameraType,
+        location,
+      };
+      await handleUpdateDevice(String(selectedDevice!.deviceId!), payload);
+
+      handleCloseModal("modal_update");
+      fetchAllDevices();
+      setSelectedIds([]);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // 🔴 DELETE
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (selectedIds.length === 0) {
       alert("Pilih user yang ingin dihapus terlebih dahulu!");
       return;
     }
-    const deletePortable = portable.filter(
-      (port) => !selectedIds.includes(port.id)
-    );
-    setPortable(deletePortable);
-    setSelectedIds([]);
-    handleCloseModal("modal_delete");
+    try {
+      setLoading(true);
+      await handleDeleteDevice({ id: String(selectedIds) });
+
+      alert(`${selectedIds.length} Device berhasil dihapus.`);
+      handleCloseModal("modal_delete");
+      setSelectedIds([]);
+      fetchAllDevices();
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      await fetchAllDevices();
+      setLoading(false);
+    };
+    loadData();
+  }, []);
 
   return (
     <div className="p-16 flex gap-3 min-h-screen pt-7 pl-72 bg-gray-100">
@@ -160,7 +198,6 @@ export default function ManageDevice() {
           </ul>
         </div>
         <h2 className="text-3xl font-bold mb-8 text-gray-800">Manage Device</h2>
-
         <CustomInput
           filter={filter}
           setFilter={setFilter}
@@ -181,173 +218,257 @@ export default function ManageDevice() {
             sort: "Contoh: PortableDeviceId",
           }}
         />
+        {loading ? (
+          <div className="flex flex-col justify-center items-center h-64">
+            <span className="loading loading-bars loading-xl text-blue-400 "></span>
+            <p className="ml-3 text-gray-700 text-lg">
+              Memuat data perangkat...
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="pt-5">
+              <CustomTable
+                headers={[
+                  "Select",
+                  "PortableDeviceId",
+                  "DeviceAddress",
+                  "DeviceRootFolder",
+                  "Location",
+                ]}
+              >
+                {filteredDevice.length > 0 ? (
+                  filteredDevice.map((device) => (
+                    <tr className="hover:bg-gray-50 text-center">
+                      <td>
+                        <input
+                          type="checkbox"
+                          className="checkbox checkbox-error"
+                          checked={selectedIds.includes(device.samId!)}
+                          onChange={() => handleSelectPortable(device.samId!)}
+                        />
+                      </td>
+                      <td>{device.samId}</td>
+                      <td>{device.deviceIP}</td>
+                      <td>{device.deviceRootFolder}</td>
+                      <td>{device.location}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="text-center text-gray-500 py-4">
+                      Tidak ada data ditemukan
+                    </td>
+                  </tr>
+                )}
+              </CustomTable>
+            </div>
 
-        <div className="pt-5">
-          <CustomTable
-            headers={[
-              "Select",
-              "PortableDeviceId",
-              "DeviceAddress",
-              "DeviceRootFolder",
-              "Location",
-            ]}
-          >
-            {filteredDevice.length > 0 ? (
-              filteredDevice.map((device) => (
-                <tr className="hover:bg-gray-50 text-center">
-                  <td>
-                    <input
-                      type="checkbox"
-                      className="checkbox checkbox-error"
-                      checked={selectedIds.includes(device.id)}
-                      onChange={() => handleSelectPortable(device.id)}
-                    />
-                  </td>
-                  <td>{device.PortableDeviceId}</td>
-                  <td>{device.DeviceAddress}</td>
-                  <td>{device.DeviceRootFolder}</td>
-                  <td>{device.Location}</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={4} className="text-center text-gray-500 py-4">
-                  Tidak ada data ditemukan
-                </td>
-              </tr>
-            )}
-          </CustomTable>
-        </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPage={totalPage}
+              onPageChange={handlePageCHange}
+            />
 
-        <Pagination />
-
-        <div className="pt-5 flex gap-3 justify-end">
-          <CustomButton
-            text="Add Device"
-            onClick={() => handleOpenModal("modal_register")}
-            className="btn-success"
-          />
-          <CustomButton
-            text="Update"
-            onClick={() => {
-              const selectedUser = portable.find(
-                (u) => u.id === selectedIds[0]
-              );
-              if (selectedUser) handleOpenModal("modal_update", selectedUser);
-              else alert("Pilih user terlebih dahulu!");
-            }}
-            className="btn-info"
-          />
-          <CustomButton
-            text="Delete"
-            onClick={() => handleOpenModal("modal_delete")}
-            className="btn-error"
-          />
-        </div>
-
-        <div className="pt-5">
-          <CustomModal
-            title="Register Device"
-            id="modal_register"
-            confirmText="Register"
-            onSubmit={handleRegister}
-          >
-            <div className="flex flex-col">
-              <input
-                type="text"
-                placeholder="Portable Device ID"
-                className="mb-4 w-full bg-gray-200 rounded-md p-2 "
-                value={formData.PortableDeviceId}
-                onChange={(e) =>
-                  setFormData({ ...formData, PortableDeviceId: e.target.value })
-                }
+            <div className="pt-5 flex gap-3 justify-end">
+              <CustomButton
+                text="Add Device"
+                onClick={() => handleOpenModal("modal_register")}
+                className="btn-success"
               />
-              <input
-                type="text"
-                placeholder="Device Address"
-                className="mb-4 w-full bg-gray-200 rounded-md p-2 "
-                value={formData.DeviceAddress}
-                onChange={(e) =>
-                  setFormData({ ...formData, DeviceAddress: e.target.value })
-                }
+              <CustomButton
+                text="Update"
+                onClick={() => {
+                  const selectedUser = devices.find(
+                    (u) => u.samId === selectedIds[0]
+                  );
+                  if (selectedUser) handleOpenModal("modal_update");
+                  else alert("Pilih user terlebih dahulu!");
+                }}
+                className="btn-info"
               />
-              <input
-                type="text"
-                placeholder="Device Root Folder"
-                className="mb-4 w-full bg-gray-200 rounded-md p-2 "
-                value={formData.DeviceRootFolder}
-                onChange={(e) =>
-                  setFormData({ ...formData, DeviceRootFolder: e.target.value })
-                }
-              />
-              <input
-                type="text"
-                placeholder="Location"
-                className="mb-4 w-full bg-gray-200 rounded-md p-2 "
-                value={formData.Location}
-                onChange={(e) =>
-                  setFormData({ ...formData, Location: e.target.value })
-                }
+              <CustomButton
+                text="Delete"
+                onClick={() => handleOpenModal("modal_delete")}
+                className="btn-error"
               />
             </div>
-          </CustomModal>
 
-          <CustomModal
-            title="Update Device"
-            id="modal_update"
-            confirmText="Update"
-            onSubmit={handleUpdate}
-          >
-            <div className="flex flex-col">
-              <input
-                type="text"
-                placeholder="Portable Device ID"
-                className="mb-4 w-full bg-gray-200 rounded-md p-2 "
-                value={formData.PortableDeviceId}
-                onChange={(e) =>
-                  setFormData({ ...formData, PortableDeviceId: e.target.value })
-                }
-              />
-              <input
-                type="text"
-                placeholder="Device Address"
-                className="mb-4 w-full bg-gray-200 rounded-md p-2 "
-                value={formData.DeviceAddress}
-                onChange={(e) =>
-                  setFormData({ ...formData, DeviceAddress: e.target.value })
-                }
-              />
-              <input
-                type="text"
-                placeholder="Device Root Folder"
-                className="mb-4 w-full bg-gray-200 rounded-md p-2 "
-                value={formData.DeviceRootFolder}
-                onChange={(e) =>
-                  setFormData({ ...formData, DeviceRootFolder: e.target.value })
-                }
-              />
-              <input
-                type="text"
-                placeholder="Location"
-                className="mb-4 w-full bg-gray-200 rounded-md p-2 "
-                value={formData.Location}
-                onChange={(e) =>
-                  setFormData({ ...formData, Location: e.target.value })
-                }
-              />
+            <div className="pt-5">
+              <CustomModal
+                title="Register Device"
+                id="modal_register"
+                confirmText="Register"
+                onSubmit={handleRegister}
+              >
+                <div className="flex flex-col">
+                  <input
+                    type="text"
+                    placeholder="Portable Device ID"
+                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
+                    value={samId}
+                    onChange={(e) => setSamId(e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Device Address"
+                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
+                    value={deviceIP}
+                    onChange={(e) => setDeviceIP(e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Device Username"
+                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
+                    value={deviceUsername}
+                    onChange={(e) => setDeviceUsername(e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Device Root Folder"
+                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
+                    value={deviceRootFolder}
+                    onChange={(e) => setDeviceRootFolder(e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Camera IP"
+                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
+                    value={cameraIP}
+                    onChange={(e) => setCameraIP(e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Camera Username"
+                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
+                    value={cameraUsername}
+                    onChange={(e) => setCameraUsername(e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Camera Password"
+                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
+                    value={cameraPassword}
+                    onChange={(e) => setCameraPassword(e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Camera Root Folder"
+                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
+                    value={cameraRootFolder}
+                    onChange={(e) => setCameraRootFolder(e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Camera Type"
+                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
+                    value={cameraType}
+                    onChange={(e) => setCameraType(e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Location"
+                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                  />
+                </div>
+              </CustomModal>
+
+              <CustomModal
+                title="Update Device"
+                id="modal_update"
+                confirmText="Update"
+                onSubmit={handleUpdate}
+              >
+                <div className="flex flex-col">
+                  <input
+                    type="text"
+                    placeholder="Portable Device ID"
+                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
+                    value={samId}
+                    onChange={(e) => setSamId(e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Device Address"
+                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
+                    value={deviceIP}
+                    onChange={(e) => setDeviceIP(e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Device Username"
+                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
+                    value={deviceUsername}
+                    onChange={(e) => setDeviceUsername(e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Device Root Folder"
+                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
+                    value={deviceRootFolder}
+                    onChange={(e) => setDeviceRootFolder(e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Camera IP"
+                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
+                    value={cameraIP}
+                    onChange={(e) => setCameraIP(e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Camera Username"
+                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
+                    value={cameraUsername}
+                    onChange={(e) => setCameraUsername(e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Camera Password"
+                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
+                    value={cameraPassword}
+                    onChange={(e) => setCameraPassword(e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Camera Root Folder"
+                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
+                    value={cameraRootFolder}
+                    onChange={(e) => setCameraRootFolder(e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Camera Type"
+                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
+                    value={cameraType}
+                    onChange={(e) => setCameraType(e.target.value)}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Location"
+                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                  />
+                </div>
+              </CustomModal>
+              <CustomModal
+                title="Delete Device"
+                id="modal_delete"
+                confirmText="Delete"
+                onSubmit={handleDelete}
+              >
+                <div className="flex flex-col">
+                  <p className="">
+                    Apakah anda yakin ingin menghapus data ini?
+                  </p>
+                </div>
+              </CustomModal>
             </div>
-          </CustomModal>
-          <CustomModal
-            title="Delete Device"
-            id="modal_delete"
-            confirmText="Delete"
-            onSubmit={handleDelete}
-          >
-            <div className="flex flex-col">
-              <p className="">Apakah anda yakin ingin menghapus data ini?</p>
-            </div>
-          </CustomModal>
-        </div>
+          </>
+        )}
       </div>
     </div>
   );

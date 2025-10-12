@@ -26,7 +26,10 @@ export const updateDevice = createAsyncThunk<
   { deviceId: string; data: Partial<Device> }
 >("device/update", async ({ deviceId, data }, { rejectWithValue }) => {
   try {
-    const response = await axios.put(`${uri}/api/v2/update/device/${deviceId}`);
+    const response = await axios.put(
+      `${uri}/api/v2/update/device/${deviceId}`,
+      data
+    );
     return response.data;
   } catch (error: any) {
     return rejectWithValue(error.response?.data || error.message);
@@ -113,6 +116,7 @@ const deviceSlice = createSlice({
       state.loading = false;
       state.error = action.payload as string;
     });
+
     // Delete Device
     builder.addCase(deleteDevice.pending, (state) => {
       state.loading = true;

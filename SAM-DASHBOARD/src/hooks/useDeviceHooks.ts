@@ -67,16 +67,22 @@ export function useDeviceData({
   };
 
   // Update device
-  const handleUpdateDevice = async () => {
+  const handleUpdateDevice = async (
+    deviceId: string,
+    data: Partial<Device>
+  ) => {
+    console.log(deviceId);
+
     if (!deviceId) {
       alert("Device ID tidak ditemukan");
       return;
     }
+
     setIsLoading(true);
     setError("");
     try {
       const res = await dispatch(
-        updateDevice({ deviceId, data: value || {} })
+        updateDevice({ deviceId, data: data || {} })
       ).unwrap();
       alert("Berhasil memperbarui perangkat");
       setSuccess("Device updated successfully");
