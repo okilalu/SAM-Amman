@@ -6,20 +6,11 @@ import CustomModal from "../components/CustomModal";
 import CustomTable from "../components/CustomTable";
 
 export default function ControlDevice() {
-  const dummyData = [
-    {
-      PortableDeviceId: "SAM01",
-      LocationName: "Supra",
-    },
-    {
-      PortableDeviceId: "SAM02",
-      LocationName: "KM 01",
-    },
-    {
-      PortableDeviceId: "SAM03",
-      LocationName: "Mataram",
-    },
-  ];
+  const [devices, setDevices] = useState([
+    { id: 1, PortableDeviceId: "SAM01", LocationName: "Supra" },
+    { id: 2, PortableDeviceId: "SAM02", LocationName: "KM 01" },
+    { id: 3, PortableDeviceId: "SAM03", LocationName: "Mataram" },
+  ]);
   const dummyDataUser = [
     {
       UserId: "1",
@@ -43,28 +34,101 @@ export default function ControlDevice() {
     },
   ];
 
+  // const [portable, setPortable] = useState(dummyDataUser);
   const [filter, setFilter] = useState("");
   const [sort, setSort] = useState("");
   const [sortDirection, SetSortDirection] = useState<"asc" | "desc">("asc");
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [formData, setFormData] = useState({
+    PortableDeviceId: "",
+    LocationName: "",
+  });
   const [perPage, setPerPage] = useState(10);
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPage = 5;
 
-  const filteredDevice = dummyDataUser
-    .filter((item) => item.UserId.toLowerCase().includes(filter.toLowerCase()))
+  const filteredUsers = dummyDataUser
+    .filter((u) => u.UserId.toLowerCase().includes(filter.toLowerCase()))
     .sort((a, b) =>
       sortDirection === "asc"
         ? a.UserId.localeCompare(b.UserId)
         : b.UserId.localeCompare(a.UserId)
     );
 
-  const handleOpenModalAdd = ({ id }: { id: string }) => {
-    document.getElementById(id)!.showModal();
+  const filteredDevices = devices
+    .filter((d) =>
+      d.PortableDeviceId.toLowerCase().includes(filter.toLowerCase())
+    )
+    .sort((a, b) =>
+      sortDirection === "asc"
+        ? a.PortableDeviceId.localeCompare(b.PortableDeviceId)
+        : b.PortableDeviceId.localeCompare(a.PortableDeviceId)
+    );
+
+  // Pagination
+  const handlePageCHange = (page: number) => {
+    setCurrentPage(page);
+    console.log("Pindah ke halaman: ", page);
   };
-  const handleOpenModalUpdate = ({ id }: { id: string }) => {
-    document.getElementById(id)!.showModal();
+
+  // 🔹 Modal control
+  const handleOpenModal = (id: string, portable?: any) => {
+    const modal = document.getElementById(id) as HTMLDialogElement;
+    modal?.showModal();
+
+    if (portable) {
+      setFormData({
+        PortableDeviceId: portable.PortableDeviceId,
+        LocationName: portable.LocationName,
+      });
+    } else {
+      setFormData({ PortableDeviceId: "", LocationName: "" });
+    }
   };
-  const handleOpenModalDelete = ({ id }: { id: string }) => {
-    document.getElementById(id)!.showModal();
+
+  const handleCloseModal = (id: string) => {
+    const modal = document.getElementById(id) as HTMLDialogElement;
+    modal?.close();
   };
+
+  // 🔸 Checkbox handler
+  const handleSelectUser = (id: number) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  // 🟢 CREATE
+  const handleRegister = () => {
+    if (!formData.PortableDeviceId || !formData.LocationName) {
+      alert("Lengkapi semua field!");
+      return;
+    }
+
+    const newPortable = {
+      id: devices.length + 1,
+      PortableDeviceId: formData.PortableDeviceId,
+      LocationName: formData.LocationName,
+    };
+
+    setDevices([...devices, newPortable]);
+    handleCloseModal("modal_register");
+  };
+
+  // 🔴 DELETE
+  const handleDelete = () => {
+    if (selectedIds.length === 0) {
+      alert("Pilih user yang ingin dihapus terlebih dahulu!");
+      return;
+    }
+    const deletePortable = devices.filter(
+      (device) => !selectedIds.includes(device.id)
+    );
+    setDevices(deletePortable);
+    setSelectedIds([]);
+    handleCloseModal("modal_delete");
+  };
+
   return (
     <div className="p-16 flex gap-3 min-h-screen pt-7 pl-72 bg-gray-100 ">
       <div className="flex-1 p-10 pt-12  text-sm text-black">
@@ -109,8 +173,8 @@ export default function ControlDevice() {
 
           <div className="pt-5">
             <CustomTable headers={["Select", "UserId", "UserName"]}>
-              {filteredDevice.length > 0 ? (
-                filteredDevice.map((item) => (
+              {filteredUsers.length > 0 ? (
+                filteredUsers.map((item) => (
                   <tr className="hover:bg-gray-50 text-center">
                     <td>
                       <input
@@ -133,21 +197,25 @@ export default function ControlDevice() {
               )}
             </CustomTable>
 
-            <Pagination />
+            <Pagination
+              currentPage={currentPage}
+              totalPage={totalPage}
+              onPageChange={handlePageCHange}
+            />
           </div>
         </div>
 
         <div className="p-3 mt-6">
           <CustomTable headers={["Select", "PortableDeviceId", "LocationName"]}>
-            {dummyData.length > 0 ? (
-              dummyData.map((item) => (
+            {filteredDevices.length > 0 ? (
+              filteredDevices.map((item) => (
                 <tr className="hover:bg-gray-50 text-center">
                   <td>
                     <input
                       type="checkbox"
                       className="checkbox checkbox-error"
-                      // checked={selectedIds.includes(item.id)}
-                      // onChange={() => handleSelectUser(item.id)}
+                      checked={selectedIds.includes(item.id)}
+                      onChange={() => handleSelectUser(item.id)}
                     />
                   </td>
                   <td>{item.PortableDeviceId}</td>
@@ -166,66 +234,55 @@ export default function ControlDevice() {
           <div className="pt-5 flex gap-3 justify-end">
             <CustomButton
               text="Add Location"
-              onClick={() => handleOpenModalAdd({ id: "my_modal_1" })}
+              onClick={() => handleOpenModal("modal_register")}
               className="btn-success"
             />
             <CustomButton
               text="Delete"
-              onClick={() => handleOpenModalDelete({ id: "my_modal_3" })}
+              onClick={() => handleOpenModal("modal_delete")}
               className="btn-error"
             />
           </div>
 
           <div>
-            <CustomModal title="Register New Location" id="my_modal_1">
+            <CustomModal
+              title="Register New Location"
+              id="modal_register"
+              confirmText="Register"
+              onSubmit={handleRegister}
+            >
               <div className="flex flex-col">
                 <input
                   type="text"
-                  name=""
-                  id=""
-                  placeholder="Enter You Username"
+                  placeholder="Portable Device Id"
                   className="mb-4 w-full bg-gray-200 rounded-md p-2 "
+                  value={formData.PortableDeviceId}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      PortableDeviceId: e.target.value,
+                    })
+                  }
                 />
                 <input
                   type="text"
-                  name=""
-                  id=""
-                  placeholder="Enter You Password"
+                  placeholder="Location Name"
                   className="mb-4 w-full bg-gray-200 rounded-md p-2 "
+                  value={formData.LocationName}
+                  onChange={(e) =>
+                    setFormData({ ...formData, LocationName: e.target.value })
+                  }
                 />
-
-                <div className="dropdown dropdown-center">
-                  <input
-                    type="text"
-                    placeholder="Choose One Options"
-                    className="w-full bg-gray-200 rounded-md p-2"
-                  />
-                  <ul className="dropdown-content menu z-1 w-full p-2 shadow-sm rounded-b-md bg-gray-50">
-                    <li>
-                      <a>Admin</a>
-                    </li>
-                    <li>
-                      <a>Guest</a>
-                    </li>
-                  </ul>
-                </div>
               </div>
             </CustomModal>
-            <CustomModal title="Delete" id="my_modal_3">
+            <CustomModal
+              title="Delete"
+              id="modal_delete"
+              confirmText="Delete"
+              onSubmit={handleDelete}
+            >
               <div className="flex flex-col">
                 <p className="">Apakah anda yakin ingin menghapus data ini?</p>
-                <div className="flex gap-3 justify-end mt-6">
-                  <CustomButton
-                    text="Hapus"
-                    className="btn-error"
-                    onClick={() => handleOpenModalUpdate({ id: "my_modal_2" })}
-                  />
-                  <CustomButton
-                    text="Cancel"
-                    className="btn-active"
-                    onClick={() => handleOpenModalUpdate({ id: "my_modal_2" })}
-                  />
-                </div>
               </div>
             </CustomModal>
           </div>
