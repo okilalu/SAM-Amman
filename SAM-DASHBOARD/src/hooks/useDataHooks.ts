@@ -24,8 +24,11 @@ export function useData() {
     setError("");
     setSuccess("");
 
+    console.log(samId, data);
     try {
       const res = await dispatch(filterData({ samId, data })).unwrap();
+
+      console.log(res);
 
       setData(res?.data?.data || []);
       setSuccess("data filtered succesfully");
@@ -56,7 +59,7 @@ export function useData() {
       } else {
         setData([]);
       }
-      alert("berhasil memuat semua data");
+      // alert("berhasil memuat semua data");
       setSuccess("Data loaded seccesfully");
     } catch (error) {
       console.log(error);

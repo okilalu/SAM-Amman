@@ -50,6 +50,7 @@ const dataSlice = createSlice({
   initialState,
   reducers: {},
   extraReducers: (builder) => {
+    // filterData
     builder.addCase(filterData.pending, (state) => {
       state.loading = true;
       state.error = null;
@@ -63,6 +64,7 @@ const dataSlice = createSlice({
       state.error = action.payload as string;
     });
 
+    // Get All data
     builder.addCase(getAll.pending, (state) => {
       state.loading = true;
       state.error = null;

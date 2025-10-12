@@ -1,100 +1,67 @@
-import { Result } from "postcss";
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import { useData } from "../hooks/useDataHooks";
+import { useDeviceData } from "../hooks/useDeviceHooks";
+import type { Datas } from "../../types/types";
 
 export default function Portable() {
-  const dummyData = [
-    {
-      id: 1,
-      date: "2025-10-01",
-      speed: 60,
-      device: "SAM01",
-      type: "All",
-    },
-    {
-      id: 2,
-      date: "2025-10-02",
-      speed: 80,
-      device: "SAM02",
-      type: "Overspeed",
-    },
-    {
-      id: 3,
-      date: "2025-10-03",
-      speed: 95,
-      device: "SAM03",
-      type: "Overspeed",
-    },
-    {
-      id: 4,
-      date: "2025-10-05",
-      speed: 50,
-      device: "SAM04",
-      type: "All",
-    },
-  ];
+  const { data, handleFilterData, handleGetAllData, isLoading } = useData();
+  const { devices, fetchAllDevices } = useDeviceData({});
+  const [startDate, setStartDate] = useState("2025-05-06");
+  const [endDate, setEndDate] = useState("2025-10-07");
+  const [speedFrom, setSpeedFrom] = useState<number>(1);
+  const [speedTo, setSpeedTo] = useState<number>(99);
+  const [status, setStatus] = useState<"all" | "over speed">("all");
+  const [device, setDevice] = useState("SAM02");
 
-  const [filter, setFilter] = useState({
-    startDate: "",
-    endDate: "",
-    minSpeed: "",
-    maxSpeed: "",
-    type: "All",
-    device: "",
-  });
-
-  const [filteredData, setFilteredData] = useState(dummyData);
-
-  const handleChange = (e) => {
-    setFilter({ ...filter, [e.target.name]: e.target.value });
-  };
-
-  const handleTypeFilter = (type) => {
-    setFilter({ ...filter, type });
-  };
-
-  const handleSearch = () => {
-    let result = dummyData;
-
-    if (filter.startDate) {
-      result = result.filter((item) => item.date >= filter.startDate);
-    }
-    if (filter.endDate) {
-      result = result.filter((item) => item.date <= filter.endDate);
-    }
-
-    if (filter.minSpeed) {
-      result = result.filter((item) => item.speed >= Number(filter.minSpeed));
-    }
-    if (filter.maxSpeed) {
-      result = result.filter((item) => item.speed <= Number(filter.maxSpeed));
-    }
-
-    if (filter.type !== "All") {
-      result = result.filter((item) => item.type === filter.type);
-    }
-    if (filter.device) {
-      result = result.filter((item) =>
-        item.device.toLowerCase().includes(filter.device.toLowerCase())
-      );
-    }
-    setFilteredData(result);
-  };
-  const handleClear = () => {
-    setFilter({
-      startDate: "",
-      endDate: "",
-      minSpeed: "",
-      maxSpeed: "",
-      type: "All",
-      device: "",
+  // 🔹 Search function
+  const handleSearch = useCallback(() => {
+    if (!device) return;
+    handleFilterData({
+      samId: device,
+      data: {
+        minSpeed: speedFrom,
+        maxSpeed: speedTo,
+        startDate,
+        endDate,
+        category: status,
+      } as unknown as Datas,
     });
-    setFilteredData(dummyData);
+  }, [
+    device,
+    speedFrom,
+    speedTo,
+    startDate,
+    endDate,
+    status,
+    handleFilterData,
+  ]);
+
+  // 🔹 Reset filter
+  const handleClear = async () => {
+    setStartDate("");
+    setEndDate("");
+    setSpeedFrom(0);
+    setSpeedTo(0);
+    setStatus("all");
+
+    await handleGetAllData({ samId: device });
   };
+
+  // 🔹 Initial fetch
+  useEffect(() => {
+    fetchAllDevices();
+  }, []);
+
+  // 🔹 Load data awal
+  useEffect(() => {
+    if (device) handleGetAllData({ samId: device });
+  }, [device]);
 
   return (
     <div className="p-16 flex gap-3 min-h-screen pt-7 pl-72 bg-gray-100">
       <div className="flex-1 p-10 pt-12 text-sm text-black">
-        <div className="breadcrumbs bg-gray-200 text-sm mb-4 p-3">
+        {/* Breadcrumb */}
+        <div className="breadcrumbs bg-gray-200 text-sm mb-4 p-3 rounded-md">
           <ul>
             <li>
               <a className="text-blue-600">Home</a>
@@ -107,11 +74,13 @@ export default function Portable() {
 
         <h2 className="text-3xl text-black font-bold mb-8">Portable</h2>
 
+        {/* Filter Section */}
         <div className="bg-white shadow rounded-xl p-6 mb-8">
           <h3 className="text-lg font-semibold text-gray-700 mb-6">
             Filter Data
           </h3>
 
+          {/* Date Filter */}
           <div className="grid grid-cols-2 gap-6 mb-6">
             <div className="flex items-center gap-6">
               <label className="font-semibold text-gray-700 w-24">
@@ -120,53 +89,57 @@ export default function Portable() {
               <input
                 type="date"
                 name="startDate"
-                value={filter.startDate}
-                onChange={handleChange}
+                value={startDate}
+                onChange={(val) => setStartDate(String(val))}
                 className="bg-gray-300 input input-bordered w-full max-w-xs"
               />
             </div>
-            <div className="flex items-center gap-15">
+            <div className="flex items-center gap-6">
               <label className="font-semibold text-gray-700 w-12">To</label>
               <input
                 type="date"
                 name="endDate"
-                value={filter.endDate}
-                onChange={handleChange}
-                className="input bg-gray-300 input-bordered w-full max-w-xs"
+                value={endDate}
+                onChange={(val) => setEndDate(String(val))}
+                className="bg-gray-300 input input-bordered w-full max-w-xs"
               />
             </div>
           </div>
 
+          {/* Speed Filter */}
           <div className="grid grid-cols-2 gap-6 mb-6">
             <div className="flex items-center gap-6">
               <label className="font-semibold text-gray-700 w-24">Speed</label>
               <input
+                type="number"
                 name="minSpeed"
                 placeholder="Min speed"
-                value={filter.minSpeed}
-                onChange={handleChange}
+                value={speedFrom}
+                onChange={(val) => setSpeedFrom(Number(val))}
                 className="input bg-gray-300 input-bordered w-full max-w-xs"
               />
             </div>
-            <div className="flex items-center gap-15">
+            <div className="flex items-center gap-6">
               <label className="font-semibold text-gray-700 w-12">To</label>
               <input
+                type="number"
                 name="maxSpeed"
                 placeholder="Max speed"
-                value={filter.maxSpeed}
-                onChange={handleChange}
+                value={speedTo}
+                onChange={(val) => setSpeedTo(Number(val))}
                 className="input bg-gray-300 input-bordered w-full max-w-xs"
               />
             </div>
           </div>
 
+          {/* Category & Device */}
           <div className="grid grid-cols-2 gap-6 mb-6">
             <div className="flex items-center justify-center">
               <div className="flex border rounded-md overflow-hidden cursor-pointer">
                 <button
-                  onClick={() => handleTypeFilter("All")}
+                  onClick={() => setStatus("all")}
                   className={`px-6 py-2 font-semibold ${
-                    filter.type === "All"
+                    status === "all"
                       ? "bg-green-600 text-white"
                       : "hover:bg-green-600 hover:text-white"
                   }`}
@@ -174,10 +147,10 @@ export default function Portable() {
                   All
                 </button>
                 <button
-                  onClick={() => handleTypeFilter("Overspeed")}
+                  onClick={() => setStatus("over speed")}
                   className={`px-6 py-2 font-semibold ${
-                    filter.type === "Overspeed"
-                      ? "bg-green-500"
+                    status === "over speed"
+                      ? "bg-green-500 text-white"
                       : "hover:bg-green-600 hover:text-white"
                   }`}
                 >
@@ -185,22 +158,34 @@ export default function Portable() {
                 </button>
               </div>
             </div>
+
             <div className="flex items-center gap-6">
               <label className="font-semibold text-gray-700 w-24">Device</label>
-              <input
-                type="text"
-                name="device"
-                value={filter.device}
-                onChange={handleChange}
-                placeholder="Device ID"
-                className="input bg-gray-300 input-bordered w-full max-w-xs"
-              />
+              <select
+                value={device}
+                onChange={(e) => setDevice(e.target.value)}
+                className="select bg-gray-200 max-w-xs"
+              >
+                {Array.isArray(devices) && devices.length > 0 ? (
+                  devices.map((item, idx) => (
+                    <option key={idx} value={item.samId}>
+                      {item.samId}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>Tidak ada device</option>
+                )}
+              </select>
             </div>
           </div>
 
+          {/* Buttons */}
           <div className="flex gap-5 justify-end">
-            <button onClick={handleSearch} className="btn btn-info px-10">
-              Search
+            <button
+              onClick={handleSearch}
+              className="btn btn-info px-10 text-white"
+            >
+              {isLoading ? "Searching..." : "Search"}
             </button>
             <button onClick={handleClear} className="btn btn-ghost px-10">
               Clear
@@ -208,27 +193,32 @@ export default function Portable() {
           </div>
         </div>
 
+        {/* Result Table */}
         <div className="bg-white shadow rounded-xl p-6">
           <h3 className="text-lg font-semibold text-gray-700 mb-4">Result</h3>
-          {filteredData.length > 0 ? (
+          {isLoading ? (
+            <div className="p-5 text-center text-gray-500 border border-dashed rounded-lg">
+              Loading Data...
+            </div>
+          ) : data && data.length > 0 ? (
             <table className="table w-full text-sm shadow rounded-sm">
               <thead className="bg-gray-200 text-black text-center">
                 <tr className="bg-gray-100">
                   <th className="p-3">ID</th>
                   <th className="p-3">Date</th>
                   <th className="p-3">Speed</th>
-                  <th className="p-3">Device</th>
-                  <th className="p-3">Type</th>
+                  <th className="p-3">DeviceId</th>
+                  <th className="p-3">Category</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredData.map((item) => (
+                {data.map((item) => (
                   <tr key={item.id} className="text-center">
                     <td className="p-3">{item.id}</td>
-                    <td className="p-3">{item.date}</td>
+                    <td className="p-3">{item.createdAt}</td>
                     <td className="p-3">{item.speed} km/h</td>
-                    <td className="p-3">{item.device}</td>
-                    <td className="p-3">{item.type}</td>
+                    <td className="p-3">{item.samId}</td>
+                    <td className="p-3">{item.category}</td>
                   </tr>
                 ))}
               </tbody>
