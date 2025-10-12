@@ -61,11 +61,6 @@ export default function ModalRegister({
             </div>
           )}
         </div>
-        <form method="dialog" className="modal-backdrop mt-6">
-          <button onClick={handleClose} className="btn btn-ghost">
-            Cancel
-          </button>
-        </form>
       </div>
     </dialog>
   );

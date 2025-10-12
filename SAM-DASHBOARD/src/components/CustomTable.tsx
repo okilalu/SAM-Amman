@@ -1,4 +1,5 @@
 import React from "react";
+import CustomLoading from "./CustomLoading";
 
 type CustomTableProps = {
   headers: string[];
@@ -7,7 +8,7 @@ type CustomTableProps = {
 export default function CustomTable({ headers, children }: CustomTableProps) {
   return (
     <div className="overflow-x-auto">
-      <table className="table bg-white shadow rounded-2xl">
+      <table className="table table-sm  bg-white shadow rounded-2xl">
         <thead className="text-black bg-gray-200 text-center">
           <tr>
             {headers.map((header, index) => (
