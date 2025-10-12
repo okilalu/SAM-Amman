@@ -1,27 +1,12 @@
 import React, { useEffect, useState } from "react";
+import { useLogs } from "../hooks/useLogHooks";
 
 export default function Logs() {
-  // sementara pakai dummy data, nanti bisa diganti dari backend
-  const [logs, setLogs] = useState<
-    { time: string; speed: string; device: string; status: string }[]
-  >([]);
+  const { logs, loading, error, getLogs, goToLogDetail } = useLogs();
 
   useEffect(() => {
-    // simulasi data masuk setiap 2 detik
-    const interval = setInterval(() => {
-      setLogs((prev) => [
-        {
-          time: new Date().toLocaleTimeString(),
-          speed: `${Math.floor(Math.random() * 120)} km/h`,
-          device: "SAM01",
-          status: Math.random() > 0.7 ? "Overspeed" : "Normal",
-        },
-        ...prev,
-      ]);
-    }, 2000);
-
-    return () => clearInterval(interval);
-  }, []);
+    getLogs();
+  }, [getLogs]);
 
   return (
     <div className="p-16 flex gap-3 min-h-screen pt-7 pl-72 bg-gray-100">
@@ -43,44 +28,25 @@ export default function Logs() {
         {/* Title */}
         <h2 className="text-3xl font-bold mb-6 text-gray-800 pt-5">Logs</h2>
 
+        <div className="rounded-lg shadow-lg bg-white flex items-center justify-center">
+          {loading && <p>Memuat data...</p>}
+          {error && <p className="text-red-500">{error}</p>}
+          {!loading && logs.length === 0 && <p>Tidak ada data log</p>}
+        </div>
+
         {/* Table Logs */}
         <div className="overflow-x-auto shadow-lg rounded-lg bg-white">
-          <table className="table w-full text-sm">
-            <thead className="bg-gray-200 text-gray-700">
-              <tr>
-                <th className="px-4 py-2">Time</th>
-                <th className="px-4 py-2">Speed</th>
-                <th className="px-4 py-2">Device</th>
-                <th className="px-4 py-2">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {logs.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="text-center py-4 text-gray-500">
-                    No data available
-                  </td>
-                </tr>
-              ) : (
-                logs.map((log, index) => (
-                  <tr key={index} className="border-t">
-                    <td className="px-4 py-2">{log.time}</td>
-                    <td className="px-4 py-2">{log.speed}</td>
-                    <td className="px-4 py-2">{log.device}</td>
-                    <td
-                      className={`px-4 py-2 font-semibold ${
-                        log.status === "Overspeed"
-                          ? "text-red-600"
-                          : "text-green-600"
-                      }`}
-                    >
-                      {log.status}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+          <ul>
+            {logs.map((log) => (
+              <li
+                key={log.id}
+                className="cursor-pointer hover:text-blue-600"
+                onClick={() => goToLogDetail(log.id!)}
+              >
+                {log.filename} - {log.speed} km/h
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </div>
