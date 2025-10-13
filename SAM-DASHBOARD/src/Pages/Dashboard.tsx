@@ -4,7 +4,7 @@ import CustomCard from "../components/CustomCard";
 
 export default function Dashboard() {
   return (
-    <div className="p-16 flex gap-3 min-h-screen pt-7 pl-72 bg-gray-100 ">
+    <div className="flex gap-3 min-h-screen pt-7 bg-gray-100 ">
       <div className="flex-1 p-10 pt-12 text-sm text-black">
         {/* Breadcrumbs */}
         <div className="breadcrumbs bg-gray-200 p-3">
@@ -26,7 +26,27 @@ export default function Dashboard() {
         </h2>
 
         {/* Statistik Card */}
-        <CustomCard />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          <CustomCard
+            title="Storage"
+            value={85}
+            color="text-blue-600"
+            unit="%"
+          />
+          <CustomCard title="Total Record" value={1250} color="text-red-600" />
+          <CustomCard
+            title="Average Speed"
+            value={43}
+            color="text-green-600"
+            unit="km/h"
+          />
+          <CustomCard
+            title="Over Speed"
+            value={15}
+            color="text-orange-500"
+            unit="km/h"
+          />
+        </div>
 
         {/* Grafik Pelanggaran */}
         <div className="mb-10">
