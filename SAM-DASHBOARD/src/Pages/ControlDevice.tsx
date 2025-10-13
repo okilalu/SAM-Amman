@@ -1,30 +1,31 @@
-import React, { useEffect, useState } from "react";
-import CustomInput from "../components/CustomInput";
-import Pagination from "../components/Pagination";
+import { useEffect, useState } from "react";
 import CustomButton from "../components/CustomButton";
 import CustomModal from "../components/CustomModal";
 import CustomTable from "../components/CustomTable";
 import { useDeviceData } from "../hooks/useDeviceHooks";
 import { useUserData } from "../hooks/useUserHooks";
 import { useUserDeviceData } from "../hooks/useUserDeviceHooks";
+import { CustomPagination } from "@/components/CustomPagination";
+import { CustomSelect } from "@/components/CustomSelect";
+import type { SingleValue } from "react-select";
+import type { SelectOption } from "../../types/types";
+import { CustomInputs } from "@/components/CustomInputs";
 
 export default function ControlDevice() {
   const { devices, fetchAllDevices } = useDeviceData({});
   const { allUsers, validateAllUsers } = useUserData({});
-  const { permissions, handleAddPermission, handleDeletePermission } =
-    useUserDeviceData({});
+  const { handleAddPermission, handleDeletePermission } = useUserDeviceData({});
   const [userId, setUserId] = useState("");
   const [deviceId, setDeviceId] = useState<string[]>([]);
   const [filter, setFilter] = useState("");
   const [sort, setSort] = useState("");
   const [sortDirection, SetSortDirection] = useState<"asc" | "desc">("asc");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [perPage, setPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPage = 5;
   const [isProcessing, setIsProcessing] = useState(false);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(5);
   const [samId, setSamId] = useState("");
-
+  const [selectOption, setSelectOption] = useState<string>("");
   const filteredUsers = (allUsers ?? [])
     .filter((u) =>
       (u.username ?? "").toLowerCase().includes(filter.toLowerCase())
@@ -49,10 +50,12 @@ export default function ControlDevice() {
     console.log("Pindah ke halaman: ", page);
   };
 
-  const itemsPerPage = filteredUsers.slice(
-    (currentPage - 1) * totalPage,
-    currentPage * totalPage
-  );
+  const paginatedUsers =
+    filteredUsers &&
+    filteredUsers!.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
 
   // Modal control
   const handleOpenModal = (id: string) => {
@@ -105,7 +108,9 @@ export default function ControlDevice() {
     }
     setIsProcessing(true);
     try {
-      await handleDeletePermission({ userId, deviceId });
+      for (const id of deviceId) {
+        await handleDeletePermission({ userId, deviceId: id });
+      }
       setSelectedIds([]);
       handleCloseModal("modal_delete");
     } catch (error) {
@@ -120,41 +125,78 @@ export default function ControlDevice() {
   useEffect(() => {
     validateAllUsers();
   }, []);
-  console.log(userId, deviceId);
+
+  const handleSelectOption = (selected: SingleValue<SelectOption>) => {
+    setSelectOption(selected ? selected.value : "");
+  };
+
+  const option = [
+    {
+      label: "Asc",
+      value: "asc",
+    },
+    {
+      label: "Desc",
+      value: "desc",
+    },
+  ];
 
   return (
-    <div className="flex gap-3 min-h-screen pt-7 bg-gray-100 ">
-      <div className="flex-1 p-10 pt-12  text-sm text-black">
-        <div className="breadcrumbs bg-gray-200 p-3">
-          <div className="divider divider-horizontal" />
-          <ul>
-            <li>
-              <a href="" className="text-blue-600">
-                Home
-              </a>
-            </li>
-            <li>
-              <a href="">Control Device</a>
-            </li>
-          </ul>
-        </div>
-        <h2 className="text-3xl font-bold mb-6 text-gray-800 pt-5">
-          Control Device
-        </h2>
+    <div className="gap-3">
+      <div className="flex-1 gap-5 text-sm text-black flex overflow-auto">
+        <div className="flex-1 bg-white shadow rounded-sm p-3 pt-0">
+          <div className="flex items-center gap-5 justify-between p-3">
+            <div className="flex flex-col gap-5">
+              <CustomInputs
+                label="Filter"
+                placeholder="Masukkan username"
+                onChange={(val) => setFilter(val)}
+                helperText="x"
+                helper={() => setFilter("")}
+                value={filter}
+              />
 
-        <div className="pt-5 bg-white shadow  rounded-sm p-3">
-          <CustomInput
+              <CustomSelect
+                values={
+                  option.find((opt) => opt.value === selectOption) || null
+                }
+                handleChange={handleSelectOption}
+                options={option}
+                label="Sort"
+                flex="flex-row"
+                labelClass="items-center gap-3"
+              />
+            </div>
+            <div className="flex flex-col gap-5">
+              <CustomInputs
+                label="Sort"
+                placeholder="Masukkan device portable"
+                onChange={(val) => setSort(val)}
+                helperText="x"
+                helper={() => setSort("")}
+                value={sort}
+              />
+              <CustomInputs
+                label="Per Page"
+                placeholder="Masukkan jumlah page"
+                onChange={(val) => setItemsPerPage(Number(val))}
+                value={Number(itemsPerPage)}
+                type="number"
+              />
+            </div>
+          </div>
+          {/* <CustomInput
             filter={filter}
             setFilter={setFilter}
             sort={sort}
             setSort={setSort}
             sortDirection={sortDirection}
             setSortDirection={SetSortDirection}
-            perPage={perPage}
-            setPerPage={setPerPage}
+            perPage={itemsPerPage}
+            setPerPage={setItemsPerPage}
             labels={{
               filter: "Filter",
-              sort: " Sort",
+              sort: "Sort",
               sortDirection: "Sort Direction",
               perPage: "Per Page",
             }}
@@ -162,43 +204,50 @@ export default function ControlDevice() {
               filter: "Masukkan ID Device",
               sort: "Contoh: PortableDeviceId",
             }}
-          />
+          /> */}
 
-          <div className="pt-5">
-            <CustomTable headers={["Select", "UserId", "UserName"]}>
-              {itemsPerPage.length > 0 ? (
-                itemsPerPage.map((item, idx) => (
-                  <tr className="hover:bg-gray-50 text-center">
-                    <td>
-                      <input
-                        type="checkbox"
-                        className="checkbox checkbox-neutral"
-                        checked={userId.includes(item.userId!)}
-                        onChange={() => setUserId(item.userId!)}
-                      />
+          <div className="pt-5 flex flex-col gap-3">
+            <div className="min-h-[250px]">
+              <CustomTable headers={["Select", "UserId", "UserName"]}>
+                {paginatedUsers && paginatedUsers.length > 0 ? (
+                  paginatedUsers.map((item, idx) => (
+                    <tr
+                      key={item.userId}
+                      className="hover:bg-gray-50 text-center"
+                    >
+                      <td>
+                        <input
+                          type="checkbox"
+                          className="checkbox checkbox-neutral"
+                          checked={userId.includes(item.userId!)}
+                          onChange={() => setUserId(item.userId!)}
+                        />
+                      </td>
+                      <td>{idx + 1}</td>
+                      <td>{item.username}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="text-center text-gray-500 py-4">
+                      Tidak ada data ditemukan
                     </td>
-                    <td>{idx + 1}</td>
-                    <td>{item.username}</td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={4} className="text-center text-gray-500 py-4">
-                    Tidak ada data ditemukan
-                  </td>
-                </tr>
-              )}
-            </CustomTable>
+                )}
+              </CustomTable>
+            </div>
 
-            <Pagination
+            {/* 👇 Pagination tetap di bawah */}
+            <CustomPagination
               currentPage={currentPage}
-              totalPage={totalPage}
+              itemsPerPage={itemsPerPage}
+              totalItems={allUsers ? allUsers!.length : 0}
               onPageChange={handlePageCHange}
             />
           </div>
         </div>
 
-        <div className="p-3 mt-6">
+        <div className="flex-1">
           <CustomTable headers={["Select", "PortableDeviceId", "LocationName"]}>
             {filteredDevices.length > 0 ? (
               filteredDevices.map((item) => (

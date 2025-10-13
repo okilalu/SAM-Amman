@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useLogs } from "../hooks/useLogHooks";
+import { CustomBreadcrumbs } from "@/components/CustomBreadcrumbs";
 
 export default function Logs() {
   const { logs, loading, error, getLogs, goToLogDetail } = useLogs();
@@ -9,21 +10,10 @@ export default function Logs() {
   }, [getLogs]);
 
   return (
-    <div className="flex gap-3 min-h-screen pt-7 bg-gray-100">
-      <div className="flex-1 p-10 pt-12 text-sm text-black">
+    <div className="flex gap-3 min-h-screen">
+      <div className="flex-1 text-sm text-black">
         {/* Breadcrumbs */}
-        <div className="breadcrumbs bg-gray-200 p-3 rounded-md">
-          <ul className="flex gap-2">
-            <li>
-              <a href="" className="text-blue-600">
-                Home
-              </a>
-            </li>
-            <li>
-              <span className="text-gray-600">Logs</span>
-            </li>
-          </ul>
-        </div>
+        <CustomBreadcrumbs label="Home" active="Logs" />
 
         {/* Title */}
         <h2 className="text-3xl font-bold mb-6 text-gray-800 pt-5">Logs</h2>

@@ -1,3 +1,8 @@
+export interface SelectOption {
+  value: string;
+  label: string;
+}
+
 // User state
 export interface User {
   id?: number;
@@ -80,6 +85,7 @@ export interface Datas {
   startDate?: string;
   endDate?: string;
   createdAt?: string;
+  filterType?: "day" | "month" | "year";
 }
 
 export interface DataState {
