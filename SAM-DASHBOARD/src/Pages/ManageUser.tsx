@@ -59,7 +59,7 @@ export default function ManageUser() {
     console.log("Pindah ke halaman: ", page);
   };
 
-  // 🟢 CREATE
+  // create
   const handleRegister = async () => {
     if (!username || !password || !credential) {
       alert("Lengkapi semua field!");
@@ -92,7 +92,7 @@ export default function ManageUser() {
     }
   };
 
-  // 🟡 UPDATE
+  // Update
   const handleUpdate = async () => {
     if (selectedIds.length !== 1) {
       alert("Pilih tepat satu user untuk diupdate!");
@@ -132,7 +132,7 @@ export default function ManageUser() {
     }
   };
 
-  // 🔴 DELETE
+  // Delete
   const handleDelete = async () => {
     if (selectedIds.length === 0) {
       alert("Pilih user yang ingin dihapus terlebih dahulu!");
@@ -164,7 +164,7 @@ export default function ManageUser() {
   }, []);
 
   return (
-    <div className="p-16 flex gap-3 min-h-screen pt-7 pl-72 bg-gray-100">
+    <div className="flex gap-3 min-h-screen pt-7 bg-gray-100">
       <div className="flex-1 p-10 pt-12 text-sm text-black">
         {/* Breadcrumb */}
         <div className="breadcrumbs bg-gray-200 text-sm mb-4 p-3">
@@ -212,7 +212,7 @@ export default function ManageUser() {
                 ]}
               >
                 {itemsPerPage.length > 0 ? (
-                  itemsPerPage.map((item, index) => (
+                  itemsPerPage.map((item) => (
                     <tr key={item.id} className="hover:bg-gray-50 text-center">
                       <td>
                         <input
@@ -222,7 +222,7 @@ export default function ManageUser() {
                           onChange={() => handleSelectUser(item.userId!)}
                         />
                       </td>
-                      <td>{(currentPage - 1) * dataPerPage + item.id!}</td>
+                      <td>{item.id}</td>
                       <td>{item.username}</td>
                       <td>{item.password}</td>
                       <td>{item.credential}</td>

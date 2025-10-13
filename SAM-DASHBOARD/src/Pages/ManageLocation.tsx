@@ -4,26 +4,18 @@ import Pagination from "../components/Pagination";
 import CustomButton from "../components/CustomButton";
 import CustomModal from "../components/CustomModal";
 import CustomTable from "../components/CustomTable";
-import { useDeviceData } from "../hooks/useDeviceHooks";
+import { useLocationData } from "../hooks/useLocationHooks";
 
 export default function ManageLocation() {
-  // const dummyData = [
-  //   { id: 1, LocationId: "SAM01", LocationName: "Supra" },
-  //   { id: 2, LocationId: "SAM02", LocationName: "KM 01" },
-  //   { id: 3, LocationId: "SAM03", LocationName: "Mataram" },
-  // ];
-
-  // const [location, setLocation] = useState(dummyData);
   const {
-    fetchAllDevices,
-    devices,
-    handleUpdateDevice,
-    handleDeleteDevice,
-    handleGenerateDevice,
-  } = useDeviceData({});
+    locations,
+    fetchAllLocations,
+    handleCreateLocation,
+    handleUpdateLocation,
+    handleDeleteLocation,
+  } = useLocationData({});
   const [filter, setFilter] = useState("");
-  const [samId, setSamId] = useState("");
-  const [location, setLocation] = useState("");
+  const [location, setLocation] = useState<string>("");
   const [sort, setSort] = useState("");
   const [sortDirection, SetSortDirection] = useState<"asc" | "desc">("asc");
   const [perPage, setPerPage] = useState(10);
@@ -32,15 +24,20 @@ export default function ManageLocation() {
   const totalPage = 5;
   const [loading, setLoading] = useState<boolean>(false);
 
-  const filteredDevice = (devices ?? [])
+  const filteredLocation = (locations ?? [])
     .filter((item) =>
-      (item.samId ?? "").toLowerCase().includes(filter.toLowerCase())
+      (item.location ?? "").toLowerCase().includes(filter.toLowerCase())
     )
     .sort((a, b) =>
       sortDirection === "asc"
-        ? (a.samId ?? "").localeCompare(b.samId ?? "")
-        : (b.samId ?? "").localeCompare(a.samId ?? "")
+        ? (a.id ?? 0) - (b.id ?? 0)
+        : (b.id ?? 0) - (a.id ?? 0)
     );
+
+  const itemsPerPage = filteredLocation.slice(
+    (currentPage - 1) * totalPage,
+    currentPage * totalPage
+  );
 
   const handleOpenModal = (id: string) => {
     const modal = document.getElementById(id) as HTMLDialogElement;
@@ -52,7 +49,7 @@ export default function ManageLocation() {
     modal?.close();
   };
 
-  const handleSelectUser = (id: string) => {
+  const handleSelectLocation = (id: string) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
@@ -65,27 +62,12 @@ export default function ManageLocation() {
   };
 
   const handleRegister = async () => {
-    if (!samId || !location) {
+    if (!location) {
       alert("Lengkapi semua field!");
       return;
     }
-    try {
-      setLoading(true);
-      await handleGenerateDevice({
-        samId,
-        location,
-      });
-
-      handleCloseModal("modal_register");
-
-      setSamId("");
-      setLocation("");
-      console.log(handleGenerateDevice);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoading(false);
-    }
+    await handleCreateLocation({ value: location });
+    handleCloseModal("modal_register");
   };
 
   const handleUpdate = async () => {
@@ -94,21 +76,16 @@ export default function ManageLocation() {
       return;
     }
     const selectedId = selectedIds[0];
-    const selectedDevice = devices?.find((d) => d.samId === selectedId);
-    console.log(selectedDevice);
+    const selectedLoc = locations?.find((d) => d.id === Number(selectedId));
+    console.log(selectedLoc);
 
     try {
       setLoading(true);
-      const payload = {
-        samId,
-        location,
-      };
-      await handleUpdateDevice(selectedDevice!.deviceId!, payload);
+      await handleUpdateLocation(selectedLoc!.id!, location);
 
       handleCloseModal("modal_update");
-      fetchAllDevices();
+      fetchAllLocations();
       setSelectedIds([]);
-      console.log(handleUpdateDevice);
     } catch (error) {
       console.log(error);
     } finally {
@@ -123,11 +100,11 @@ export default function ManageLocation() {
     }
     try {
       setLoading(true);
-      await handleDeleteDevice({ id: String(selectedIds) });
+      await handleDeleteLocation(Number(selectedIds));
 
       handleCloseModal("modal_delete");
       setSelectedIds([]);
-      fetchAllDevices();
+      fetchAllLocations();
     } catch (error) {
       console.log(error);
     } finally {
@@ -136,16 +113,11 @@ export default function ManageLocation() {
   };
 
   useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      await fetchAllDevices();
-      setLoading(false);
-    };
-    loadData();
+    fetchAllLocations();
   }, []);
 
   return (
-    <div className="p-16 flex gap-3 min-h-screen pt-7 pl-72 bg-gray-100">
+    <div className="flex gap-3 min-h-screen pt-7 bg-gray-100">
       <div className="flex-1 p-10 pt-12 text-sm text-black">
         {/* Breadcrumb */}
         <div className="breadcrumbs text-sm mb-4  p-3 bg-gray-200">
@@ -194,18 +166,20 @@ export default function ManageLocation() {
           <>
             <div className="pt-5">
               <CustomTable headers={["Select", "LocationId", "LocationName"]}>
-                {filteredDevice && filteredDevice.length > 0 ? (
-                  filteredDevice.map((item) => (
+                {itemsPerPage && itemsPerPage.length > 0 ? (
+                  itemsPerPage.map((item) => (
                     <tr className="hover:bg-gray-50 text-center">
                       <td>
                         <input
                           type="checkbox"
                           className="checkbox checkbox-error"
-                          checked={selectedIds.includes(item.samId!)}
-                          onChange={() => handleSelectUser(item.samId!)}
+                          checked={selectedIds.includes(String(item.id!))}
+                          onChange={() =>
+                            handleSelectLocation(String(item.id!))
+                          }
                         />
                       </td>
-                      <td>{item.samId}</td>
+                      <td>{item.id}</td>
                       <td>{item.location}</td>
                     </tr>
                   ))
@@ -234,10 +208,10 @@ export default function ManageLocation() {
               <CustomButton
                 text="Update"
                 onClick={() => {
-                  const selectedUser = devices.find(
-                    (u) => u.samId === selectedIds[0]
+                  const selectedLoc = locations.find(
+                    (u) => u.id === Number(selectedIds[0])
                   );
-                  if (selectedUser) handleOpenModal("modal_update");
+                  if (selectedLoc) handleOpenModal("modal_update");
                   else alert("Pilih user terlebih dahulu!");
                 }}
                 className="btn-info"
@@ -259,17 +233,10 @@ export default function ManageLocation() {
                 <div className="flex flex-col">
                   <input
                     type="text"
-                    placeholder="Location ID"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
-                    value={samId}
-                    onChange={(e) => setSamId(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Location Name"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
+                    className="bg-gray-200 w-full rounded-md p-2"
+                    placeholder="Location"
                   />
                 </div>
               </CustomModal>
@@ -281,13 +248,6 @@ export default function ManageLocation() {
                 onSubmit={handleUpdate}
               >
                 <div className="flex flex-col">
-                  <input
-                    type="text"
-                    placeholder="Enter You Username"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
-                    value={samId}
-                    onChange={(e) => setSamId(e.target.value)}
-                  />
                   <input
                     type="text"
                     placeholder="Enter You Password"

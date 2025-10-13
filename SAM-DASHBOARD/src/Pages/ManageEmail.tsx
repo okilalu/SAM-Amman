@@ -22,6 +22,7 @@ export default function ManageEmail() {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [formData, setFormData] = useState<Email>({ emailName: "" });
+  const dataPerPage = 5;
   const totalPage = 5;
 
   useEffect(() => {
@@ -39,6 +40,11 @@ export default function ManageEmail() {
         : (b.id ?? 0) - (a.id ?? 0)
     );
   console.log(emails);
+
+  const itemsPerPage = filteredEmails.slice(
+    (currentPage - 1) * dataPerPage,
+    currentPage * dataPerPage
+  );
 
   // 🔹 Modal Control
   const handleOpenModal = (id: string, email?: Email) => {
@@ -106,7 +112,7 @@ export default function ManageEmail() {
   };
 
   return (
-    <div className="p-16 flex gap-3 min-h-screen pt-7 pl-72 bg-gray-100">
+    <div className="flex gap-3 min-h-screen pt-7 bg-gray-100">
       <div className="flex-1 p-10 pt-12 text-sm text-black">
         {/* 🔹 Breadcrumb */}
         <div className="breadcrumbs bg-gray-200 text-sm mb-4 p-3">
@@ -142,8 +148,8 @@ export default function ManageEmail() {
                   Memuat data...
                 </td>
               </tr>
-            ) : filteredEmails.length > 0 ? (
-              filteredEmails.map((item) => (
+            ) : itemsPerPage.length > 0 ? (
+              itemsPerPage.map((item) => (
                 <tr key={item.id} className="hover:bg-gray-50 text-center">
                   <td>
                     <input

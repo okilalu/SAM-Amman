@@ -5,6 +5,7 @@ import CustomButton from "../components/CustomButton";
 import CustomModal from "../components/CustomModal";
 import CustomTable from "../components/CustomTable";
 import { useDeviceData } from "../hooks/useDeviceHooks";
+import { useLocationData } from "../hooks/useLocationHooks";
 
 export default function ManageDevice() {
   const {
@@ -14,6 +15,9 @@ export default function ManageDevice() {
     handleUpdateDevice,
     handleDeleteDevice,
   } = useDeviceData({});
+  const { locations, fetchAllLocations } = useLocationData({});
+
+  // === STATE ===
   const [samId, setSamId] = useState("");
   const [deviceIP, setDeviceIP] = useState("");
   const [deviceUsername, setDeviceUsername] = useState("");
@@ -33,6 +37,7 @@ export default function ManageDevice() {
   const totalPage = 5;
   const [loading, setLoading] = useState<boolean>(false);
 
+  // === FILTER DATA ===
   const filteredDevice = (devices ?? [])
     .filter((item) =>
       (item.samId ?? "").toLowerCase().includes(filter.toLowerCase())
@@ -43,6 +48,7 @@ export default function ManageDevice() {
         : (b.samId ?? "").localeCompare(a.samId ?? "")
     );
 
+  // === MODAL HANDLER ===
   const handleOpenModal = (id: string) => {
     const modal = document.getElementById(id) as HTMLDialogElement;
     modal?.showModal();
@@ -53,18 +59,19 @@ export default function ManageDevice() {
     modal?.close();
   };
 
-  // Checkbox Handler
+  // === SELECT CHECKBOX ===
   const handleSelectPortable = (id: string) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
-  }; // Pagination
-  const handlePageCHange = (page: number) => {
+  };
+
+  const handlePageChange = (page: number) => {
     setCurrentPage(page);
     console.log("Pindah ke halaman: ", page);
   };
 
-  // 🟢 CREATE
+  // 🟢 CREATE DEVICE
   const handleRegister = async () => {
     if (
       !samId ||
@@ -73,7 +80,6 @@ export default function ManageDevice() {
       !deviceRootFolder ||
       !cameraIP ||
       !cameraUsername ||
-      !cameraRootFolder ||
       !cameraPassword ||
       !cameraRootFolder ||
       !cameraType ||
@@ -82,6 +88,7 @@ export default function ManageDevice() {
       alert("Lengkapi semua field!");
       return;
     }
+
     try {
       setLoading(true);
       await handleGenerateDevice({
@@ -94,10 +101,13 @@ export default function ManageDevice() {
         cameraPassword,
         cameraRootFolder,
         cameraType,
-        location,
+        location, // lokasi diambil dari dropdown
       });
-      handleCloseModal("modal_register");
 
+      handleCloseModal("modal_register");
+      await fetchAllDevices();
+
+      // reset field
       setSamId("");
       setDeviceIP("");
       setDeviceUsername("");
@@ -115,21 +125,24 @@ export default function ManageDevice() {
     }
   };
 
-  // 🟡 UPDATE
+  // 🟡 UPDATE DEVICE
   const handleUpdate = async () => {
     if (selectedIds.length !== 1) {
-      alert("Pilih tepat satu user untuk diupdate!");
+      alert("Pilih tepat satu device untuk diupdate!");
       return;
     }
 
     const selectedId = selectedIds[0];
     const selectedDevice = devices?.find((d) => d.samId === selectedId);
-    console.log(selectedDevice);
-    console.log(selectedId);
+
+    if (!selectedDevice) {
+      alert("Device tidak ditemukan!");
+      return;
+    }
 
     try {
       setLoading(true);
-      const payload = {
+      await handleUpdateDevice(String(selectedDevice.deviceId!), {
         samId,
         deviceIP,
         deviceUsername,
@@ -140,11 +153,10 @@ export default function ManageDevice() {
         cameraRootFolder,
         cameraType,
         location,
-      };
-      await handleUpdateDevice(String(selectedDevice!.deviceId!), payload);
+      });
 
       handleCloseModal("modal_update");
-      fetchAllDevices();
+      await fetchAllDevices();
       setSelectedIds([]);
     } catch (error) {
       console.log(error);
@@ -153,20 +165,19 @@ export default function ManageDevice() {
     }
   };
 
-  // 🔴 DELETE
+  // 🔴 DELETE DEVICE
   const handleDelete = async () => {
     if (selectedIds.length === 0) {
-      alert("Pilih user yang ingin dihapus terlebih dahulu!");
+      alert("Pilih device yang ingin dihapus!");
       return;
     }
     try {
       setLoading(true);
       await handleDeleteDevice({ id: String(selectedIds) });
-
       alert(`${selectedIds.length} Device berhasil dihapus.`);
       handleCloseModal("modal_delete");
       setSelectedIds([]);
-      fetchAllDevices();
+      await fetchAllDevices();
     } catch (error) {
       console.log(error);
     } finally {
@@ -174,17 +185,40 @@ export default function ManageDevice() {
     }
   };
 
+  // === FETCH DATA ===
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
       await fetchAllDevices();
+      await fetchAllLocations();
       setLoading(false);
     };
     loadData();
   }, []);
 
+  // === PREFILL UPDATE FORM ===
+  const handlePrefillUpdate = () => {
+    if (selectedIds.length !== 1) {
+      alert("Pilih satu device untuk diupdate!");
+      return;
+    }
+    const selectedDevice = devices?.find((u) => u.samId === selectedIds[0]);
+    if (!selectedDevice) return alert("Device tidak ditemukan!");
+    setSamId(selectedDevice.samId || "");
+    setDeviceIP(selectedDevice.deviceIP || "");
+    setDeviceUsername(selectedDevice.deviceUsername || "");
+    setDeviceRootFolder(selectedDevice.deviceRootFolder || "");
+    setCameraIP(selectedDevice.cameraIP || "");
+    setCameraUsername(selectedDevice.cameraUsername || "");
+    setCameraPassword(selectedDevice.cameraPassword || "");
+    setCameraRootFolder(selectedDevice.cameraRootFolder || "");
+    setCameraType(selectedDevice.cameraType || "");
+    setLocation(selectedDevice.location || "");
+    handleOpenModal("modal_update");
+  };
+
   return (
-    <div className="p-16 flex gap-3 min-h-screen pt-7 pl-72 bg-gray-100">
+    <div className="flex gap-3 min-h-screen pt-7 bg-gray-100">
       <div className="flex-1 p-10 pt-12 text-sm text-black">
         {/* Breadcrumb */}
         <div className="breadcrumbs text-sm mb-4 p-3 bg-gray-200">
@@ -197,7 +231,9 @@ export default function ManageDevice() {
             </li>
           </ul>
         </div>
+
         <h2 className="text-3xl font-bold mb-8 text-gray-800">Manage Device</h2>
+
         <CustomInput
           filter={filter}
           setFilter={setFilter}
@@ -218,9 +254,10 @@ export default function ManageDevice() {
             sort: "Contoh: PortableDeviceId",
           }}
         />
+
         {loading ? (
           <div className="flex flex-col justify-center items-center h-64">
-            <span className="loading loading-bars loading-xl text-blue-400 "></span>
+            <span className="loading loading-bars loading-xl text-blue-400"></span>
             <p className="ml-3 text-gray-700 text-lg">
               Memuat data perangkat...
             </p>
@@ -239,7 +276,10 @@ export default function ManageDevice() {
               >
                 {filteredDevice.length > 0 ? (
                   filteredDevice.map((device) => (
-                    <tr className="hover:bg-gray-50 text-center">
+                    <tr
+                      key={device.samId}
+                      className="hover:bg-gray-50 text-center"
+                    >
                       <td>
                         <input
                           type="checkbox"
@@ -267,7 +307,7 @@ export default function ManageDevice() {
             <Pagination
               currentPage={currentPage}
               totalPage={totalPage}
-              onPageChange={handlePageCHange}
+              onPageChange={handlePageChange}
             />
 
             <div className="pt-5 flex gap-3 justify-end">
@@ -278,13 +318,7 @@ export default function ManageDevice() {
               />
               <CustomButton
                 text="Update"
-                onClick={() => {
-                  const selectedUser = devices.find(
-                    (u) => u.samId === selectedIds[0]
-                  );
-                  if (selectedUser) handleOpenModal("modal_update");
-                  else alert("Pilih user terlebih dahulu!");
-                }}
+                onClick={handlePrefillUpdate}
                 className="btn-info"
               />
               <CustomButton
@@ -294,179 +328,199 @@ export default function ManageDevice() {
               />
             </div>
 
-            <div className="pt-5">
-              <CustomModal
-                title="Register Device"
-                id="modal_register"
-                confirmText="Register"
-                onSubmit={handleRegister}
-              >
-                <div className="flex flex-col">
-                  <input
-                    type="text"
-                    placeholder="Portable Device ID"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
-                    value={samId}
-                    onChange={(e) => setSamId(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Device Address"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
-                    value={deviceIP}
-                    onChange={(e) => setDeviceIP(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Device Username"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
-                    value={deviceUsername}
-                    onChange={(e) => setDeviceUsername(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Device Root Folder"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
-                    value={deviceRootFolder}
-                    onChange={(e) => setDeviceRootFolder(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Camera IP"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
-                    value={cameraIP}
-                    onChange={(e) => setCameraIP(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Camera Username"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
-                    value={cameraUsername}
-                    onChange={(e) => setCameraUsername(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Camera Password"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
-                    value={cameraPassword}
-                    onChange={(e) => setCameraPassword(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Camera Root Folder"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
-                    value={cameraRootFolder}
-                    onChange={(e) => setCameraRootFolder(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Camera Type"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
-                    value={cameraType}
-                    onChange={(e) => setCameraType(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Location"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                  />
-                </div>
-              </CustomModal>
+            {/* === MODAL REGISTER === */}
+            <CustomModal
+              title="Register Device"
+              id="modal_register"
+              confirmText="Register"
+              onSubmit={handleRegister}
+            >
+              <div className="flex flex-col">
+                <input
+                  type="text"
+                  placeholder="Portable Device ID"
+                  className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                  value={samId}
+                  onChange={(e) => setSamId(e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Device Address"
+                  className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                  value={deviceIP}
+                  onChange={(e) => setDeviceIP(e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Device Username"
+                  className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                  value={deviceUsername}
+                  onChange={(e) => setDeviceUsername(e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Device Root Folder"
+                  className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                  value={deviceRootFolder}
+                  onChange={(e) => setDeviceRootFolder(e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Camera IP"
+                  className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                  value={cameraIP}
+                  onChange={(e) => setCameraIP(e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Camera Username"
+                  className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                  value={cameraUsername}
+                  onChange={(e) => setCameraUsername(e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Camera Password"
+                  className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                  value={cameraPassword}
+                  onChange={(e) => setCameraPassword(e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Camera Root Folder"
+                  className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                  value={cameraRootFolder}
+                  onChange={(e) => setCameraRootFolder(e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Camera Type"
+                  className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                  value={cameraType}
+                  onChange={(e) => setCameraType(e.target.value)}
+                />
 
-              <CustomModal
-                title="Update Device"
-                id="modal_update"
-                confirmText="Update"
-                onSubmit={handleUpdate}
-              >
-                <div className="flex flex-col">
-                  <input
-                    type="text"
-                    placeholder="Portable Device ID"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
-                    value={samId}
-                    onChange={(e) => setSamId(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Device Address"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
-                    value={deviceIP}
-                    onChange={(e) => setDeviceIP(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Device Username"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
-                    value={deviceUsername}
-                    onChange={(e) => setDeviceUsername(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Device Root Folder"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
-                    value={deviceRootFolder}
-                    onChange={(e) => setDeviceRootFolder(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Camera IP"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
-                    value={cameraIP}
-                    onChange={(e) => setCameraIP(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Camera Username"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
-                    value={cameraUsername}
-                    onChange={(e) => setCameraUsername(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Camera Password"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
-                    value={cameraPassword}
-                    onChange={(e) => setCameraPassword(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Camera Root Folder"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
-                    value={cameraRootFolder}
-                    onChange={(e) => setCameraRootFolder(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Camera Type"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
-                    value={cameraType}
-                    onChange={(e) => setCameraType(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Location"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2 "
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                  />
-                </div>
-              </CustomModal>
-              <CustomModal
-                title="Delete Device"
-                id="modal_delete"
-                confirmText="Delete"
-                onSubmit={handleDelete}
-              >
-                <div className="flex flex-col">
-                  <p className="">
-                    Apakah anda yakin ingin menghapus data ini?
-                  </p>
-                </div>
-              </CustomModal>
-            </div>
+                {/* Dropdown lokasi */}
+                <select
+                  className="select w-full bg-gray-200 mb-3"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                >
+                  <option value="">-- Pilih Lokasi --</option>
+                  {Array.isArray(locations) && locations.length > 0 ? (
+                    locations.map((item, idx) => (
+                      <option key={idx} value={item.location}>
+                        {item.location}
+                      </option>
+                    ))
+                  ) : (
+                    <option disabled>Tidak ada data lokasi</option>
+                  )}
+                </select>
+              </div>
+            </CustomModal>
+
+            {/* === MODAL UPDATE === */}
+            <CustomModal
+              title="Update Device"
+              id="modal_update"
+              confirmText="Update"
+              onSubmit={handleUpdate}
+            >
+              <div className="flex flex-col">
+                <input
+                  type="text"
+                  placeholder="Portable Device ID"
+                  className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                  value={samId}
+                  onChange={(e) => setSamId(e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Device Address"
+                  className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                  value={deviceIP}
+                  onChange={(e) => setDeviceIP(e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Device Username"
+                  className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                  value={deviceUsername}
+                  onChange={(e) => setDeviceUsername(e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Device Root Folder"
+                  className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                  value={deviceRootFolder}
+                  onChange={(e) => setDeviceRootFolder(e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Camera IP"
+                  className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                  value={cameraIP}
+                  onChange={(e) => setCameraIP(e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Camera Username"
+                  className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                  value={cameraUsername}
+                  onChange={(e) => setCameraUsername(e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Camera Password"
+                  className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                  value={cameraPassword}
+                  onChange={(e) => setCameraPassword(e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Camera Root Folder"
+                  className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                  value={cameraRootFolder}
+                  onChange={(e) => setCameraRootFolder(e.target.value)}
+                />
+                <input
+                  type="text"
+                  placeholder="Camera Type"
+                  className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                  value={cameraType}
+                  onChange={(e) => setCameraType(e.target.value)}
+                />
+
+                {/* Dropdown lokasi untuk update */}
+                <select
+                  className="select w-full bg-gray-200 mb-3"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                >
+                  <option value="">-- Pilih Lokasi --</option>
+                  {Array.isArray(locations) && locations.length > 0 ? (
+                    locations.map((item, idx) => (
+                      <option key={idx} value={item.location}>
+                        {item.location}
+                      </option>
+                    ))
+                  ) : (
+                    <option disabled>Tidak ada data lokasi</option>
+                  )}
+                </select>
+              </div>
+            </CustomModal>
+
+            {/* === MODAL DELETE === */}
+            <CustomModal
+              title="Delete Device"
+              id="modal_delete"
+              confirmText="Delete"
+              onSubmit={handleDelete}
+            >
+              <p>Apakah Anda yakin ingin menghapus data ini?</p>
+            </CustomModal>
           </>
         )}
       </div>
