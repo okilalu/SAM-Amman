@@ -1,38 +1,31 @@
 import React from "react";
 
-// interface CustomCardProps {
-//   title?: string;
-//   data?: string;
-//   className?: string;
-// }
+interface CustomCardProps {
+  title: string;
+  value: number | string;
+  color?: string; // warna teks value
+  unit?: string;
+  className?: string; // untuk tambahan style custom
+}
 
-export default function CustomCard() {
+export default function CustomCard({
+  title,
+  value,
+  color = "text-blue-600",
+  unit = "",
+  className = "",
+}: CustomCardProps) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-      {/* <div className={className}>
-         <h2 className={className}>{title}</h2>
-         <p className={className}>{data}</p>
-    </div> */}
-
-      <div className="bg-white rounded-xl shadow p-6 hover:shadow-lg transition">
-        <h2 className="text-lg font-semibold text-gray-700">Storage</h2>
-        <p className="text-3xl font-bold text-blue-600 mt-2">0</p>
-      </div>
-
-      <div className="bg-white rounded-xl shadow p-6 hover:shadow-lg transition">
-        <h2 className="text-lg font-semibold text-gray-700">Total Record</h2>
-        <p className="text-3xl font-bold text-red-600 mt-2">0</p>
-      </div>
-
-      <div className="bg-white rounded-xl shadow p-6 hover:shadow-lg transition">
-        <h2 className="text-lg font-semibold text-gray-700">Average Speed</h2>
-        <p className="text-3xl font-bold text-green-600 mt-2">0 km/h</p>
-      </div>
-
-      <div className="bg-white rounded-xl shadow p-6 hover:shadow-lg transition">
-        <h2 className="text-lg font-semibold text-gray-700">Over Speed</h2>
-        <p className="text-3xl font-bold text-orange-500 mt-2">0 km/h</p>
-      </div>
+    <div
+      className={`bg-white rounded-xl shadow p-6 hover:shadow-lg transition ${className}`}
+    >
+      <h2 className="text-lg font-semibold text-gray-700">{title}</h2>
+      <p className={`text-3xl font-bold mt-2 ${color}`}>
+        {value} {unit}
+      </p>
     </div>
+    // <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+
+    // </div>
   );
 }
