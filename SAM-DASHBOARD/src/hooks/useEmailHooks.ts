@@ -48,6 +48,7 @@ export function useEmailData({ closeModal }: UseEmailProps = {}) {
   const handleCreateEmail = async (payload: Partial<Email>) => {
     setIsLoading(true);
     setError(null);
+
     try {
       const res = await dispatch(createEmail({ data: payload })).unwrap(); // EmailsResponse
       if (res && Array.isArray(res.data)) {
