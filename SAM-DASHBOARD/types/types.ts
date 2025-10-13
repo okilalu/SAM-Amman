@@ -154,16 +154,7 @@ export interface EmailsResponse {
 
 // Logs State
 export interface Log {
-  id: number; // ID unik log
-  deviceId: string; // ID alat / SAM
-  filename: string; // Nama file log (jika ada)
-  speed: number; // Kecepatan kendaraan
-  date: string; // Tanggal log (format ISO)
-  time: string; // Waktu log
-  location?: string; // Lokasi kejadian (opsional)
-  category?: string; // Kategori pelanggaran (opsional)
-  createdAt?: string; // Waktu data dibuat
-  updatedAt?: string; // Waktu data diperbarui
+  acttivity: string;
 }
 
 export interface LogResponse {
@@ -178,4 +169,39 @@ export interface LogState {
   loading: boolean; // Status loading saat fetch
   error: string | null; // Menyimpan pesan error
   selectedLog: Log | null; // Data log yang sedang dipilih (opsional)
+}
+
+// Location state
+export interface Location {
+  id?: number;
+  location?: string;
+}
+
+export interface LocationState {
+  data: Location[];
+  selectedLocation: Location | null;
+  loading: boolean;
+  error: string | null;
+}
+
+export interface LocationResponse {
+  data: Location[];
+  status: boolean;
+  message: string;
+}
+
+// User-Device State
+export interface UserDevice {
+  userId: string;
+  deviceId: string | string[];
+}
+export interface UserDeviceState {
+  data: UserDevice[];
+  loading: boolean;
+  error: string | null;
+}
+export interface UserDeviceResponse {
+  data: UserDevice[];
+  status: boolean;
+  message: string;
 }
