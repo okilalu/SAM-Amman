@@ -7,19 +7,13 @@ function App() {
   return (
     <div className="min-h-screen">
       <Routes>
-        {/* Route untuk halaman login */}
         <Route path="/login" element={<Login />} />
-
-        {/* Route untuk halaman register */}
         <Route path="/register" element={<Register />} />
-
-        {/* Route default (misalnya dashboard) */}
         <Route
           path="/*"
           element={
             <div>
               <Sidebar />
-              {/* konten utama bisa kamu isi di sini */}
             </div>
           }
         />
