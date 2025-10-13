@@ -1,10 +1,15 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   MdDashboard,
   MdEmail,
   MdGpsFixed,
   MdManageHistory,
 } from "react-icons/md";
+import { GrUserManager } from "react-icons/gr";
+import { FaRaspberryPi } from "react-icons/fa";
+import { TbDeviceImacCode, TbFilterCode } from "react-icons/tb";
+
 import Dashboard from "../Pages/Dashboard";
 import Portable from "../Pages/Portable";
 import ManageUser from "../Pages/ManageUser";
@@ -13,11 +18,10 @@ import ManageDevice from "../Pages/ManageDevice";
 import ManageLocation from "../Pages/ManageLocation";
 import ControlDevice from "../Pages/ControlDevice";
 import Logs from "../Pages/Logs";
-import { GrUserManager } from "react-icons/gr";
-import { FaRaspberryPi } from "react-icons/fa";
-import { TbDeviceImacCode, TbFilterCode } from "react-icons/tb";
 
 export default function Sidebar() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState({ credential: "Admin" }); // default sementara
   const [activeMenu, setActiveMenu] = useState("Home");
 
   const renderContent = () => {
@@ -42,71 +46,94 @@ export default function Sidebar() {
         return <Dashboard />;
     }
   };
-  return (
-    <div className="h-screen left-0">
-      <div>{renderContent()}</div>
-      {/* Logo / Judul */}
-      <div className="fixed left-0 top-0 h-screen w-[20%]">
-        <div className="flex flex-col top-0 left-0 h-full bg-gray-800 text-white justify-between">
-          <div>
-            <div className="px-6 py-4 border-b border-gray-700 flex items-center justify-center">
-              <h1 className="text-3xl font-bold">AMMAN</h1>
-            </div>
 
-            {/* Menu */}
-            <nav className="flex-1 mt-6 ">
-              <ul className="">
-                <li className="px-6 py-3 flex items-center gap-3 hover:bg-gray-700 rounded-md">
-                  <MdDashboard className="text-xl" />
-                  <button onClick={() => setActiveMenu("Home")}>
-                    Dashboard
-                  </button>
-                </li>
-                <li className="px-6 py-3 flex items-center gap-3 hover:bg-gray-700 rounded-md">
-                  <TbFilterCode className="text-xl" />
-                  <button onClick={() => setActiveMenu("Portable")}>
-                    Portable
-                  </button>
-                </li>
-                <li className="px-6 py-3 flex items-center gap-3 hover:bg-gray-700 rounded-md">
-                  <GrUserManager className="text-xl" />
-                  <button onClick={() => setActiveMenu("Manage User")}>
-                    Manage User
-                  </button>
-                </li>
-                <li className="px-6 py-3 flex items-center gap-3 hover:bg-gray-700 rounded-md">
-                  <MdEmail className="text-xl" />
-                  <button onClick={() => setActiveMenu("Manage Email")}>
-                    Manage Email
-                  </button>
-                </li>
-                <li className="px-6 py-3 flex items-center gap-3 hover:bg-gray-700 rounded-md">
-                  <FaRaspberryPi className="text-xl" />
-                  <button onClick={() => setActiveMenu("Manage Device")}>
-                    Manage Device
-                  </button>
-                </li>
-                <li className="px-6 py-3 flex items-center gap-3 hover:bg-gray-700 rounded-md">
-                  <MdGpsFixed className="text-xl" />
-                  <button onClick={() => setActiveMenu("Manage Location")}>
-                    Manage Location
-                  </button>
-                </li>
-                <li className="px-6 py-3 flex items-center gap-3 hover:bg-gray-700 rounded-md">
-                  <TbDeviceImacCode className="text-xl" />
-                  <button onClick={() => setActiveMenu("Control Device")}>
-                    Control Device
-                  </button>
-                </li>
-                <li className="px-6 py-3 flex items-center gap-3 hover:bg-gray-700 rounded-md">
-                  <MdManageHistory className="text-xl" />
-                  <button onClick={() => setActiveMenu("Logs")}>Logs</button>
-                </li>
-              </ul>
-            </nav>
+  // Menu yang tampil sesuai role
+  const menuItems =
+    user.credential !== "Operator"
+      ? [
+          { name: "Home", icon: <MdDashboard className="text-xl" /> },
+          { name: "Portable", icon: <TbFilterCode className="text-xl" /> },
+          { name: "Manage User", icon: <GrUserManager className="text-xl" /> },
+          { name: "Manage Email", icon: <MdEmail className="text-xl" /> },
+          {
+            name: "Manage Device",
+            icon: <FaRaspberryPi className="text-xl" />,
+          },
+          { name: "Manage Location", icon: <MdGpsFixed className="text-xl" /> },
+          {
+            name: "Control Device",
+            icon: <TbDeviceImacCode className="text-xl" />,
+          },
+          { name: "Logs", icon: <MdManageHistory className="text-xl" /> },
+        ]
+      : [
+          { name: "Home", icon: <MdDashboard className="text-xl" /> },
+          { name: "Portable", icon: <TbFilterCode className="text-xl" /> },
+        ];
+
+  return (
+    <div className="flex h-screen w-full">
+      {/* Sidebar */}
+      <aside className="fixed left-0 top-0 h-full w-[20%] bg-gray-800 text-white flex flex-col justify-between shadow-lg">
+        {/* Header */}
+        <div>
+          <div className="px-6 py-4 border-b border-gray-700 flex items-center justify-center">
+            <h1 className="text-3xl font-bold tracking-wider">AMMAN</h1>
           </div>
+
+          {/* Navigation */}
+          <nav className="mt-6">
+            <ul>
+              {menuItems.map((item) => (
+                <li
+                  key={item.name}
+                  onClick={() => setActiveMenu(item.name)}
+                  className={`px-6 py-3 flex items-center gap-3 cursor-pointer rounded-md transition-all duration-200 ${
+                    activeMenu === item.name
+                      ? "bg-blue-600 text-white"
+                      : "hover:bg-gray-700"
+                  }`}
+                >
+                  {item.icon}
+                  <span>{item.name}</span>
+                </li>
+              ))}
+            </ul>
+          </nav>
         </div>
-      </div>
+
+        {/* Auth Buttons */}
+        <div className="px-6 py-5 border-t border-gray-700 flex flex-col gap-3">
+          {isLoggedIn ? (
+            <button
+              onClick={() => setIsLoggedIn(false)}
+              className="bg-red-600 hover:bg-red-700 text-center text-white py-2 rounded-md font-semibold transition"
+            >
+              Logout
+            </button>
+          ) : (
+            <>
+              <Link
+                to="/login"
+                className="bg-blue-600 hover:bg-blue-700 text-center transition text-white py-2 rounded-md font-semibold"
+              >
+                Sign In
+              </Link>
+              <Link
+                to="/register"
+                className="bg-green-600 hover:bg-green-700 text-center transition text-white py-2 rounded-md font-semibold"
+              >
+                Sign Up
+              </Link>
+            </>
+          )}
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="ml-[20%] w-[80%] h-full overflow-y-auto bg-gray-50 p-6">
+        {renderContent()}
+      </main>
     </div>
   );
 }
