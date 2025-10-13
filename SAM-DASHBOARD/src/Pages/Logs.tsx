@@ -9,7 +9,7 @@ export default function Logs() {
   }, [getLogs]);
 
   return (
-    <div className="p-16 flex gap-3 min-h-screen pt-7 pl-72 bg-gray-100">
+    <div className="flex gap-3 min-h-screen pt-7 bg-gray-100">
       <div className="flex-1 p-10 pt-12 text-sm text-black">
         {/* Breadcrumbs */}
         <div className="breadcrumbs bg-gray-200 p-3 rounded-md">
