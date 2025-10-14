@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { useLogs } from "../hooks/useLogHooks";
-import { CustomBreadcrumbs } from "@/components/CustomBreadcrumbs";
 
 export default function Logs() {
   const { logs, loading, error, getLogs } = useLogs();
