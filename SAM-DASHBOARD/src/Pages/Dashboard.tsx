@@ -3,12 +3,8 @@ import CustomCard from "../components/CustomCard";
 
 export default function Dashboard() {
   return (
-    <div className="flex gap-3 min-h-screen">
+    <div className="flex gap-3">
       <div className="flex-1 text-sm text-black">
-        <h2 className="text-3xl font-bold mb-6 text-gray-800 pt-5">
-          Dashboard
-        </h2>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           <CustomCard
             title="Storage"

@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import CustomTable from "../components/CustomTable";
-import Pagination from "../components/Pagination";
 import CustomButton from "../components/CustomButton";
 import CustomModal from "../components/CustomModal";
-import CustomFilter from "../components/CustomFilter";
 import { useUserData } from "../hooks/useUserHooks";
+import { CustomInputs } from "@/components/CustomInputs";
+import { CustomSelects } from "@/components/CustomSelects";
+import { CustomPagination } from "@/components/CustomPagination";
 
 export default function ManageUser() {
   const { allUsers, validateAllUsers, registerUser, updateUsers, deleteUsers } =
@@ -13,29 +14,27 @@ export default function ManageUser() {
   const [password, setPassword] = useState("");
   const [credential, setCredential] = useState("");
   const [filter, setFilter] = useState("");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const dataPerPage = 5;
-  const totalPage = 5;
+  const itemsPerPage = 5;
   const [loading, setLoading] = useState<boolean>(false);
+  const [selectOption, setSelectOption] = useState<string>("asc");
 
-  // 🔍 Filter & Sort
   const filteredUsers = (allUsers ?? [])
     .filter((u) =>
       (u.username ?? "").toLowerCase().includes(filter.toLowerCase())
     )
     .sort((a, b) =>
-      sortDirection === "asc"
-        ? (a.id ?? 0) - (b.id ?? 0)
-        : (b.id ?? 0) - (a.id ?? 0)
+      selectOption === "asc"
+        ? (a.username ?? "").localeCompare(b.username ?? "")
+        : (b.username ?? "").localeCompare(a.username ?? "")
     );
 
-  const itemsPerPage = filteredUsers.slice(
-    (currentPage - 1) * dataPerPage,
-    currentPage * dataPerPage
+  const paginatedUsers = filteredUsers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
   );
-  // 🔹 Modal control
+
   const handleOpenModal = (id: string) => {
     const modal = document.getElementById(id) as HTMLDialogElement;
     modal?.showModal();
@@ -163,23 +162,43 @@ export default function ManageUser() {
     loadData();
   }, []);
 
+  const handleSelectOption = (selected: string) => {
+    setSelectOption(selected);
+  };
+
+  const option = [
+    {
+      label: "Asc",
+      value: "asc",
+    },
+    {
+      label: "Desc",
+      value: "desc",
+    },
+  ];
+
   return (
-    <div className="flex gap-3 min-h-screen">
+    <div className="flex gap-3">
       <div className="flex-1 text-sm text-black">
-        <h2 className="text-3xl text-black font-bold mb-8">Manage User</h2>
+        <div className="flex flex-col gap-5 flex-1">
+          <CustomInputs
+            label="Filter users"
+            placeholder="Cari users"
+            onChange={(val) => setFilter(val)}
+            helperText="x"
+            helper={() => setFilter("")}
+            value={filter}
+          />
+          <CustomSelects
+            value={option.find((opt) => opt.value === selectOption) || null}
+            onChange={handleSelectOption}
+            options={option}
+            label="Sort"
+            flex="flex-row"
+            labelClass="items-center gap-3"
+          />
+        </div>
 
-        {/* FILTER */}
-        <CustomFilter
-          filterLabel="Filter"
-          sortLabel="Sort Direction"
-          placeholder="Cari username..."
-          filter={filter}
-          setFilter={setFilter}
-          sortDirection={sortDirection}
-          setSortDirection={setSortDirection}
-        />
-
-        {/* TABLE */}
         {loading ? (
           <div className="flex flex-col justify-center items-center h-64">
             <span className="loading loading-bars loading-xl text-blue-400"></span>
@@ -189,7 +208,7 @@ export default function ManageUser() {
           </div>
         ) : (
           <>
-            <div className="pt-5">
+            <div className="pt-5 min-h-[270px] ">
               <CustomTable
                 headers={[
                   "Select",
@@ -199,9 +218,9 @@ export default function ManageUser() {
                   "Privilage",
                 ]}
               >
-                {itemsPerPage.length > 0 ? (
-                  itemsPerPage.map((item) => (
-                    <tr key={item.id} className="hover:bg-gray-50 text-center">
+                {paginatedUsers.length > 0 ? (
+                  paginatedUsers.map((item, idx) => (
+                    <tr key={idx} className="hover:bg-gray-50 text-center">
                       <td>
                         <input
                           type="checkbox"
@@ -226,13 +245,13 @@ export default function ManageUser() {
               </CustomTable>
             </div>
 
-            <Pagination
+            <CustomPagination
               currentPage={currentPage}
-              totalPage={totalPage}
+              itemsPerPage={itemsPerPage}
+              totalItems={allUsers ? allUsers!.length : 0}
               onPageChange={handlePageCHange}
             />
 
-            {/* BUTTON ACTION */}
             <div className="pt-5 flex gap-3 justify-end">
               <CustomButton
                 text="Add User"
@@ -257,7 +276,6 @@ export default function ManageUser() {
               />
             </div>
 
-            {/* MODALS */}
             <div className="pt-5">
               <CustomModal
                 title="Register User"

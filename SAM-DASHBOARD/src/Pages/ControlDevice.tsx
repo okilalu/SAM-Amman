@@ -6,10 +6,8 @@ import { useDeviceData } from "../hooks/useDeviceHooks";
 import { useUserData } from "../hooks/useUserHooks";
 import { useUserDeviceData } from "../hooks/useUserDeviceHooks";
 import { CustomPagination } from "@/components/CustomPagination";
-import { CustomSelect } from "@/components/CustomSelect";
-import type { SingleValue } from "react-select";
-import type { SelectOption } from "../../types/types";
 import { CustomInputs } from "@/components/CustomInputs";
+import { CustomSelects } from "@/components/CustomSelects";
 
 export default function ControlDevice() {
   const { devices, fetchAllDevices } = useDeviceData({});
@@ -19,28 +17,26 @@ export default function ControlDevice() {
   const [deviceId, setDeviceId] = useState<string[]>([]);
   const [filter, setFilter] = useState("");
   const [sort, setSort] = useState("");
-  const [sortDirection, SetSortDirection] = useState<"asc" | "desc">("asc");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
   const [itemsPerPage, setItemsPerPage] = useState<number>(5);
-  const [samId, setSamId] = useState("");
-  const [selectOption, setSelectOption] = useState<string>("");
+  const [selectOption, setSelectOption] = useState<string>("asc");
 
   const filteredUsers = (allUsers ?? [])
     .filter((u) =>
       (u.username ?? "").toLowerCase().includes(filter.toLowerCase())
     )
     .sort((a, b) =>
-      sortDirection === "asc"
-        ? (a.id ?? 0) - (b.id ?? 0)
-        : (b.id ?? 0) - (a.id ?? 0)
+      selectOption === "asc"
+        ? (a.username ?? "").localeCompare(b.username ?? "")
+        : (b.username ?? "").localeCompare(a.username ?? "")
     );
 
   const filteredDevices = (devices ?? "")
     .filter((d) => (d.samId ?? "").toLowerCase().includes(filter.toLowerCase()))
     .sort((a, b) =>
-      sortDirection === "asc"
+      selectOption === "asc"
         ? (a.samId ?? "").localeCompare(b.samId ?? "")
         : (b.samId ?? "").localeCompare(a.samId ?? "")
     );
@@ -127,8 +123,8 @@ export default function ControlDevice() {
     validateAllUsers();
   }, []);
 
-  const handleSelectOption = (selected: SingleValue<SelectOption>) => {
-    setSelectOption(selected ? selected.value : "");
+  const handleSelectOption = (selected: string) => {
+    setSelectOption(selected);
   };
 
   const option = [
@@ -157,11 +153,9 @@ export default function ControlDevice() {
                 value={filter}
               />
 
-              <CustomSelect
-                values={
-                  option.find((opt) => opt.value === selectOption) || null
-                }
-                handleChange={handleSelectOption}
+              <CustomSelects
+                value={option.find((opt) => opt.value === selectOption) || null}
+                onChange={handleSelectOption}
                 options={option}
                 label="Sort"
                 flex="flex-row"
@@ -192,10 +186,7 @@ export default function ControlDevice() {
               <CustomTable headers={["Select", "UserId", "UserName"]}>
                 {paginatedUsers && paginatedUsers.length > 0 ? (
                   paginatedUsers.map((item, idx) => (
-                    <tr
-                      key={item.userId}
-                      className="hover:bg-gray-50 text-center"
-                    >
+                    <tr key={idx} className="hover:bg-gray-50 text-center">
                       <td>
                         <input
                           type="checkbox"
@@ -218,7 +209,6 @@ export default function ControlDevice() {
               </CustomTable>
             </div>
 
-            {/* 👇 Pagination tetap di bawah */}
             <CustomPagination
               currentPage={currentPage}
               itemsPerPage={itemsPerPage}
@@ -277,7 +267,7 @@ export default function ControlDevice() {
               <p>
                 Apakah anda akan memberikan akses ke user{" "}
                 <strong>{selectedIds.length}</strong> untuk mendapatkan
-                activitas dari Portable Device Id <strong>{samId}</strong> ?
+                activitas dari Portable Device Id <strong>{deviceId}</strong> ?
               </p>
             </CustomModal>
 
@@ -291,7 +281,8 @@ export default function ControlDevice() {
                 <p>
                   Apakah anda akan mencabut akses ke user{" "}
                   <strong>{selectedIds.length}</strong> untuk mendapatkan
-                  activitas dari Portable Device Id <strong>{samId}</strong> ?
+                  activitas dari Portable Device Id <strong>{deviceId}</strong>{" "}
+                  ?
                 </p>
               </div>
             </CustomModal>

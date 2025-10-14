@@ -4,10 +4,8 @@ import CustomModal from "../components/CustomModal";
 import CustomTable from "../components/CustomTable";
 import { useLocationData } from "../hooks/useLocationHooks";
 import { CustomInputs } from "@/components/CustomInputs";
-import { CustomSelect } from "@/components/CustomSelect";
-import type { SingleValue } from "react-select";
-import type { SelectOption } from "../../types/types";
 import { CustomPagination } from "@/components/CustomPagination";
+import { CustomSelects } from "@/components/CustomSelects";
 
 export default function ManageLocation() {
   const {
@@ -20,10 +18,9 @@ export default function ManageLocation() {
   const [filter, setFilter] = useState("");
   const [location, setLocation] = useState<string>("");
   const [sort, setSort] = useState("");
-  // const [sortDirection, SetSortDirection] = useState<"asc" | "desc">("asc");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectOption, setSelectOption] = useState<string>("");
+  const [selectOption, setSelectOption] = useState<string>("asc");
   const [itemsPerPage, setItemsPerPage] = useState<number>(5);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -121,8 +118,8 @@ export default function ManageLocation() {
     fetchAllLocations();
   }, []);
 
-  const handleSelectOption = (selected: SingleValue<SelectOption>) => {
-    setSelectOption(selected ? selected.value : "");
+  const handleSelectOption = (selected: string) => {
+    setSelectOption(selected);
   };
 
   const option = [
@@ -137,12 +134,8 @@ export default function ManageLocation() {
   ];
 
   return (
-    <div className="flex gap-3 min-h-screen">
+    <div className="flex gap-3">
       <div className="flex-1 text-sm text-black">
-        <h2 className="text-3xl font-bold mb-8 text-gray-800">
-          Manage Location
-        </h2>
-
         <div className="flex items-center gap-5 justify-between p-3">
           <div className="flex flex-col gap-5 flex-1">
             <CustomInputs
@@ -154,9 +147,9 @@ export default function ManageLocation() {
               value={filter}
             />
 
-            <CustomSelect
-              values={option.find((opt) => opt.value === selectOption) || null}
-              handleChange={handleSelectOption}
+            <CustomSelects
+              value={option.find((opt) => opt.value === selectOption) || null}
+              onChange={handleSelectOption}
               options={option}
               label="Sort"
               flex="flex-row"
@@ -191,11 +184,11 @@ export default function ManageLocation() {
           </div>
         ) : (
           <>
-            <div className="pt-5">
+            <div className="pt-5 min-h-[270px] ">
               <CustomTable headers={["Select", "LocationId", "LocationName"]}>
                 {paginatedUsers && paginatedUsers.length > 0 ? (
-                  paginatedUsers.map((item) => (
-                    <tr className="hover:bg-gray-50 text-center">
+                  paginatedUsers.map((item, idx) => (
+                    <tr key={idx} className="hover:bg-gray-50 text-center">
                       <td>
                         <input
                           type="checkbox"

@@ -1,14 +1,12 @@
 import { useEffect, useState } from "react";
-import Pagination from "../components/Pagination";
 import CustomButton from "../components/CustomButton";
 import CustomModal from "../components/CustomModal";
 import CustomTable from "../components/CustomTable";
 import { useDeviceData } from "../hooks/useDeviceHooks";
 import { useLocationData } from "../hooks/useLocationHooks";
 import { CustomInputs } from "@/components/CustomInputs";
-import { CustomSelect } from "@/components/CustomSelect";
-import type { SingleValue } from "react-select";
-import type { SelectOption } from "../../types/types";
+import { CustomSelects } from "@/components/CustomSelects";
+import { CustomPagination } from "@/components/CustomPagination";
 
 export default function ManageDevice() {
   const {
@@ -19,8 +17,6 @@ export default function ManageDevice() {
     handleDeleteDevice,
   } = useDeviceData({});
   const { locations, fetchAllLocations } = useLocationData({});
-
-  // === STATE ===
   const [samId, setSamId] = useState("");
   const [deviceIP, setDeviceIP] = useState("");
   const [deviceUsername, setDeviceUsername] = useState("");
@@ -33,14 +29,12 @@ export default function ManageDevice() {
   const [location, setLocation] = useState("");
   const [filter, setFilter] = useState("");
   const [sort, setSort] = useState("");
-  const [selectOption, setSelectOption] = useState<string>("");
+  const [selectOption, setSelectOption] = useState<string>("asc");
   const [itemsPerPage, setItemsPerPage] = useState<number>(5);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPage = 5;
   const [loading, setLoading] = useState<boolean>(false);
 
-  // === FILTER DATA ===
   const filteredDevice = (devices ?? [])
     .filter((item) =>
       (item.samId ?? "").toLowerCase().includes(filter.toLowerCase())
@@ -51,7 +45,11 @@ export default function ManageDevice() {
         : (b.samId ?? "").localeCompare(a.samId ?? "")
     );
 
-  // === MODAL HANDLER ===
+  const paginatedUsers = filteredDevice.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   const handleOpenModal = (id: string) => {
     const modal = document.getElementById(id) as HTMLDialogElement;
     modal?.showModal();
@@ -62,7 +60,6 @@ export default function ManageDevice() {
     modal?.close();
   };
 
-  // === SELECT CHECKBOX ===
   const handleSelectPortable = (id: string) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
@@ -71,10 +68,8 @@ export default function ManageDevice() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    console.log("Pindah ke halaman: ", page);
   };
 
-  // 🟢 CREATE DEVICE
   const handleRegister = async () => {
     if (
       !samId ||
@@ -104,13 +99,12 @@ export default function ManageDevice() {
         cameraPassword,
         cameraRootFolder,
         cameraType,
-        location, // lokasi diambil dari dropdown
+        location,
       });
 
       handleCloseModal("modal_register");
       await fetchAllDevices();
 
-      // reset field
       setSamId("");
       setDeviceIP("");
       setDeviceUsername("");
@@ -128,7 +122,6 @@ export default function ManageDevice() {
     }
   };
 
-  // 🟡 UPDATE DEVICE
   const handleUpdate = async () => {
     if (selectedIds.length !== 1) {
       alert("Pilih tepat satu device untuk diupdate!");
@@ -168,7 +161,6 @@ export default function ManageDevice() {
     }
   };
 
-  // 🔴 DELETE DEVICE
   const handleDelete = async () => {
     if (selectedIds.length === 0) {
       alert("Pilih device yang ingin dihapus!");
@@ -188,7 +180,6 @@ export default function ManageDevice() {
     }
   };
 
-  // === FETCH DATA ===
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
@@ -199,8 +190,8 @@ export default function ManageDevice() {
     loadData();
   }, []);
 
-  const handleSelectOption = (selected: SingleValue<SelectOption>) => {
-    setSelectOption(selected ? selected.value : "");
+  const handleSelectOption = (selected: string) => {
+    setSelectOption(selected);
   };
 
   const option = [
@@ -214,7 +205,6 @@ export default function ManageDevice() {
     },
   ];
 
-  // === PREFILL UPDATE FORM ===
   const handlePrefillUpdate = () => {
     if (selectedIds.length !== 1) {
       alert("Pilih satu device untuk diupdate!");
@@ -236,10 +226,8 @@ export default function ManageDevice() {
   };
 
   return (
-    <div className="flex gap-3 min-h-screen">
+    <div className="flex gap-3">
       <div className="flex-1 text-sm text-black">
-        <h2 className="text-3xl font-bold mb-8 text-gray-800">Manage Device</h2>
-
         <div className="flex items-center gap-5 justify-between p-3">
           <div className="flex flex-col gap-5 flex-1">
             <CustomInputs
@@ -251,9 +239,9 @@ export default function ManageDevice() {
               value={filter}
             />
 
-            <CustomSelect
-              values={option.find((opt) => opt.value === selectOption) || null}
-              handleChange={handleSelectOption}
+            <CustomSelects
+              value={option.find((opt) => opt.value === selectOption) || null}
+              onChange={handleSelectOption}
               options={option}
               label="Sort"
               flex="flex-row"
@@ -288,7 +276,7 @@ export default function ManageDevice() {
           </div>
         ) : (
           <>
-            <div className="pt-5">
+            <div className="pt-5 min-h-[270px] ">
               <CustomTable
                 headers={[
                   "Select",
@@ -298,12 +286,9 @@ export default function ManageDevice() {
                   "Location",
                 ]}
               >
-                {filteredDevice.length > 0 ? (
-                  filteredDevice.map((device) => (
-                    <tr
-                      key={device.samId}
-                      className="hover:bg-gray-50 text-center"
-                    >
+                {paginatedUsers.length > 0 ? (
+                  paginatedUsers.map((device, idx) => (
+                    <tr key={idx} className="hover:bg-gray-50 text-center">
                       <td>
                         <input
                           type="checkbox"
@@ -328,9 +313,10 @@ export default function ManageDevice() {
               </CustomTable>
             </div>
 
-            <Pagination
+            <CustomPagination
               currentPage={currentPage}
-              totalPage={totalPage}
+              itemsPerPage={itemsPerPage}
+              totalItems={devices ? devices!.length : 0}
               onPageChange={handlePageChange}
             />
 

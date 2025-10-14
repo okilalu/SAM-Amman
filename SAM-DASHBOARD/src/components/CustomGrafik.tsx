@@ -10,8 +10,8 @@ import {
 } from "recharts";
 import { useData } from "../hooks/useDataHooks";
 import { useDeviceData } from "../hooks/useDeviceHooks";
-import { CustomSelect } from "./CustomSelect";
 import type { SelectOption } from "../../types/types";
+import { CustomSelects } from "./CustomSelects";
 
 export default function CustomGrafik() {
   const { data, handleFilterData, handleGetAllData, isLoading } = useData();
@@ -73,7 +73,6 @@ export default function CustomGrafik() {
     setFilterType("day");
   };
 
-  // Handle filter day/month/year
   const handleFilterChange = (type: "day" | "month" | "year") => {
     setFilterType(type);
     if (!samId) return;
@@ -110,9 +109,9 @@ export default function CustomGrafik() {
       {/* Info Device */}
       <div className="flex justify-between rounded-md p-3 gap-5 mb-6 bg-gray-50">
         <div className="rounded-none w-xs">
-          <CustomSelect
-            values={selectedDevice}
-            handleChange={handleDeviceSelect}
+          <CustomSelects
+            value={selectedDevice}
+            onChange={handleDeviceSelect}
             options={option}
           />
         </div>

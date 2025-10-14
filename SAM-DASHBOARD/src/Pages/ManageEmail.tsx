@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import CustomTable from "../components/CustomTable";
-import Pagination from "../components/Pagination";
 import CustomButton from "../components/CustomButton";
 import CustomModal from "../components/CustomModal";
-import CustomFilter from "../components/CustomFilter";
 import { useEmailData } from "../hooks/useEmailHooks";
 import type { Email } from "../../types/types";
+import { CustomInputs } from "@/components/CustomInputs";
+import { CustomSelects } from "@/components/CustomSelects";
+import { CustomPagination } from "@/components/CustomPagination";
 
 export default function ManageEmail() {
   const {
@@ -18,35 +19,32 @@ export default function ManageEmail() {
   } = useEmailData();
 
   const [filter, setFilter] = useState("");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [formData, setFormData] = useState<Email>({ emailName: "" });
   const dataPerPage = 5;
-  const totalPage = 5;
+  const itemsPerPage = 5;
+  const [selectOption, setSelectOption] = useState<string>("asc");
 
   useEffect(() => {
     fetchAllEmails();
   }, []);
 
-  // 🔍 Filter dan sort
   const filteredEmails = (emails ?? [])
     .filter((email) =>
       (email.emailName ?? "").toLowerCase().includes(filter.toLowerCase())
     )
     .sort((a, b) =>
-      sortDirection === "asc"
-        ? (a.id ?? 0) - (b.id ?? 0)
-        : (b.id ?? 0) - (a.id ?? 0)
+      selectOption === "asc"
+        ? (a.emailName ?? "").localeCompare(b.emailName ?? "")
+        : (b.emailName ?? "").localeCompare(a.emailName ?? "")
     );
-  console.log(emails);
 
-  const itemsPerPage = filteredEmails.slice(
+  const paginatedEmails = filteredEmails.slice(
     (currentPage - 1) * dataPerPage,
     currentPage * dataPerPage
   );
 
-  // 🔹 Modal Control
   const handleOpenModal = (id: string, email?: Email) => {
     if (email) setFormData(email);
     else setFormData({ emailName: "" });
@@ -59,20 +57,17 @@ export default function ManageEmail() {
     modal?.close();
   };
 
-  // ✅ Select Checkbox
   const handleSelectEmail = (id: number) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
   };
 
-  // 🔄 Pagination
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     console.log("Pindah ke halaman:", page);
   };
 
-  // 🟢 CREATE
   const handleRegister = async () => {
     if (!formData.emailName?.trim()) {
       alert("Nama email harus diisi!");
@@ -82,7 +77,6 @@ export default function ManageEmail() {
     handleCloseModal("modal_register");
   };
 
-  // 🟡 UPDATE
   const handleUpdate = async () => {
     if (selectedIds.length !== 1) {
       alert("Pilih tepat satu email untuk diupdate!");
@@ -98,7 +92,6 @@ export default function ManageEmail() {
     handleCloseModal("modal_update");
   };
 
-  // 🔴 DELETE
   const handleDelete = async () => {
     if (selectedIds.length === 0) {
       alert("Pilih email yang ingin dihapus terlebih dahulu!");
@@ -111,24 +104,44 @@ export default function ManageEmail() {
     handleCloseModal("modal_delete");
   };
 
+  const handleSelectOption = (selected: string) => {
+    setSelectOption(selected);
+  };
+
+  const option = [
+    {
+      label: "Asc",
+      value: "asc",
+    },
+    {
+      label: "Desc",
+      value: "desc",
+    },
+  ];
+
   return (
-    <div className="flex gap-3 min-h-screen">
+    <div className="flex gap-3">
       <div className="flex-1 text-sm text-black">
-        <h2 className="text-3xl text-black font-bold mb-8">Manage Email</h2>
+        <div className="flex flex-col gap-5 flex-1">
+          <CustomInputs
+            label="Filter email"
+            placeholder="Cari email"
+            onChange={(val) => setFilter(val)}
+            helperText="x"
+            helper={() => setFilter("")}
+            value={filter}
+          />
+          <CustomSelects
+            value={option.find((opt) => opt.value === selectOption) || null}
+            onChange={handleSelectOption}
+            options={option}
+            label="Sort"
+            flex="flex-row"
+            labelClass="items-center gap-3"
+          />
+        </div>
 
-        {/* 🔹 Filter */}
-        <CustomFilter
-          filterLabel="Filter"
-          sortLabel="Sort Direction"
-          placeholder="Cari email..."
-          filter={filter}
-          setFilter={setFilter}
-          sortDirection={sortDirection}
-          setSortDirection={setSortDirection}
-        />
-
-        {/* 🔹 Table */}
-        <div className="pt-5">
+        <div className="pt-5 min-h-[270px]">
           <CustomTable headers={["Select", "ID", "Email Name"]}>
             {isLoading ? (
               <tr>
@@ -136,8 +149,8 @@ export default function ManageEmail() {
                   Memuat data...
                 </td>
               </tr>
-            ) : itemsPerPage.length > 0 ? (
-              itemsPerPage.map((item) => (
+            ) : paginatedEmails.length > 0 ? (
+              paginatedEmails.map((item) => (
                 <tr key={item.id} className="hover:bg-gray-50 text-center">
                   <td>
                     <input
@@ -161,10 +174,10 @@ export default function ManageEmail() {
           </CustomTable>
         </div>
 
-        {/* 🔹 Pagination */}
-        <Pagination
+        <CustomPagination
           currentPage={currentPage}
-          totalPage={totalPage}
+          itemsPerPage={itemsPerPage}
+          totalItems={emails ? emails!.length : 0}
           onPageChange={handlePageChange}
         />
 

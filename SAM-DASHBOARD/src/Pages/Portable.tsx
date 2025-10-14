@@ -1,23 +1,35 @@
 import { useCallback, useEffect, useState } from "react";
 import { useData } from "../hooks/useDataHooks";
 import { useDeviceData } from "../hooks/useDeviceHooks";
-import type { Datas } from "../../types/types";
+import type { Datas, SelectOption } from "../../types/types";
+import { CustomInputs } from "@/components/CustomInputs";
+import { CustomSelects } from "@/components/CustomSelects";
 
 export default function Portable() {
   const { data, handleFilterData, handleGetAllData, isLoading } = useData();
   const { devices, fetchAllDevices } = useDeviceData({});
+
+  const option =
+    (Array.isArray(devices) &&
+      devices.map((item) => ({
+        label: item.samId || "",
+        value: item.samId || "",
+      }))) ||
+    [];
+
   const [startDate, setStartDate] = useState("2025-05-06");
   const [endDate, setEndDate] = useState("2025-10-07");
   const [speedFrom, setSpeedFrom] = useState<number>(1);
   const [speedTo, setSpeedTo] = useState<number>(99);
   const [status, setStatus] = useState<"all" | "over speed">("all");
-  const [device, setDevice] = useState("SAM02");
+  const [selectedDevice, setSelectedDevice] = useState<SelectOption | null>(
+    null
+  );
 
-  // 🔹 Search function
   const handleSearch = useCallback(() => {
-    if (!device) return;
+    if (!selectedDevice?.value) return;
     handleFilterData({
-      samId: device,
+      samId: selectedDevice.value,
       data: {
         minSpeed: speedFrom,
         maxSpeed: speedTo,
@@ -27,7 +39,7 @@ export default function Portable() {
       } as unknown as Datas,
     });
   }, [
-    device,
+    selectedDevice?.value,
     speedFrom,
     speedTo,
     startDate,
@@ -36,7 +48,6 @@ export default function Portable() {
     handleFilterData,
   ]);
 
-  // 🔹 Reset filter
   const handleClear = async () => {
     setStartDate("");
     setEndDate("");
@@ -44,146 +55,111 @@ export default function Portable() {
     setSpeedTo(0);
     setStatus("all");
 
-    await handleGetAllData({ samId: device });
+    if (selectedDevice?.value) {
+      await handleGetAllData({ samId: selectedDevice.value });
+    }
   };
 
-  // 🔹 Initial fetch
   useEffect(() => {
     fetchAllDevices();
   }, []);
 
-  // 🔹 Load data awal
   useEffect(() => {
-    if (device) handleGetAllData({ samId: device });
-  }, [device]);
+    if (selectedDevice?.value)
+      handleGetAllData({ samId: selectedDevice.value });
+  }, [selectedDevice?.value]);
+
+  const handleDeviceSelect = (selectedOption: any) => {
+    setSelectedDevice(selectedOption);
+  };
 
   return (
-    <div className="flex gap-3 min-h-screen">
+    <div className="flex gap-3">
       <div className="flex-1 text-sm text-black">
-        <h2 className="text-3xl text-black font-bold mb-8">Portable</h2>
-
         {/* Filter Section */}
         <div className="bg-white shadow rounded-xl p-6 mb-8">
-          <h3 className="text-lg font-semibold text-gray-700 mb-6">
-            Filter Data
-          </h3>
-
-          {/* Date Filter */}
-          <div className="grid grid-cols-2 gap-6 mb-6">
-            <div className="flex justify-between items-center gap-6">
-              <label className="font-semibold text-gray-700 w-24">
-                Start Date
-              </label>
-              <input
-                type="date"
-                name="startDate"
+          <div className="flex items-center gap-5 justify-between p-3">
+            <div className="flex flex-col gap-5 flex-1">
+              <CustomInputs
+                label="Start date"
+                placeholder="Masukkan start date"
                 value={startDate}
                 onChange={(val) => setStartDate(String(val))}
-                className="bg-gray-300 input input-bordered w-full max-w-xs"
-              />
-            </div>
-            <div className="flex items-center gap-6">
-              <label className="font-semibold text-gray-700 w-12">To</label>
-              <input
                 type="date"
-                name="endDate"
-                value={endDate}
-                onChange={(val) => setEndDate(String(val))}
-                className="bg-gray-300 input input-bordered w-full max-w-xs"
               />
-            </div>
-          </div>
-
-          {/* Speed Filter */}
-          <div className="grid grid-cols-2 gap-6 mb-6">
-            <div className="flex items-center gap-6">
-              <label className="font-semibold text-gray-700 w-24">Speed</label>
-              <input
-                type="number"
-                name="minSpeed"
-                placeholder="Min speed"
+              <CustomInputs
+                label="Speed"
+                placeholder="Masukkan speed"
                 value={speedFrom}
                 onChange={(val) => setSpeedFrom(Number(val))}
-                className="input bg-gray-300 input-bordered w-full max-w-xs"
-              />
-            </div>
-            <div className="flex items-center gap-6">
-              <label className="font-semibold text-gray-700 w-12">To</label>
-              <input
                 type="number"
-                name="maxSpeed"
-                placeholder="Max speed"
-                value={speedTo}
-                onChange={(val) => setSpeedTo(Number(val))}
-                className="input bg-gray-300 input-bordered w-full max-w-xs"
               />
-            </div>
-          </div>
-
-          {/* Category & Device */}
-          <div className="grid grid-cols-2 gap-6 mb-6">
-            <div className="flex items-center justify-center">
-              <div className="flex border rounded-md overflow-hidden cursor-pointer">
+              <div className="flex border border-[#63b1bb] rounded-xl overflow-hidden cursor-pointer self-end">
                 <button
                   onClick={() => setStatus("all")}
-                  className={`px-6 py-2 font-semibold ${
+                  className={`px-6 py-2 cursor-pointer font-semibold ${
                     status === "all"
-                      ? "bg-green-600 text-white"
-                      : "hover:bg-green-600 hover:text-white"
+                      ? "bg-[#63b1bb] text-white"
+                      : "hover:bg-[#63b1bb] hover:text-white"
                   }`}
                 >
                   All
                 </button>
                 <button
                   onClick={() => setStatus("over speed")}
-                  className={`px-6 py-2 font-semibold ${
+                  className={`px-6 py-2 cursor-pointer font-semibold ${
                     status === "over speed"
-                      ? "bg-green-500 text-white"
-                      : "hover:bg-green-600 hover:text-white"
+                      ? "bg-[#63b1bb] text-white"
+                      : "hover:bg-[#63b1bb] hover:text-white"
                   }`}
                 >
                   Overspeed
                 </button>
               </div>
             </div>
-
-            <div className="flex items-center gap-6">
-              <label className="font-semibold text-gray-700 w-24">Device</label>
-              <select
-                value={device}
-                onChange={(e) => setDevice(e.target.value)}
-                className="select bg-gray-300 max-w-xs"
-              >
-                {Array.isArray(devices) && devices.length > 0 ? (
-                  devices.map((item, idx) => (
-                    <option key={idx} value={item.samId}>
-                      {item.samId}
-                    </option>
-                  ))
-                ) : (
-                  <option disabled>Tidak ada device</option>
-                )}
-              </select>
+            <div className="flex flex-col gap-5 flex-1">
+              <CustomInputs
+                label="End date"
+                placeholder="Masukkan end date"
+                value={endDate}
+                onChange={(val) => setEndDate(String(val))}
+                type="date"
+              />
+              <CustomInputs
+                label="Max speed"
+                placeholder="Max speed"
+                value={speedTo}
+                onChange={(val) => setSpeedTo(Number(val))}
+                type="number"
+              />
+              <CustomSelects
+                value={selectedDevice}
+                onChange={handleDeviceSelect}
+                options={option}
+                label="Device"
+                flex="flex-row"
+                labelClass="items-center gap-3"
+              />
             </div>
           </div>
 
-          {/* Buttons */}
           <div className="flex gap-5 justify-end">
             <button
+              onClick={handleClear}
+              className="btn bg-transparent border border-[#63b1bb] shadow-none text-[#63b1bb] px-10"
+            >
+              Clear
+            </button>
+            <button
               onClick={handleSearch}
-              className="btn btn-info px-10 text-white"
+              className="btn bg-[#63b1bb] shadow-none border-none px-10 text-white"
             >
               {isLoading ? "Searching..." : "Search"}
-            </button>
-            <button onClick={handleClear} className="btn btn-ghost px-10">
-              Clear
             </button>
           </div>
         </div>
 
-        {/* Result Table */}
         <div className="bg-white shadow rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">Result</h3>
           {isLoading ? (
             <div className="p-5 text-center text-gray-500 border border-dashed rounded-lg">
               Loading Data...
@@ -200,8 +176,8 @@ export default function Portable() {
                 </tr>
               </thead>
               <tbody>
-                {data.map((item) => (
-                  <tr key={item.id} className="text-center">
+                {data.map((item, idx) => (
+                  <tr key={idx} className="text-center">
                     <td className="p-3">{item.id}</td>
                     <td className="p-3">{item.createdAt}</td>
                     <td className="p-3">{item.speed} km/h</td>
