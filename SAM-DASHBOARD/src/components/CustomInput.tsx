@@ -52,13 +52,13 @@ export default function CustomInput({
     <div className="bg-gray-300 rounded-sm p-3">
       <div className="grid grid-cols-2 gap-6">
         <div className="flex items-center gap-4 text-black">
-          <h3 className="w-20 mr-8">{labels.filter}</h3>
+          <h3 className="">{labels.filter}</h3>
           <input
             type="search"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             placeholder={placeholder.filter}
-            className="bg-white rounded-sm flex-1 px-2 py-1"
+            className="bg-white rounded-sm px-2 py-1"
           />
           <button
             className="btn btn-sm px-3 py-1 rounded-sm"
@@ -74,7 +74,7 @@ export default function CustomInput({
             value={sort}
             onChange={(e) => setSort(e.target.value)}
             placeholder={placeholder.sort}
-            className="bg-white rounded-sm flex-1 px-2 py-1"
+            className="bg-white rounded-sm px-2 py-1"
           />
         </div>
       </div>
@@ -85,7 +85,7 @@ export default function CustomInput({
           <select
             value={sortDirection}
             onChange={(e) => setSortDirection(e.target.value as "asc" | "desc")}
-            className="select select-bordered bg-white rounded-sm flex-1 "
+            className="select select-bordered bg-white rounded-sm "
           >
             <option value="asc">Ascending</option>
             <option value="desc">Descending</option>
@@ -98,7 +98,7 @@ export default function CustomInput({
             type="number"
             value={perPage}
             onChange={(e) => setPerPage(Number(e.target.value))}
-            className="bg-white rounded-sm flex-1 px-2 py-1"
+            className="bg-white rounded-sm px-2 py-1"
           />
         </div>
       </div>

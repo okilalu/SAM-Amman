@@ -10,6 +10,8 @@ import {
 } from "recharts";
 import { useData } from "../hooks/useDataHooks";
 import { useDeviceData } from "../hooks/useDeviceHooks";
+import { CustomSelect } from "./CustomSelect";
+import type { SelectOption } from "../../types/types";
 
 export default function CustomGrafik() {
   const { data, handleFilterData, handleGetAllData, isLoading } = useData();
@@ -19,9 +21,12 @@ export default function CustomGrafik() {
     "month"
   );
   const [selectedDate, setSelectedDate] = useState<string>("");
+  const [selectedDevice, setSelectedDevice] = useState<SelectOption | null>(
+    null
+  );
 
   const getFormattedMonthYear = (dateStr?: string) => {
-    const date = dateStr ? new Date(dateStr) : new Date(); // jika tidak ada dateStr → pakai tanggal sekarang
+    const date = dateStr ? new Date(dateStr) : new Date();
     return date.toLocaleDateString("id-ID", { month: "long", year: "numeric" });
   };
 
@@ -33,7 +38,7 @@ export default function CustomGrafik() {
 
   useEffect(() => {
     if (devices.length > 0 && !samId) {
-      setSamId(devices[0].samId);
+      setSamId(devices[0].samId || "");
     }
   }, [devices]);
 
@@ -61,7 +66,7 @@ export default function CustomGrafik() {
       data: {
         startDate: dateValue,
         endDate: dateValue,
-        filterType: "day",
+        filterType,
       },
     };
     handleFilterData({ data: filterPayload.data, samId });
@@ -84,6 +89,18 @@ export default function CustomGrafik() {
     handleFilterData({ data: filterPayload.data, samId });
   };
 
+  const handleDeviceSelect = (selectedOption: any) => {
+    setSelectedDevice(selectedOption);
+  };
+
+  const option =
+    (Array.isArray(devices) &&
+      devices.map((item) => ({
+        label: item.samId || "",
+        value: item.samId || "",
+      }))) ||
+    [];
+
   return (
     <div className="bg-white rounded-xl shadow p-6">
       <h2 className="text-xl font-semibold text-gray-700 mb-4">
@@ -91,25 +108,15 @@ export default function CustomGrafik() {
       </h2>
 
       {/* Info Device */}
-      <div className="flex border border-gray-300 rounded-md p-3 gap-5 mb-6 bg-gray-50">
-        <div className="border bg-gray-400 rounded-md p-2 w-xs">
-          <select
-            className="bg-gray-100 rounded-md p-1 font-semibold text-black"
-            value={samId}
-            onChange={(e) => setSamId(e.target.value)}
-          >
-            {devices.length > 0 ? (
-              devices.map((d, i) => (
-                <option key={i} value={d.samId}>
-                  {d.samId}
-                </option>
-              ))
-            ) : (
-              <option disabled>Tidak ada Device</option>
-            )}
-          </select>
+      <div className="flex justify-between rounded-md p-3 gap-5 mb-6 bg-gray-50">
+        <div className="rounded-none w-xs">
+          <CustomSelect
+            values={selectedDevice}
+            handleChange={handleDeviceSelect}
+            options={option}
+          />
         </div>
-        <div>
+        <div className="text-center">
           <p className="text-gray-700">Traffic Data</p>
           <p className="text-gray-500 text-sm">{formattedMonthYear}</p>
         </div>
@@ -117,7 +124,7 @@ export default function CustomGrafik() {
 
       {/* Filter & Date Picker */}
       <div className="flex justify-between items-center mb-6">
-        <div className="bg-gray-300 px-3 py-2 rounded-md">
+        <div className="bg-[#bde1e4] px-3 py-2 rounded-md">
           <input
             type="date"
             className="text-md text-gray-700"
@@ -126,27 +133,27 @@ export default function CustomGrafik() {
           />
         </div>
 
-        <div className="flex bg-gray-300 rounded-md overflow-hidden text-sm font-medium text-black">
+        <div className="flex bg-[#bde1e4] rounded-xl overflow-hidden text-sm font-medium border border-[#63b1bb] text-black">
           <button
             onClick={() => handleFilterChange("day")}
-            className={`px-3 py-2 hover:bg-gray-400 ${
-              filterType === "day" ? "bg-gray-400 font-semibold" : ""
+            className={`px-3 py-2 cursor-pointer ${
+              filterType === "day" ? "bg-[#63b1bb] font-semibold" : ""
             }`}
           >
             Day
           </button>
           <button
             onClick={() => handleFilterChange("month")}
-            className={`px-3 py-2 hover:bg-gray-400 border-l ${
-              filterType === "month" ? "bg-gray-400 font-semibold" : ""
+            className={`px-3 py-2 cursor-pointer border-l border-[#63b1bb]  ${
+              filterType === "month" ? "bg-[#63b1bb] font-semibold" : ""
             }`}
           >
             Month
           </button>
           <button
             onClick={() => handleFilterChange("year")}
-            className={`px-3 py-2 hover:bg-gray-400 border-l ${
-              filterType === "year" ? "bg-gray-400 font-semibold" : ""
+            className={`px-3 py-2 cursor-pointer border-l border-[#63b1bb] ${
+              filterType === "year" ? "bg-[#63b1bb] font-semibold" : ""
             }`}
           >
             Year

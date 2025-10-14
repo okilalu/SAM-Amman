@@ -1,5 +1,3 @@
-import React from "react";
-
 interface CustomButtonProps {
   text?: string;
   onClick: () => void;

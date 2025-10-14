@@ -1,0 +1,54 @@
+import React from "react";
+import { PiGlobeHemisphereWestFill, PiUser } from "react-icons/pi";
+import CutomButton from "./CustomButton";
+import { useNavigate } from "react-router-dom";
+
+interface CustomBreadcrumbsProps {
+  label?: string;
+  active: string;
+  isLoggedIn?: boolean;
+  className?: string;
+}
+export const CustomBreadcrumbs: React.FC<CustomBreadcrumbsProps> = ({
+  label,
+  active,
+  isLoggedIn = false,
+  className = "rounded-md",
+}) => {
+  const navigate = useNavigate();
+  return (
+    <div
+      className={`bg-gray-200 px-3 py-1 ${className} flex items-center justify-between`}
+    >
+      <div className="breadcrumbs ">
+        <div className="divider divider-horizontal" />
+        <ul>
+          <li className="flex items-center gap-2">
+            <PiGlobeHemisphereWestFill size={20} color="#63b0ba" />
+            <a href="#" className="text-[#63b0ba] font-bold">
+              {label}
+            </a>
+          </li>
+          <li>
+            <a className="" href="#">
+              {active}
+            </a>
+          </li>
+        </ul>
+      </div>
+      {!isLoggedIn ? (
+        <div>
+          <CutomButton
+            onClick={() => navigate("/login")}
+            text="Sign In"
+            className="bg-transparent border-none shadow-none font-bold text-[#63b1bb]"
+          />
+        </div>
+      ) : (
+        <div>
+          <PiUser size={20} color="#63b0ba" />
+        </div>
+      )}
+    </div>
+  );
+};

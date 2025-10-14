@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import CustomInput from "../components/CustomInput";
 import Pagination from "../components/Pagination";
 import CustomButton from "../components/CustomButton";
@@ -117,19 +117,8 @@ export default function ManageLocation() {
   }, []);
 
   return (
-    <div className="flex gap-3 min-h-screen pt-7 bg-gray-100">
-      <div className="flex-1 p-10 pt-12 text-sm text-black">
-        {/* Breadcrumb */}
-        <div className="breadcrumbs text-sm mb-4  p-3 bg-gray-200">
-          <ul className="flex gap-2">
-            <li>
-              <a className="text-blue-600 hover:underline">Home</a>
-            </li>
-            <li>
-              <a className="text-gray-800 font-semibold">Manage Location</a>
-            </li>
-          </ul>
-        </div>
+    <div className="flex gap-3 min-h-screen">
+      <div className="flex-1 text-sm text-black">
         <h2 className="text-3xl font-bold mb-8 text-gray-800">
           Manage Location
         </h2>

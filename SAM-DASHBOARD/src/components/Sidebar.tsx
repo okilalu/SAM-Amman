@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   MdDashboard,
   MdEmail,
@@ -18,6 +19,8 @@ import ManageDevice from "../Pages/ManageDevice";
 import ManageLocation from "../Pages/ManageLocation";
 import ControlDevice from "../Pages/ControlDevice";
 import Logs from "../Pages/Logs";
+
+import { CustomBreadcrumbs } from "./CustomBreadcrumbs
 import { useUserData } from "../hooks/useUserHooks";
 
 const getToken = () => {
@@ -32,10 +35,10 @@ const getToken = () => {
   }
 };
 
+
 export default function Sidebar() {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [error, setError] = useState("");
   const [activeMenu, setActiveMenu] = useState("Home");
   const { handleLogout, validateUser, user } = useUserData({});
 
@@ -110,24 +113,28 @@ export default function Sidebar() {
         ];
 
   return (
+    <div className="w-full h-screen flex">
+      <aside className="fixed left-0 top-0 h-screen w-[20%] bg-gray-800 text-white flex flex-col justify-between shadow-lg">
+
     <div className="flex h-screen w-full">
       {/* Sidebar */}
       <aside className="fixed left-0 top-0 h-full w-[20%] bg-gray-800 text-white flex flex-col justify-between shadow-lg">
+
         <div>
-          <div className="px-6 py-4 border-b border-gray-700 flex items-center justify-center">
+          <div className="px-6 h-16 border-b border-gray-700 flex items-center justify-center">
             <h1 className="text-3xl font-bold tracking-wider">AMMAN</h1>
           </div>
 
           <nav className="mt-6">
-            <ul>
+            <ul className="duration-300 ease-in-out">
               {menuItems.map((item) => (
                 <li
                   key={item.name}
                   onClick={() => setActiveMenu(item.name)}
-                  className={`px-6 py-3 flex items-center gap-3 cursor-pointer rounded-md transition-all duration-200 ${
+                  className={`px-6 py-3 flex items-center gap-3 cursor-pointer rounded-md transition-all duration-200 justify-self-start ${
                     activeMenu === item.name
-                      ? "bg-blue-600 text-white"
-                      : "hover:bg-gray-700"
+                      ? "text-[#63b0ba]"
+                      : "hover:text-gray-300"
                   }`}
                 >
                   {item.icon}
@@ -139,36 +146,30 @@ export default function Sidebar() {
         </div>
 
         <div className="px-6 py-5 border-t border-gray-700 flex flex-col gap-3">
-          {isLoggedIn ? (
+          {isLoggedIn && (
             <button
               onClick={Logout}
               className="bg-red-600 hover:bg-red-700 text-center text-white py-2 rounded-md font-semibold transition"
             >
               Logout
             </button>
-          ) : (
-            <>
-              <Link
-                to="/login"
-                className="bg-blue-600 hover:bg-blue-700 text-center transition text-white py-2 rounded-md font-semibold"
-              >
-                Sign In
-              </Link>
-              <Link
-                to="/register"
-                className="bg-green-600 hover:bg-green-700 text-center transition text-white py-2 rounded-md font-semibold"
-              >
-                Sign Up
-              </Link>
-            </>
           )}
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="ml-[20%] w-[80%] h-full overflow-y-auto bg-gray-50 p-6">
-        {renderContent()}
-      </main>
+      <div className="ml-[20%] w-[80%] h-screen flex flex-col overflow-hidden">
+        <div className="sticky top-0 z-40 shadow-md">
+          <CustomBreadcrumbs
+            className="rounded-none text-black h-16 pl-5"
+            label="Home"
+            active={activeMenu === "Home" ? "Dashboard" : activeMenu}
+          />
+        </div>
+
+        <main className="flex-1 overflow-y-auto bg-gray-50 p-6">
+          {renderContent()}
+        </main>
+      </div>
     </div>
   );
 }

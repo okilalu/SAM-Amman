@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import CustomTable from "../components/CustomTable";
 import Pagination from "../components/Pagination";
 import CustomButton from "../components/CustomButton";
@@ -164,20 +164,8 @@ export default function ManageUser() {
   }, []);
 
   return (
-    <div className="flex gap-3 min-h-screen pt-7 bg-gray-100">
-      <div className="flex-1 p-10 pt-12 text-sm text-black">
-        {/* Breadcrumb */}
-        <div className="breadcrumbs bg-gray-200 text-sm mb-4 p-3">
-          <ul>
-            <li>
-              <a className="text-blue-600">Home</a>
-            </li>
-            <li>
-              <a>Manage User</a>
-            </li>
-          </ul>
-        </div>
-
+    <div className="flex gap-3 min-h-screen">
+      <div className="flex-1 text-sm text-black">
         <h2 className="text-3xl text-black font-bold mb-8">Manage User</h2>
 
         {/* FILTER */}
