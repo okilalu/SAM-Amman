@@ -8,9 +8,9 @@ import type {
   UserState,
 } from "../../../types/types";
 
-const saveToken = (token: string) => {
+const saveToken = (data: { token: string; user: any }) => {
   try {
-    localStorage.setItem("token", token);
+    localStorage.setItem("auth", JSON.stringify(data));
   } catch (error) {
     console.error("Error saving token", error);
   }
@@ -24,11 +24,12 @@ const removeToken = () => {
   }
 };
 
-const getToken = () => {
+const getToken = (): { token: string; user: any } | null => {
   try {
-    localStorage.getItem("token");
+    const auth = localStorage.getItem("auth");
+    return auth ? JSON.parse(auth) : null;
   } catch (error) {
-    console.error("Error reading token: ", error);
+    console.error("Error reading token:", error);
     return null;
   }
 };
@@ -52,8 +53,13 @@ export const login = createAsyncThunk<UserResponse, User>(
   async (data, { rejectWithValue }) => {
     try {
       const response = await axios.post(`${uri}/api/v1/login/user`, data);
+      console.log(response);
+
       const token = response.data?.data?.token;
-      if (token) saveToken(token);
+      const user = response.data?.data?.user;
+      if (token && user) {
+        saveToken({ token, user });
+      }
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data || "Login Failed");
@@ -67,17 +73,17 @@ export const currentUser = createAsyncThunk<UserResponse>(
   async (_, { rejectWithValue }) => {
     try {
       const token = getToken();
-      if (!token) throw new Error("No token found");
+      console.log(token?.token);
+
+      if (!token?.token) throw new Error("No token found");
 
       const response = await axios.get(`${uri}/api/v1/current/user`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token.token}` },
       });
 
       return response.data;
     } catch (error: any) {
-      if (error?.response.status === 401) {
-        removeToken();
-      }
+      console.log(error);
       return rejectWithValue(
         error.response?.data || "Failed to fetch current user"
       );

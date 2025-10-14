@@ -158,17 +158,16 @@ export interface Log {
 }
 
 export interface LogResponse {
+  data: Log[]; // Data log yang dikembalikan oleh API
   status: boolean;
   status_code: number;
   message: string;
-  data: Log[]; // Data log yang dikembalikan oleh API
 }
 
 export interface LogState {
   logs: Log[]; // Semua data log
   loading: boolean; // Status loading saat fetch
   error: string | null; // Menyimpan pesan error
-  selectedLog: Log | null; // Data log yang sedang dipilih (opsional)
 }
 
 // Location state
