@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
-import CustomInput from "../components/CustomInput";
-import Pagination from "../components/Pagination";
 import CustomButton from "../components/CustomButton";
 import CustomModal from "../components/CustomModal";
 import CustomTable from "../components/CustomTable";
 import { useLocationData } from "../hooks/useLocationHooks";
+import { CustomInputs } from "@/components/CustomInputs";
+import { CustomSelect } from "@/components/CustomSelect";
+import type { SingleValue } from "react-select";
+import type { SelectOption } from "../../types/types";
+import { CustomPagination } from "@/components/CustomPagination";
 
 export default function ManageLocation() {
   const {
@@ -17,11 +20,11 @@ export default function ManageLocation() {
   const [filter, setFilter] = useState("");
   const [location, setLocation] = useState<string>("");
   const [sort, setSort] = useState("");
-  const [sortDirection, SetSortDirection] = useState<"asc" | "desc">("asc");
-  const [perPage, setPerPage] = useState(10);
+  // const [sortDirection, SetSortDirection] = useState<"asc" | "desc">("asc");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPage = 5;
+  const [selectOption, setSelectOption] = useState<string>("");
+  const [itemsPerPage, setItemsPerPage] = useState<number>(5);
   const [loading, setLoading] = useState<boolean>(false);
 
   const filteredLocation = (locations ?? [])
@@ -29,15 +32,17 @@ export default function ManageLocation() {
       (item.location ?? "").toLowerCase().includes(filter.toLowerCase())
     )
     .sort((a, b) =>
-      sortDirection === "asc"
+      selectOption === "asc"
         ? (a.id ?? 0) - (b.id ?? 0)
         : (b.id ?? 0) - (a.id ?? 0)
     );
 
-  const itemsPerPage = filteredLocation.slice(
-    (currentPage - 1) * totalPage,
-    currentPage * totalPage
-  );
+  const paginatedUsers =
+    filteredLocation &&
+    filteredLocation!.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
 
   const handleOpenModal = (id: string) => {
     const modal = document.getElementById(id) as HTMLDialogElement;
@@ -116,6 +121,21 @@ export default function ManageLocation() {
     fetchAllLocations();
   }, []);
 
+  const handleSelectOption = (selected: SingleValue<SelectOption>) => {
+    setSelectOption(selected ? selected.value : "");
+  };
+
+  const option = [
+    {
+      label: "Asc",
+      value: "asc",
+    },
+    {
+      label: "Desc",
+      value: "desc",
+    },
+  ];
+
   return (
     <div className="flex gap-3 min-h-screen">
       <div className="flex-1 text-sm text-black">
@@ -123,26 +143,44 @@ export default function ManageLocation() {
           Manage Location
         </h2>
 
-        <CustomInput
-          filter={filter}
-          setFilter={setFilter}
-          sort={sort}
-          setSort={setSort}
-          sortDirection={sortDirection}
-          setSortDirection={SetSortDirection}
-          perPage={perPage}
-          setPerPage={setPerPage}
-          labels={{
-            filter: "Filter",
-            sort: " Sort",
-            sortDirection: "Sort Direction",
-            perPage: "Per Page",
-          }}
-          placeholder={{
-            filter: "Masukkan ID Device",
-            sort: "Contoh: PortableDeviceId",
-          }}
-        />
+        <div className="flex items-center gap-5 justify-between p-3">
+          <div className="flex flex-col gap-5 flex-1">
+            <CustomInputs
+              label="Filter"
+              placeholder="Masukkan username"
+              onChange={(val) => setFilter(val)}
+              helperText="x"
+              helper={() => setFilter("")}
+              value={filter}
+            />
+
+            <CustomSelect
+              values={option.find((opt) => opt.value === selectOption) || null}
+              handleChange={handleSelectOption}
+              options={option}
+              label="Sort"
+              flex="flex-row"
+              labelClass="items-center gap-3"
+            />
+          </div>
+          <div className="flex flex-col gap-5 flex-1">
+            <CustomInputs
+              label="Sort"
+              placeholder="Masukkan device portable"
+              onChange={(val) => setSort(val)}
+              helperText="x"
+              helper={() => setSort("")}
+              value={sort}
+            />
+            <CustomInputs
+              label="Per Page"
+              placeholder="Masukkan jumlah page"
+              onChange={(val) => setItemsPerPage(Number(val))}
+              value={Number(itemsPerPage)}
+              type="number"
+            />
+          </div>
+        </div>
 
         {loading ? (
           <div className="flex flex-col justify-center items-center h-64">
@@ -155,8 +193,8 @@ export default function ManageLocation() {
           <>
             <div className="pt-5">
               <CustomTable headers={["Select", "LocationId", "LocationName"]}>
-                {itemsPerPage && itemsPerPage.length > 0 ? (
-                  itemsPerPage.map((item) => (
+                {paginatedUsers && paginatedUsers.length > 0 ? (
+                  paginatedUsers.map((item) => (
                     <tr className="hover:bg-gray-50 text-center">
                       <td>
                         <input
@@ -182,9 +220,10 @@ export default function ManageLocation() {
               </CustomTable>
             </div>
 
-            <Pagination
+            <CustomPagination
               currentPage={currentPage}
-              totalPage={totalPage}
+              itemsPerPage={itemsPerPage}
+              totalItems={locations ? locations!.length : 0}
               onPageChange={handlePageCHange}
             />
 

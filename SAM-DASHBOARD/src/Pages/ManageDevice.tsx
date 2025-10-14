@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
-import CustomInput from "../components/CustomInput";
 import Pagination from "../components/Pagination";
 import CustomButton from "../components/CustomButton";
 import CustomModal from "../components/CustomModal";
 import CustomTable from "../components/CustomTable";
 import { useDeviceData } from "../hooks/useDeviceHooks";
 import { useLocationData } from "../hooks/useLocationHooks";
+import { CustomInputs } from "@/components/CustomInputs";
+import { CustomSelect } from "@/components/CustomSelect";
+import type { SingleValue } from "react-select";
+import type { SelectOption } from "../../types/types";
 
 export default function ManageDevice() {
   const {
@@ -30,8 +33,8 @@ export default function ManageDevice() {
   const [location, setLocation] = useState("");
   const [filter, setFilter] = useState("");
   const [sort, setSort] = useState("");
-  const [sortDirection, SetSortDirection] = useState<"asc" | "desc">("asc");
-  const [perPage, setPerPage] = useState(10);
+  const [selectOption, setSelectOption] = useState<string>("");
+  const [itemsPerPage, setItemsPerPage] = useState<number>(5);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const totalPage = 5;
@@ -43,7 +46,7 @@ export default function ManageDevice() {
       (item.samId ?? "").toLowerCase().includes(filter.toLowerCase())
     )
     .sort((a, b) =>
-      sortDirection === "asc"
+      selectOption === "asc"
         ? (a.samId ?? "").localeCompare(b.samId ?? "")
         : (b.samId ?? "").localeCompare(a.samId ?? "")
     );
@@ -196,6 +199,21 @@ export default function ManageDevice() {
     loadData();
   }, []);
 
+  const handleSelectOption = (selected: SingleValue<SelectOption>) => {
+    setSelectOption(selected ? selected.value : "");
+  };
+
+  const option = [
+    {
+      label: "Asc",
+      value: "asc",
+    },
+    {
+      label: "Desc",
+      value: "desc",
+    },
+  ];
+
   // === PREFILL UPDATE FORM ===
   const handlePrefillUpdate = () => {
     if (selectedIds.length !== 1) {
@@ -222,26 +240,44 @@ export default function ManageDevice() {
       <div className="flex-1 text-sm text-black">
         <h2 className="text-3xl font-bold mb-8 text-gray-800">Manage Device</h2>
 
-        <CustomInput
-          filter={filter}
-          setFilter={setFilter}
-          sort={sort}
-          setSort={setSort}
-          sortDirection={sortDirection}
-          setSortDirection={SetSortDirection}
-          perPage={perPage}
-          setPerPage={setPerPage}
-          labels={{
-            filter: "Filter",
-            sort: " Sort",
-            sortDirection: "Sort Direction",
-            perPage: "Per Page",
-          }}
-          placeholder={{
-            filter: "Masukkan ID Device",
-            sort: "Contoh: PortableDeviceId",
-          }}
-        />
+        <div className="flex items-center gap-5 justify-between p-3">
+          <div className="flex flex-col gap-5 flex-1">
+            <CustomInputs
+              label="Filter"
+              placeholder="Masukkan username"
+              onChange={(val) => setFilter(val)}
+              helperText="x"
+              helper={() => setFilter("")}
+              value={filter}
+            />
+
+            <CustomSelect
+              values={option.find((opt) => opt.value === selectOption) || null}
+              handleChange={handleSelectOption}
+              options={option}
+              label="Sort"
+              flex="flex-row"
+              labelClass="items-center gap-3"
+            />
+          </div>
+          <div className="flex flex-col gap-5 flex-1">
+            <CustomInputs
+              label="Sort"
+              placeholder="Masukkan device portable"
+              onChange={(val) => setSort(val)}
+              helperText="x"
+              helper={() => setSort("")}
+              value={sort}
+            />
+            <CustomInputs
+              label="Per Page"
+              placeholder="Masukkan jumlah page"
+              onChange={(val) => setItemsPerPage(Number(val))}
+              value={Number(itemsPerPage)}
+              type="number"
+            />
+          </div>
+        </div>
 
         {loading ? (
           <div className="flex flex-col justify-center items-center h-64">

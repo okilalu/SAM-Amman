@@ -26,6 +26,7 @@ export default function ControlDevice() {
   const [itemsPerPage, setItemsPerPage] = useState<number>(5);
   const [samId, setSamId] = useState("");
   const [selectOption, setSelectOption] = useState<string>("");
+
   const filteredUsers = (allUsers ?? [])
     .filter((u) =>
       (u.username ?? "").toLowerCase().includes(filter.toLowerCase())
@@ -146,7 +147,7 @@ export default function ControlDevice() {
       <div className="flex-1 gap-5 text-sm text-black flex overflow-auto">
         <div className="flex-1 bg-white shadow rounded-sm p-3 pt-0">
           <div className="flex items-center gap-5 justify-between p-3">
-            <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-5 flex-1">
               <CustomInputs
                 label="Filter"
                 placeholder="Masukkan username"
@@ -167,7 +168,7 @@ export default function ControlDevice() {
                 labelClass="items-center gap-3"
               />
             </div>
-            <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-5 flex-1">
               <CustomInputs
                 label="Sort"
                 placeholder="Masukkan device portable"
@@ -185,26 +186,6 @@ export default function ControlDevice() {
               />
             </div>
           </div>
-          {/* <CustomInput
-            filter={filter}
-            setFilter={setFilter}
-            sort={sort}
-            setSort={setSort}
-            sortDirection={sortDirection}
-            setSortDirection={SetSortDirection}
-            perPage={itemsPerPage}
-            setPerPage={setItemsPerPage}
-            labels={{
-              filter: "Filter",
-              sort: "Sort",
-              sortDirection: "Sort Direction",
-              perPage: "Per Page",
-            }}
-            placeholder={{
-              filter: "Masukkan ID Device",
-              sort: "Contoh: PortableDeviceId",
-            }}
-          /> */}
 
           <div className="pt-5 flex flex-col gap-3">
             <div className="min-h-[250px]">
