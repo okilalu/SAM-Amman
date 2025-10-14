@@ -70,7 +70,7 @@ export default function Portable() {
 
           {/* Date Filter */}
           <div className="grid grid-cols-2 gap-6 mb-6">
-            <div className="flex items-center gap-6">
+            <div className="flex justify-between items-center gap-6">
               <label className="font-semibold text-gray-700 w-24">
                 Start Date
               </label>
@@ -152,7 +152,7 @@ export default function Portable() {
               <select
                 value={device}
                 onChange={(e) => setDevice(e.target.value)}
-                className="select bg-gray-200 max-w-xs"
+                className="select bg-gray-300 max-w-xs"
               >
                 {Array.isArray(devices) && devices.length > 0 ? (
                   devices.map((item, idx) => (
