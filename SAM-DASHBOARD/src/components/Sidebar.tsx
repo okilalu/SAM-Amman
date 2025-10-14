@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   MdDashboard,
   MdEmail,
@@ -18,11 +18,50 @@ import ManageDevice from "../Pages/ManageDevice";
 import ManageLocation from "../Pages/ManageLocation";
 import ControlDevice from "../Pages/ControlDevice";
 import Logs from "../Pages/Logs";
+import { useUserData } from "../hooks/useUserHooks";
+
+const getToken = () => {
+  try {
+    const auth = localStorage.getItem("auth");
+    if (!auth) return null;
+    const parsed = JSON.parse(auth);
+    return parsed?.token || null;
+  } catch (error) {
+    console.error("Error reading token:", error);
+    return null;
+  }
+};
 
 export default function Sidebar() {
+  const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState({ credential: "Admin" }); // default sementara
+  const [error, setError] = useState("");
   const [activeMenu, setActiveMenu] = useState("Home");
+  const { handleLogout, validateUser, user } = useUserData({});
+
+  useEffect(() => {
+    const token = getToken();
+    if (!token) {
+      navigate("/login");
+    } else {
+      validateUser(); // panggil API validasi user
+      setIsLoggedIn(true);
+    }
+  }, [navigate]);
+
+  const Logout = async () => {
+    try {
+      const res = await handleLogout();
+      localStorage.removeItem("auth");
+      console.log(res);
+
+      navigate("/login");
+      setError("");
+      alert("Anda telah logout!");
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const renderContent = () => {
     switch (activeMenu) {
@@ -47,9 +86,8 @@ export default function Sidebar() {
     }
   };
 
-  // Menu yang tampil sesuai role
   const menuItems =
-    user.credential !== "Operator"
+    user && user.credential !== "Operator"
       ? [
           { name: "Home", icon: <MdDashboard className="text-xl" /> },
           { name: "Portable", icon: <TbFilterCode className="text-xl" /> },
@@ -75,13 +113,11 @@ export default function Sidebar() {
     <div className="flex h-screen w-full">
       {/* Sidebar */}
       <aside className="fixed left-0 top-0 h-full w-[20%] bg-gray-800 text-white flex flex-col justify-between shadow-lg">
-        {/* Header */}
         <div>
           <div className="px-6 py-4 border-b border-gray-700 flex items-center justify-center">
             <h1 className="text-3xl font-bold tracking-wider">AMMAN</h1>
           </div>
 
-          {/* Navigation */}
           <nav className="mt-6">
             <ul>
               {menuItems.map((item) => (
@@ -102,11 +138,10 @@ export default function Sidebar() {
           </nav>
         </div>
 
-        {/* Auth Buttons */}
         <div className="px-6 py-5 border-t border-gray-700 flex flex-col gap-3">
           {isLoggedIn ? (
             <button
-              onClick={() => setIsLoggedIn(false)}
+              onClick={Logout}
               className="bg-red-600 hover:bg-red-700 text-center text-white py-2 rounded-md font-semibold transition"
             >
               Logout
