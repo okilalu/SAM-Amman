@@ -1,6 +1,5 @@
-
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   MdDashboard,
   MdEmail,
@@ -20,7 +19,7 @@ import ManageLocation from "../Pages/ManageLocation";
 import ControlDevice from "../Pages/ControlDevice";
 import Logs from "../Pages/Logs";
 
-import { CustomBreadcrumbs } from "./CustomBreadcrumbs
+import { CustomBreadcrumbs } from "./CustomBreadcrumbs";
 import { useUserData } from "../hooks/useUserHooks";
 
 const getToken = () => {
@@ -34,7 +33,6 @@ const getToken = () => {
     return null;
   }
 };
-
 
 export default function Sidebar() {
   const navigate = useNavigate();
@@ -59,7 +57,6 @@ export default function Sidebar() {
       console.log(res);
 
       navigate("/login");
-      setError("");
       alert("Anda telah logout!");
     } catch (error) {
       console.log(error);
@@ -114,14 +111,9 @@ export default function Sidebar() {
 
   return (
     <div className="w-full h-screen flex">
-      <aside className="fixed left-0 top-0 h-screen w-[20%] bg-gray-800 text-white flex flex-col justify-between shadow-lg">
-
-    <div className="flex h-screen w-full">
-      {/* Sidebar */}
-      <aside className="fixed left-0 top-0 h-full w-[20%] bg-gray-800 text-white flex flex-col justify-between shadow-lg">
-
+      <aside className="fixed left-0 top-0 h-screen w-[20%] bg-gray-300 text-black flex flex-col justify-between shadow-lg">
         <div>
-          <div className="px-6 h-16 border-b border-gray-700 flex items-center justify-center">
+          <div className="px-6 h-16  border-gray-700 flex items-center justify-center">
             <h1 className="text-3xl font-bold tracking-wider">AMMAN</h1>
           </div>
 
@@ -145,7 +137,7 @@ export default function Sidebar() {
           </nav>
         </div>
 
-        <div className="px-6 py-5 border-t border-gray-700 flex flex-col gap-3">
+        <div className="px-6 py-5  border-gray-700 flex flex-col gap-3">
           {isLoggedIn && (
             <button
               onClick={Logout}
@@ -160,6 +152,7 @@ export default function Sidebar() {
       <div className="ml-[20%] w-[80%] h-screen flex flex-col overflow-hidden">
         <div className="sticky top-0 z-40 shadow-md">
           <CustomBreadcrumbs
+            isLoggedIn={isLoggedIn}
             className="rounded-none text-black h-16 pl-5"
             label="Home"
             active={activeMenu === "Home" ? "Dashboard" : activeMenu}
