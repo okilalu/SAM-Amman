@@ -5,52 +5,51 @@ import {
 } from "@reduxjs/toolkit";
 import axios from "axios";
 import type { Log, LogState, LogResponse } from "../../../types/types";
+import { uri } from "../../../utils/uri";
 
 const initialState: LogState = {
   logs: [],
   loading: false,
   error: null,
-  selectedLog: null,
 };
 
-export const fetchLogs = createAsyncThunk(
-  "logs/fetchAll",
-  async (_, thunkAPI) => {
-    try {
-      const response = await axios.get<LogResponse>("/api/v7/logs/get");
-      return response.data.data;
-    } catch (error: any) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.message || "Failed to fetch logs"
-      );
-    }
+export const fetchLogs = createAsyncThunk<
+  LogResponse,
+  void,
+  { rejectValue: string }
+>("logs/get", async (_, { rejectWithValue }) => {
+  try {
+    const response = await axios.get(`${uri}/api/v7/logs/get`);
+    return response.data as LogResponse;
+  } catch (error: any) {
+    return rejectWithValue(
+      error.response?.data?.message || "Gagal memuat data log"
+    );
   }
-);
+});
 
 const logSlice = createSlice({
   name: "logs",
   initialState,
-  reducers: {
-    setSelectedLog(state, action: PayloadAction<Log | null>) {
-      state.selectedLog = action.payload;
-    },
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchLogs.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchLogs.fulfilled, (state, action: PayloadAction<Log[]>) => {
-        state.loading = false;
-        state.logs = action.payload;
-      })
+      .addCase(
+        fetchLogs.fulfilled,
+        (state, action: PayloadAction<LogResponse>) => {
+          state.loading = false;
+          state.logs = action.payload.data ?? [];
+        }
+      )
       .addCase(fetchLogs.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        state.error = action.payload ?? "Gagal memuat data log";
       });
   },
 });
 
-export const { setSelectedLog } = logSlice.actions;
 export default logSlice.reducer;
