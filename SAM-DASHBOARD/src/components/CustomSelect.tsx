@@ -47,7 +47,7 @@ export const CustomSelect: React.FC<SelectOptionsProps> = ({
       "&:hover": {
         borderColor: "0077b6",
       },
-      fontSize: "12px",
+      fontSize: "14px",
       color: "#0f172a",
       fontWeight: "500",
       minHeight: "33px",
@@ -76,16 +76,16 @@ export const CustomSelect: React.FC<SelectOptionsProps> = ({
       ...provided,
       backgroundColor: state.isSelected ? "#0077b6" : provided.backgroundColor,
       color: state.isSelected ? "#fff" : "#0077b6",
-      fontSize: "12px",
+      fontSize: "14px",
       lineHeight: "1rem",
       padding: "8px",
     }),
   };
 
   return (
-    <div className={`flex ${flex} ${labelClass} gap-6 w-full`}>
+    <div className={`flex ${flex} ${labelClass} gap-10 w-full`}>
       {label && (
-        <label className="block text-xs font-semibold text-slate-600">
+        <label className="block text-sm font-semibold text-slate-600">
           {label}
         </label>
       )}

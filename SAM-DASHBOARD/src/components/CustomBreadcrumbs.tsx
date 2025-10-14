@@ -18,7 +18,7 @@ export const CustomBreadcrumbs: React.FC<CustomBreadcrumbsProps> = ({
   const navigate = useNavigate();
   return (
     <div
-      className={`bg-gray-200 px-3 py-1 ${className} flex items-center justify-between`}
+      className={`bg-gray-300 px-3 py-1 ${className} flex items-center justify-between`}
     >
       <div className="breadcrumbs ">
         <div className="divider divider-horizontal" />
