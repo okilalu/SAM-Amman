@@ -108,7 +108,13 @@ export const getAllUser = createAsyncThunk<MultiUserResponse>(
   "user/getAll",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${uri}/api/v1/getAll/user`);
+      const token = getToken();
+      console.log(token?.token);
+
+      if (!token?.token) throw new Error("No token found");
+      const response = await axios.get(`${uri}/api/v1/getAll/user`, {
+        headers: { Authorization: `Bearer ${token.token}` },
+      });
       console.log(response);
       return response.data;
     } catch (error: any) {
