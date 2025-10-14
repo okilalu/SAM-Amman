@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -18,12 +19,52 @@ import ManageDevice from "../Pages/ManageDevice";
 import ManageLocation from "../Pages/ManageLocation";
 import ControlDevice from "../Pages/ControlDevice";
 import Logs from "../Pages/Logs";
-import { CustomBreadcrumbs } from "./CustomBreadcrumbs";
+
+import { CustomBreadcrumbs } from "./CustomBreadcrumbs
+import { useUserData } from "../hooks/useUserHooks";
+
+const getToken = () => {
+  try {
+    const auth = localStorage.getItem("auth");
+    if (!auth) return null;
+    const parsed = JSON.parse(auth);
+    return parsed?.token || null;
+  } catch (error) {
+    console.error("Error reading token:", error);
+    return null;
+  }
+};
+
 
 export default function Sidebar() {
+  const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user] = useState({ credential: "Admin" });
   const [activeMenu, setActiveMenu] = useState("Home");
+  const { handleLogout, validateUser, user } = useUserData({});
+
+  useEffect(() => {
+    const token = getToken();
+    if (!token) {
+      navigate("/login");
+    } else {
+      validateUser(); // panggil API validasi user
+      setIsLoggedIn(true);
+    }
+  }, [navigate]);
+
+  const Logout = async () => {
+    try {
+      const res = await handleLogout();
+      localStorage.removeItem("auth");
+      console.log(res);
+
+      navigate("/login");
+      setError("");
+      alert("Anda telah logout!");
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const renderContent = () => {
     switch (activeMenu) {
@@ -49,7 +90,7 @@ export default function Sidebar() {
   };
 
   const menuItems =
-    user.credential !== "Operator"
+    user && user.credential !== "Operator"
       ? [
           { name: "Home", icon: <MdDashboard className="text-xl" /> },
           { name: "Portable", icon: <TbFilterCode className="text-xl" /> },
@@ -74,6 +115,11 @@ export default function Sidebar() {
   return (
     <div className="w-full h-screen flex">
       <aside className="fixed left-0 top-0 h-screen w-[20%] bg-gray-800 text-white flex flex-col justify-between shadow-lg">
+
+    <div className="flex h-screen w-full">
+      {/* Sidebar */}
+      <aside className="fixed left-0 top-0 h-full w-[20%] bg-gray-800 text-white flex flex-col justify-between shadow-lg">
+
         <div>
           <div className="px-6 h-16 border-b border-gray-700 flex items-center justify-center">
             <h1 className="text-3xl font-bold tracking-wider">AMMAN</h1>
@@ -102,7 +148,7 @@ export default function Sidebar() {
         <div className="px-6 py-5 border-t border-gray-700 flex flex-col gap-3">
           {isLoggedIn && (
             <button
-              onClick={() => setIsLoggedIn(false)}
+              onClick={Logout}
               className="bg-red-600 hover:bg-red-700 text-center text-white py-2 rounded-md font-semibold transition"
             >
               Logout

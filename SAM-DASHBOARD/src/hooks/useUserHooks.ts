@@ -73,7 +73,11 @@ export function useUserData({ closeModal }: UserDataProps) {
     }
   };
 
-  const loginUser = async (payload: { username: string; password: string }) => {
+  const loginUser = async (payload: {
+    username: string;
+    password: string;
+    credential: string;
+  }) => {
     setIsLoading(true);
     try {
       const res = await dispatch(login(payload)).unwrap();
@@ -92,7 +96,6 @@ export function useUserData({ closeModal }: UserDataProps) {
       setUsers(res?.data?.user ?? null);
     } catch (error) {
       console.log(error);
-      navigate("/home");
     }
   };
 
