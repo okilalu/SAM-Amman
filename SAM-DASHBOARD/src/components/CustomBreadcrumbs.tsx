@@ -1,4 +1,4 @@
-import React from "react";
+import React, { type ReactElement } from "react";
 import { PiGlobeHemisphereWestFill, PiUser } from "react-icons/pi";
 import CutomButton from "./CustomButton";
 import { useNavigate } from "react-router-dom";
@@ -8,23 +8,25 @@ interface CustomBreadcrumbsProps {
   active: string;
   isLoggedIn?: boolean;
   className?: string;
+  icon?: ReactElement;
 }
 export const CustomBreadcrumbs: React.FC<CustomBreadcrumbsProps> = ({
   label,
   active,
   isLoggedIn = false,
   className = "rounded-md",
+  icon = <PiGlobeHemisphereWestFill size={20} color="#63b0ba" />,
 }) => {
   const navigate = useNavigate();
   return (
     <div
-      className={`bg-gray-300 px-3 py-1 ${className} flex items-center justify-between`}
+      className={`bg-gray-300 px-3 pr-8 py-1 ${className} flex items-center justify-between`}
     >
-      <div className="breadcrumbs ">
+      <div className="breadcrumbs shadow-none">
         <div className="divider divider-horizontal" />
         <ul>
           <li className="flex items-center gap-2">
-            <PiGlobeHemisphereWestFill size={20} color="#63b0ba" />
+            {icon}
             <a href="#" className="text-[#63b0ba] font-bold">
               {label}
             </a>
