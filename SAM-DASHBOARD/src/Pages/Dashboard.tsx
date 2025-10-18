@@ -30,9 +30,6 @@ export default function Dashboard() {
         <div className="mb-10">
           <CustomGrafik />
         </div>
-        <div className="mb-10">
-          <CustomGrafik />
-        </div>
       </div>
     </div>
   );

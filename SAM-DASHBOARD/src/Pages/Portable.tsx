@@ -17,8 +17,8 @@ export default function Portable() {
       }))) ||
     [];
 
-  const [startDate, setStartDate] = useState("2025-05-06");
-  const [endDate, setEndDate] = useState("2025-10-07");
+  const [startDate, setStartDate] = useState("2025-10-16");
+  const [endDate, setEndDate] = useState("2025-10-18");
   const [speedFrom, setSpeedFrom] = useState<number>(1);
   const [speedTo, setSpeedTo] = useState<number>(99);
   const [status, setStatus] = useState<"all" | "over speed">("all");
@@ -26,10 +26,12 @@ export default function Portable() {
     null
   );
 
+  console.log(selectedDevice);
+
   const handleSearch = useCallback(() => {
-    if (!selectedDevice?.value) return;
+    if (!selectedDevice) return;
     handleFilterData({
-      samId: selectedDevice.value,
+      samId: selectedDevice,
       data: {
         minSpeed: speedFrom,
         maxSpeed: speedTo,
@@ -39,7 +41,7 @@ export default function Portable() {
       } as unknown as Datas,
     });
   }, [
-    selectedDevice?.value,
+    selectedDevice,
     speedFrom,
     speedTo,
     startDate,
@@ -55,8 +57,8 @@ export default function Portable() {
     setSpeedTo(0);
     setStatus("all");
 
-    if (selectedDevice?.value) {
-      await handleGetAllData({ samId: selectedDevice.value });
+    if (selectedDevice) {
+      await handleGetAllData({ samId: selectedDevice });
     }
   };
 
@@ -65,9 +67,9 @@ export default function Portable() {
   }, []);
 
   useEffect(() => {
-    if (selectedDevice?.value)
-      handleGetAllData({ samId: selectedDevice.value });
-  }, [selectedDevice?.value]);
+    if (selectedDevice) handleGetAllData({ samId: selectedDevice });
+    console.log(selectedDevice);
+  }, [selectedDevice]);
 
   const handleDeviceSelect = (selectedOption: any) => {
     setSelectedDevice(selectedOption);

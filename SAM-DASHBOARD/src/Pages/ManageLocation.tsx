@@ -133,6 +133,17 @@ export default function ManageLocation() {
     },
   ];
 
+  const handlePrefillUpdate = () => {
+    if (selectedIds.length !== 1) {
+      alert("Pilih satu email untuk diupdate");
+      return;
+    }
+    const selectedLoc = locations?.find((u) => u.id === Number(selectedIds[0]));
+    if (!selectedLoc) return alert("User tidak ditemukan");
+    setLocation(selectedLoc.location || "");
+    handleOpenModal("modal_update");
+  };
+
   return (
     <div className="flex gap-3">
       <div className="flex-1 text-sm text-black">
@@ -228,13 +239,7 @@ export default function ManageLocation() {
               />
               <CustomButton
                 text="Update"
-                onClick={() => {
-                  const selectedLoc = locations.find(
-                    (u) => u.id === Number(selectedIds[0])
-                  );
-                  if (selectedLoc) handleOpenModal("modal_update");
-                  else alert("Pilih user terlebih dahulu!");
-                }}
+                onClick={handlePrefillUpdate}
                 className="btn-info"
               />
               <CustomButton
@@ -271,7 +276,7 @@ export default function ManageLocation() {
                 <div className="flex flex-col">
                   <input
                     type="text"
-                    placeholder="Enter You Password"
+                    placeholder="Update Location"
                     className="mb-4 w-full bg-gray-200 rounded-md p-2 "
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}

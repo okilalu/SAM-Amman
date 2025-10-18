@@ -3,7 +3,6 @@ import CustomTable from "../components/CustomTable";
 import CustomButton from "../components/CustomButton";
 import CustomModal from "../components/CustomModal";
 import { useEmailData } from "../hooks/useEmailHooks";
-import type { Email } from "../../types/types";
 import { CustomInputs } from "@/components/CustomInputs";
 import { CustomSelects } from "@/components/CustomSelects";
 import { CustomPagination } from "@/components/CustomPagination";
@@ -21,7 +20,7 @@ export default function ManageEmail() {
   const [filter, setFilter] = useState("");
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [formData, setFormData] = useState<Email>({ emailName: "" });
+  const [emailName, setEmailName] = useState("");
   const dataPerPage = 5;
   const itemsPerPage = 5;
   const [selectOption, setSelectOption] = useState<string>("asc");
@@ -36,8 +35,8 @@ export default function ManageEmail() {
     )
     .sort((a, b) =>
       selectOption === "asc"
-        ? (a.emailName ?? "").localeCompare(b.emailName ?? "")
-        : (b.emailName ?? "").localeCompare(a.emailName ?? "")
+        ? (a.id ?? 0) - (b.id ?? 0)
+        : (b.id ?? 0) - (a.id ?? 0)
     );
 
   const paginatedEmails = filteredEmails.slice(
@@ -45,9 +44,7 @@ export default function ManageEmail() {
     currentPage * dataPerPage
   );
 
-  const handleOpenModal = (id: string, email?: Email) => {
-    if (email) setFormData(email);
-    else setFormData({ emailName: "" });
+  const handleOpenModal = (id: string) => {
     const modal = document.getElementById(id) as HTMLDialogElement;
     modal?.showModal();
   };
@@ -69,11 +66,11 @@ export default function ManageEmail() {
   };
 
   const handleRegister = async () => {
-    if (!formData.emailName?.trim()) {
+    if (!emailName) {
       alert("Nama email harus diisi!");
       return;
     }
-    await handleCreateEmail({ emailName: formData.emailName });
+    await handleCreateEmail({ emailName });
     handleCloseModal("modal_register");
   };
 
@@ -83,11 +80,11 @@ export default function ManageEmail() {
       return;
     }
     const id = selectedIds[0];
-    if (!formData.emailName?.trim()) {
+    if (!emailName) {
       alert("Nama email harus diisi!");
       return;
     }
-    await handleUpdateEmail(id, formData.emailName);
+    await handleUpdateEmail(id, emailName);
     setSelectedIds([]);
     handleCloseModal("modal_update");
   };
@@ -118,6 +115,17 @@ export default function ManageEmail() {
       value: "desc",
     },
   ];
+
+  const handlePrefillUpdate = () => {
+    if (selectedIds.length !== 1) {
+      alert("Pilih satu email untuk diupdate");
+      return;
+    }
+    const selectedEmail = emails?.find((u) => u.id === selectedIds[0]);
+    if (!selectedEmail) return alert("User tidak ditemukan");
+    setEmailName(selectedEmail.emailName || "");
+    handleOpenModal("modal_update");
+  };
 
   return (
     <div className="flex gap-3">
@@ -190,11 +198,7 @@ export default function ManageEmail() {
           />
           <CustomButton
             text="Update"
-            onClick={() => {
-              const selected = emails.find((e) => e.id === selectedIds[0]);
-              if (selected) handleOpenModal("modal_update", selected);
-              else alert("Pilih email terlebih dahulu!");
-            }}
+            onClick={handlePrefillUpdate}
             className="btn-info"
           />
           <CustomButton
@@ -217,10 +221,8 @@ export default function ManageEmail() {
                 type="text"
                 placeholder="Masukkan nama email"
                 className="mb-4 w-full bg-gray-200 rounded-md p-2"
-                value={formData.emailName ?? ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, emailName: e.target.value })
-                }
+                value={emailName}
+                onChange={(e) => setEmailName(e.target.value)}
               />
             </div>
           </CustomModal>
@@ -237,10 +239,8 @@ export default function ManageEmail() {
                 type="text"
                 placeholder="Masukkan nama email"
                 className="mb-4 w-full bg-gray-200 rounded-md p-2"
-                value={formData.emailName ?? ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, emailName: e.target.value })
-                }
+                value={emailName}
+                onChange={(e) => setEmailName(e.target.value)}
               />
             </div>
           </CustomModal>

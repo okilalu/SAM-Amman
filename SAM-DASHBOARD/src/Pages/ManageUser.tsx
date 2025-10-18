@@ -55,7 +55,6 @@ export default function ManageUser() {
   // Pagination
   const handlePageCHange = (page: number) => {
     setCurrentPage(page);
-    console.log("Pindah ke halaman: ", page);
   };
 
   // create
@@ -121,7 +120,7 @@ export default function ManageUser() {
       await updateUsers(String(selectedUser.userId!), payload);
 
       handleCloseModal("modal_update");
-      validateAllUsers();
+      await validateAllUsers();
       setSelectedIds([]);
     } catch (error) {
       alert("Gagal memperbarui user");
@@ -144,7 +143,7 @@ export default function ManageUser() {
       alert(`${selectedIds.length} user berhasil dihapus.`);
       handleCloseModal("modal_delete");
       setSelectedIds([]);
-      validateAllUsers();
+      await validateAllUsers();
     } catch (error) {
       alert("Gagal menghapus user");
       console.error(error);
@@ -176,6 +175,20 @@ export default function ManageUser() {
       value: "desc",
     },
   ];
+
+  const handlePrefillUpdate = () => {
+    if (selectedIds.length !== 1) {
+      alert("Pilih satu user untuk diupdate");
+      return;
+    }
+    const selectedUser = allUsers?.find((u) => u.userId === selectedIds[0]);
+    if (!selectedUser) return alert("User tidak ditemukan");
+
+    setUsername(selectedUser.username || "");
+    setPassword(selectedUser.password || "");
+    setCredential(selectedUser.credential || "");
+    handleOpenModal("modal_update");
+  };
 
   return (
     <div className="flex gap-3">
@@ -229,7 +242,7 @@ export default function ManageUser() {
                           onChange={() => handleSelectUser(item.userId!)}
                         />
                       </td>
-                      <td>{item.id}</td>
+                      <td>{idx + 1}</td>
                       <td>{item.username}</td>
                       <td>{item.password}</td>
                       <td>{item.credential}</td>
@@ -260,13 +273,14 @@ export default function ManageUser() {
               />
               <CustomButton
                 text="Update"
-                onClick={() => {
-                  const selectedUser = allUsers?.find(
-                    (u) => u.userId === selectedIds[0]
-                  );
-                  if (selectedUser) handleOpenModal("modal_update");
-                  else alert("Pilih user terlebih dahulu!");
-                }}
+                onClick={handlePrefillUpdate}
+                // onClick={() => {
+                //   const selectedUser = allUsers?.find(
+                //     (u) => u.userId === selectedIds[0]
+                //   );
+                //   if (selectedUser) handleOpenModal("modal_update");
+                //   else alert("Pilih user terlebih dahulu!");
+                // }}
                 className="btn-info"
               />
               <CustomButton
