@@ -100,6 +100,13 @@ export default function CustomGrafik() {
       }))) ||
     [];
 
+  const dataValue = Array.isArray(data)
+    ? data.map((d) => ({
+        name: d?.createdAt || "",
+        uv: d?.speed || 0,
+      }))
+    : [];
+
   return (
     <div className="bg-white rounded-xl shadow p-6">
       <h2 className="text-xl font-semibold text-gray-700 mb-4">
@@ -168,14 +175,14 @@ export default function CustomGrafik() {
           </div>
         ) : data && data.length > 0 ? (
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data}>
+            <LineChart data={dataValue}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey={xKey} />
-              <YAxis />
+              <XAxis dataKey={"name"} />
+              <YAxis dataKey={"uv"} />
               <Tooltip />
               <Line
                 type="monotone"
-                dataKey="overspeed"
+                dataKey="speed"
                 stroke="#ef4444"
                 strokeWidth={3}
                 dot={{ r: 5 }}
