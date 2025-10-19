@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   LineChart,
   Line,
@@ -14,7 +14,7 @@ import type { SelectOption } from "../../types/types";
 import { CustomSelects } from "./CustomSelects";
 
 export default function CustomGrafik() {
-  const { data, handleFilterData, handleGetAllData, isLoading } = useData();
+  const { chartData, handleGetAllFilter, isLoading } = useData();
   const { devices, fetchAllDevices } = useDeviceData({});
   const [samId, setSamId] = useState<string>("");
   const [filterType, setFilterType] = useState<"day" | "month" | "year">("day");
@@ -23,6 +23,40 @@ export default function CustomGrafik() {
     null
   );
 
+  useEffect(() => {
+    fetchAllDevices();
+  }, []);
+
+  useEffect(() => {
+    if (devices.length > 0 && !samId) {
+      const firstSamId = devices[0].samId || "";
+      setSamId(firstSamId);
+      setSelectedDevice({ label: firstSamId, value: firstSamId });
+    }
+  }, [devices]);
+
+  const getDateRange = (type: "day" | "month" | "year", baseDate: string) => {
+    const date = baseDate ? new Date(baseDate) : new Date();
+    let startDate: Date;
+    let endDate: Date;
+
+    if (type === "day") {
+      startDate = new Date(date);
+      endDate = new Date(date);
+    } else if (type === "month") {
+      startDate = new Date(date.getFullYear(), date.getMonth(), 1);
+      endDate = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+    } else {
+      startDate = new Date(date.getFullYear(), 0, 1);
+      endDate = new Date(date.getFullYear(), 11, 31);
+    }
+
+    return {
+      startDate: startDate.toISOString().split("T")[0],
+      endDate: endDate.toISOString().split("T")[0],
+    };
+  };
+
   const getFormattedMonthYear = (dateStr?: string) => {
     const date = dateStr ? new Date(dateStr) : new Date();
     return date.toLocaleDateString("id-ID", { month: "long", year: "numeric" });
@@ -30,37 +64,18 @@ export default function CustomGrafik() {
 
   const formattedMonthYear = getFormattedMonthYear(selectedDate);
 
-  useEffect(() => {
-    fetchAllDevices();
-  }, []);
-
-  useEffect(() => {
-    if (devices.length > 0 && !samId) {
-      setSamId(devices[0].samId || "");
-    }
-  }, [devices]);
-
-  useEffect(() => {
-    if (samId) {
-      handleGetAllData({ samId });
-    }
-  }, [samId]);
-
-  // === Handler untuk input tanggal ===
   const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const dateValue = event.target.value;
     setSelectedDate(dateValue);
     if (!samId) return;
 
-    handleFilterData({
+    const { startDate, endDate } = getDateRange(filterType, dateValue);
+
+    handleGetAllFilter({
       samId,
-      data: {
-        startDate: dateValue,
-        endDate: dateValue,
-        filterType: "day",
-      },
-    });
-    setFilterType("day");
+      filterType,
+      filterValue: { startDate, endDate },
+    } as any);
   };
 
   // === Handler untuk ganti filter ===
@@ -68,46 +83,55 @@ export default function CustomGrafik() {
     setFilterType(type);
     if (!samId) return;
 
-    handleFilterData({
+    const { startDate, endDate } = getDateRange(
+      type,
+      selectedDate || new Date().toISOString()
+    );
+
+    handleGetAllFilter({
       samId,
-      data: {
-        filterType: type,
-        selectedDate: selectedDate || null,
-      },
-    });
+      filterType: type,
+      filterValue: { startDate, endDate },
+    } as any);
   };
 
-  const handleDeviceSelect = (selectedOption: SelectOption) => {
+  const handleDeviceSelect = (selectedOption: SelectOption | null) => {
     setSelectedDevice(selectedOption);
-    setSamId(selectedOption?.value);
+    if (selectedOption) {
+      setSamId(selectedOption.value);
+      if (selectedDate) {
+        const { startDate, endDate } = getDateRange(filterType, selectedDate);
+        handleGetAllFilter({
+          samId: selectedOption.value,
+          filterType,
+          filterValue: { startDate, endDate },
+        } as any);
+      }
+    }
   };
 
-  // === Option dropdown device ===
-  const option =
-    (Array.isArray(devices) &&
-      devices.map((item) => ({
+  const option: SelectOption[] = Array.isArray(devices)
+    ? devices.map((item) => ({
         label: item.samId || "",
         value: item.samId || "",
-      }))) ||
-    [];
+      }))
+    : [];
 
-  // === Format data untuk grafik ===
-  const formatDataForChart = (rawData: any[]) => {
-    if (!Array.isArray(rawData)) return [];
-
-    return rawData.map((item) => {
-      const dateObj = new Date(item.createdAt);
-      const hour = dateObj.getHours().toString().padStart(2, "0");
-      const minute = dateObj.getMinutes().toString().padStart(2, "0");
-
-      return {
-        name: `${hour}:${minute}`, // tampil di XAxis
-        uv: Number(item.speed) || 0, // tampil di YAxis
-      };
-    });
+  const downsampleData = (rawData: any[], maxPoints: number) => {
+    if (!rawData || rawData.length <= maxPoints) return rawData;
+    const step = Math.ceil(rawData.length / maxPoints);
+    return rawData.filter((_, i) => i % step === 0);
   };
 
-  const dataValue = formatDataForChart(data);
+  const dataValue = useMemo(() => {
+    const mapped = Array.isArray(chartData)
+      ? chartData.map((d: any) => ({
+          name: d?.createdAt || "",
+          uv: d?.speed || 0,
+        }))
+      : [];
+    return downsampleData(mapped, 500);
+  }, [chartData]);
 
   return (
     <div className="bg-white rounded-xl shadow p-6">
@@ -115,7 +139,6 @@ export default function CustomGrafik() {
         Data Pelanggaran Kendaraan
       </h2>
 
-      {/* Info Device */}
       <div className="flex justify-between rounded-md p-3 gap-5 mb-6 bg-gray-50">
         <div className="rounded-none w-xs">
           <CustomSelects
@@ -130,7 +153,6 @@ export default function CustomGrafik() {
         </div>
       </div>
 
-      {/* Filter & Date Picker */}
       <div className="flex justify-between items-center mb-6">
         <div className="bg-[#bde1e4] px-3 py-2 rounded-md">
           <input
@@ -142,54 +164,61 @@ export default function CustomGrafik() {
         </div>
 
         <div className="flex bg-[#bde1e4] rounded-xl overflow-hidden text-sm font-medium border border-[#63b1bb] text-black">
-          <button
-            onClick={() => handleFilterChange("day")}
-            className={`px-3 py-2 cursor-pointer ${
-              filterType === "day" ? "bg-[#63b1bb] font-semibold" : ""
-            }`}
-          >
-            Day
-          </button>
-          <button
-            onClick={() => handleFilterChange("month")}
-            className={`px-3 py-2 cursor-pointer border-l border-[#63b1bb]  ${
-              filterType === "month" ? "bg-[#63b1bb] font-semibold" : ""
-            }`}
-          >
-            Month
-          </button>
-          <button
-            onClick={() => handleFilterChange("year")}
-            className={`px-3 py-2 cursor-pointer border-l border-[#63b1bb] ${
-              filterType === "year" ? "bg-[#63b1bb] font-semibold" : ""
-            }`}
-          >
-            Year
-          </button>
+          {["day", "month", "year"].map((t) => (
+            <button
+              key={t}
+              onClick={() => handleFilterChange(t as any)}
+              className={`px-3 py-2 cursor-pointer ${
+                filterType === t ? "bg-[#63b1bb] font-semibold" : ""
+              } ${t !== "day" ? "border-l border-[#63b1bb]" : ""}`}
+            >
+              {t.toUpperCase()}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Grafik */}
       <div className="h-80">
         {isLoading ? (
           <div className="flex justify-center items-center h-full text-gray-500">
             Loading data...
           </div>
-        ) : data && data.length > 0 ? (
+        ) : dataValue && dataValue.length > 0 ? (
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={dataValue}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-              <YAxis domain={[0, "auto"]} tick={{ fontSize: 10 }} />
-              <Tooltip />
+              <XAxis
+                dataKey="name"
+                interval="preserveStartEnd"
+                tickFormatter={(val) =>
+                  new Date(val).toLocaleDateString("id-ID", {
+                    day: filterType === "year" ? undefined : "2-digit",
+                    month: filterType !== "day" ? "short" : undefined,
+                    year: "numeric",
+                  })
+                }
+              />
+              <YAxis />
+              <Tooltip
+                labelFormatter={(val) =>
+                  new Date(val).toLocaleString("id-ID", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                }
+              />
               <Line
                 type="monotone"
                 dataKey="uv"
                 stroke="#ef4444"
-                strokeWidth={3}
-                dot={{ r: 3 }}
+                strokeWidth={2}
+                dot={false}
                 activeDot={{ r: 5 }}
               />
+              {/* <Brush dataKey="name" height={30} stroke="#63b1bb" /> */}
             </LineChart>
           </ResponsiveContainer>
         ) : (

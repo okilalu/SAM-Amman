@@ -39,6 +39,26 @@ export const getAll = createAsyncThunk<DataResponse, { samId: string }>(
   }
 );
 
+// GetAll filters
+export const getAllFilter = createAsyncThunk<DataResponse, { data: Datas }>(
+  "get/all/filter",
+  async ({ data }, { rejectWithValue }) => {
+    try {
+      const res = await axios.get(`${uri}/api/v3/get/all-data/filters`, {
+        params: {
+          samId: data.samId,
+          filterType: data.filterType,
+          filterValue: data.filterValue,
+        },
+      });
+
+      return res.data;
+    } catch (error: any) {
+      return rejectWithValue(error.res?.data || error.massage);
+    }
+  }
+);
+
 const initialState: DataState = {
   data: [],
   loading: false,
@@ -74,6 +94,19 @@ const dataSlice = createSlice({
       state.data = action.payload.data.data ?? [];
     });
     builder.addCase(getAll.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload as string;
+    }),
+      // Get All data filter
+      builder.addCase(getAllFilter.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      });
+    builder.addCase(getAllFilter.fulfilled, (state, action) => {
+      state.loading = false;
+      state.data = action.payload.data.data ?? [];
+    });
+    builder.addCase(getAllFilter.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload as string;
     });
