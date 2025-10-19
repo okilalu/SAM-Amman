@@ -85,6 +85,7 @@ export interface Datas {
   startDate?: string;
   endDate?: string;
   createdAt?: string;
+  filterValue?: string;
   filterType?: "day" | "month" | "year";
 }
 
