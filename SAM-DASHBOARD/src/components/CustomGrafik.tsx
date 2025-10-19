@@ -17,9 +17,7 @@ export default function CustomGrafik() {
   const { data, handleFilterData, handleGetAllData, isLoading } = useData();
   const { devices, fetchAllDevices } = useDeviceData({});
   const [samId, setSamId] = useState<string>("");
-  const [filterType, setFilterType] = useState<"day" | "month" | "year">(
-    "month"
-  );
+  const [filterType, setFilterType] = useState<"day" | "month" | "year">("day");
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [selectedDevice, setSelectedDevice] = useState<SelectOption | null>(
     null
@@ -48,50 +46,43 @@ export default function CustomGrafik() {
     }
   }, [samId]);
 
-  // Pilih key X-Axis berdasarkan filter
-  const xKey =
-    filterType === "day"
-      ? "tanggal"
-      : filterType === "month"
-      ? "bulan"
-      : "tahun";
-
+  // === Handler untuk input tanggal ===
   const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const dateValue = event.target.value;
     setSelectedDate(dateValue);
     if (!samId) return;
 
-    const filterPayload = {
+    handleFilterData({
       samId,
       data: {
         startDate: dateValue,
         endDate: dateValue,
-        filterType,
+        filterType: "day",
       },
-    };
-    handleFilterData({ data: filterPayload.data, samId });
+    });
     setFilterType("day");
   };
 
+  // === Handler untuk ganti filter ===
   const handleFilterChange = (type: "day" | "month" | "year") => {
     setFilterType(type);
     if (!samId) return;
 
-    const filterPayload = {
+    handleFilterData({
       samId,
       data: {
         filterType: type,
         selectedDate: selectedDate || null,
       },
-    };
-
-    handleFilterData({ data: filterPayload.data, samId });
+    });
   };
 
-  const handleDeviceSelect = (selectedOption: any) => {
+  const handleDeviceSelect = (selectedOption: SelectOption) => {
     setSelectedDevice(selectedOption);
+    setSamId(selectedOption?.value);
   };
 
+  // === Option dropdown device ===
   const option =
     (Array.isArray(devices) &&
       devices.map((item) => ({
@@ -100,12 +91,23 @@ export default function CustomGrafik() {
       }))) ||
     [];
 
-  const dataValue = Array.isArray(data)
-    ? data.map((d) => ({
-        name: d?.createdAt || "",
-        uv: d?.speed || 0,
-      }))
-    : [];
+  // === Format data untuk grafik ===
+  const formatDataForChart = (rawData: any[]) => {
+    if (!Array.isArray(rawData)) return [];
+
+    return rawData.map((item) => {
+      const dateObj = new Date(item.createdAt);
+      const hour = dateObj.getHours().toString().padStart(2, "0");
+      const minute = dateObj.getMinutes().toString().padStart(2, "0");
+
+      return {
+        name: `${hour}:${minute}`, // tampil di XAxis
+        uv: Number(item.speed) || 0, // tampil di YAxis
+      };
+    });
+  };
+
+  const dataValue = formatDataForChart(data);
 
   return (
     <div className="bg-white rounded-xl shadow p-6">
@@ -177,16 +179,16 @@ export default function CustomGrafik() {
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={dataValue}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey={"name"} />
-              <YAxis dataKey={"uv"} />
+              <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+              <YAxis domain={[0, "auto"]} tick={{ fontSize: 10 }} />
               <Tooltip />
               <Line
                 type="monotone"
-                dataKey="speed"
+                dataKey="uv"
                 stroke="#ef4444"
                 strokeWidth={3}
-                dot={{ r: 5 }}
-                activeDot={{ r: 8 }}
+                dot={{ r: 3 }}
+                activeDot={{ r: 5 }}
               />
             </LineChart>
           </ResponsiveContainer>
