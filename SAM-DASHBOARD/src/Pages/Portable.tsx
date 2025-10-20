@@ -4,6 +4,7 @@ import { useDeviceData } from "../hooks/useDeviceHooks";
 import type { Datas, SelectOption } from "../../types/types";
 import { CustomInputs } from "@/components/CustomInputs";
 import { CustomSelects } from "@/components/CustomSelects";
+import { CustomPagination } from "@/components/CustomPagination";
 
 export default function Portable() {
   const { data, handleFilterData, handleGetAllData, isLoading } = useData();
@@ -25,6 +26,8 @@ export default function Portable() {
   const [selectedDevice, setSelectedDevice] = useState<SelectOption | null>(
     null
   );
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   console.log(selectedDevice);
 
@@ -73,6 +76,13 @@ export default function Portable() {
 
   const handleDeviceSelect = (selectedOption: any) => {
     setSelectedDevice(selectedOption);
+  };
+  const paginatedDatas = data.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+  const handlePageCHange = (page: number) => {
+    setCurrentPage(page);
   };
 
   return (
@@ -166,7 +176,7 @@ export default function Portable() {
             <div className="p-5 text-center text-gray-500 border border-dashed rounded-lg">
               Loading Data...
             </div>
-          ) : data && data.length > 0 ? (
+          ) : paginatedDatas && paginatedDatas.length > 0 ? (
             <table className="table w-full text-sm shadow rounded-sm">
               <thead className="bg-gray-200 text-black text-center">
                 <tr className="bg-gray-100">
@@ -178,7 +188,7 @@ export default function Portable() {
                 </tr>
               </thead>
               <tbody>
-                {data.map((item, idx) => (
+                {paginatedDatas.map((item, idx) => (
                   <tr key={idx} className="text-center">
                     <td className="p-3">{item.id}</td>
                     <td className="p-3">{item.createdAt}</td>
@@ -194,6 +204,15 @@ export default function Portable() {
               No data to show
             </div>
           )}
+        </div>
+
+        <div className="mt-3">
+          <CustomPagination
+            currentPage={currentPage}
+            itemsPerPage={itemsPerPage}
+            totalItems={data ? data!.length : 0}
+            onPageChange={handlePageCHange}
+          />
         </div>
       </div>
     </div>
