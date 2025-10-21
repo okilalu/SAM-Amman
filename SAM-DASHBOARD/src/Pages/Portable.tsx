@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useData } from "../hooks/useDataHooks";
 import { useDeviceData } from "../hooks/useDeviceHooks";
+import { useUserDeviceData } from "../hooks/useUserDeviceHooks";
 import type { Datas, SelectOption } from "../../types/types";
 import { CustomInputs } from "@/components/CustomInputs";
 import { CustomSelects } from "@/components/CustomSelects";
@@ -9,14 +10,21 @@ import { CustomPagination } from "@/components/CustomPagination";
 export default function Portable() {
   const { data, handleFilterData, handleGetAllData, isLoading } = useData();
   const { devices, fetchAllDevices } = useDeviceData({});
+  const { permissions, fetchAllPermissions } = useUserDeviceData({});
 
+  const allowedDevices =
+    Array.isArray(devices) && Array.isArray(permissions)
+      ? devices.filter((device) =>
+          permissions.some((perm) => perm.deviceId === device.samId)
+        )
+      : [];
+
+  // ✅ Mapping untuk opsi Select
   const option =
-    (Array.isArray(devices) &&
-      devices.map((item) => ({
-        label: item.samId || "",
-        value: item.samId || "",
-      }))) ||
-    [];
+    allowedDevices.map((item) => ({
+      label: item.samId || "",
+      value: item.samId || "",
+    })) || [];
 
   const [startDate, setStartDate] = useState("2025-10-16");
   const [endDate, setEndDate] = useState("2025-10-18");
@@ -42,6 +50,7 @@ export default function Portable() {
         endDate,
         category: status,
       } as unknown as Datas,
+      x,
     });
   }, [
     selectedDevice,
@@ -67,6 +76,8 @@ export default function Portable() {
 
   useEffect(() => {
     fetchAllDevices();
+    // fetchAllPermissionsByUserId("userId");
+    fetchAllPermissions();
   }, []);
 
   useEffect(() => {

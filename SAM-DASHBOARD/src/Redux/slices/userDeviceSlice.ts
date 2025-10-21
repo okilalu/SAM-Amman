@@ -7,6 +7,16 @@ import type {
 } from "../../../types/types";
 import { uri } from "../../../utils/uri";
 
+const getToken = (): { token: string; user: any } | null => {
+  try {
+    const auth = localStorage.getItem("auth");
+    return auth ? JSON.parse(auth) : null;
+  } catch (error) {
+    console.error("Error reading token:", error);
+    return null;
+  }
+};
+
 // ==========================
 // 🔹 ADD PERMISSION
 // ==========================
@@ -60,6 +70,7 @@ export const getAllPermissionsByUserId = createAsyncThunk<
     const response = await axios.get(
       `${uri}/api/v9/user-device/get/device/${userId}`
     );
+    console.log("response:", response);
     return response.data as UserDeviceResponse;
   } catch (error: any) {
     return rejectWithValue(
@@ -87,6 +98,28 @@ export const getAllPermissionsByDeviceId = createAsyncThunk<
     );
   }
 });
+export const getAllPermissions = createAsyncThunk<UserDeviceResponse>(
+  "user-device/get/accessible/device",
+  async (_, { rejectWithValue }) => {
+    try {
+      const token = getToken();
+      console.log("token perm: ", token?.token);
+
+      if (!token?.token) throw new Error("No token found");
+      const response = await axios.get(
+        `${uri}/api/v9/user-device/get/accessible/device`,
+        {
+          headers: { Authorization: `Bearer ${token.token}` },
+        }
+      );
+      return response.data as UserDeviceResponse;
+    } catch (error: any) {
+      return rejectWithValue(
+        error?.response?.data?.message || "Failed to get permissions by device"
+      );
+    }
+  }
+);
 
 // ==========================
 // 🧩 INITIAL STATE
@@ -183,6 +216,20 @@ const userDeviceSlice = createSlice({
         state.data = action.payload?.data ?? [];
       })
       .addCase(getAllPermissionsByDeviceId.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload ?? "Failed to get permissions by device";
+      });
+
+    builder
+      .addCase(getAllPermissions.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getAllPermissions.fulfilled, (state, action) => {
+        state.loading = false;
+        state.data = action.payload?.data ?? [];
+      })
+      .addCase(getAllPermissions.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload ?? "Failed to get permissions by device";
       });

@@ -7,6 +7,7 @@ import {
   deletePermission,
   getAllPermissionsByUserId,
   getAllPermissionsByDeviceId,
+  getAllPermissions,
 } from "../Redux/slices/userDeviceSlice";
 
 interface UserDeviceDataProps {
@@ -131,6 +132,33 @@ export function useUserDeviceData({ closeModal }: UserDeviceDataProps) {
     }
   };
 
+  const fetchAllPermissions = async () => {
+    setIsLoading(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const res = await dispatch(getAllPermissions()).unwrap();
+      setPermissions(res.data);
+      console.log(res);
+
+      // if (res && Array.isArray(res.data)) {
+      //   setPermissions(res.data);
+      // } else {
+      //   setPermissions([]);
+      // }
+      // setSuccess(res?.message ?? "Fetched");
+
+      // return res;
+    } catch (err: any) {
+      console.error("❌ Fetch Locations Error:", err);
+      setError(err?.message || "Gagal memuat daftar lokasi");
+      return undefined;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     permissions,
     isLoading,
@@ -140,5 +168,6 @@ export function useUserDeviceData({ closeModal }: UserDeviceDataProps) {
     fetchAllPermissionsByUserId,
     handleDeletePermission,
     fetchAllPermissionsByDeviceId,
+    fetchAllPermissions,
   };
 }
