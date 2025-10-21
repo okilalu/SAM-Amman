@@ -328,7 +328,7 @@ export default function ManageUser() {
                   >
                     <option value="">Choose Role</option>
                     <option value="Admin">Admin</option>
-                    <option value="Guest">Guest</option>
+                    <option value="Guest">Operator</option>
                   </select>
                 </div>
               </CustomModal>
@@ -371,7 +371,7 @@ export default function ManageUser() {
                   >
                     <option value="">Choose Role</option>
                     <option value="Admin">Admin</option>
-                    <option value="Guest">Guest</option>
+                    <option value="Guest">Operator</option>
                   </select>
                 </div>
               </CustomModal>

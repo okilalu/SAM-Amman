@@ -48,6 +48,7 @@ export const getAllPermissionsByUserId = createAsyncThunk<
     const response = await axios.get(
       `${uri}/api/v9/user-device/get/device/${userId}`
     );
+    console.log("response:", response);
     return response.data as UserDeviceResponse;
   } catch (error: any) {
     return rejectWithValue(
@@ -176,6 +177,7 @@ const userDeviceSlice = createSlice({
         state.loading = false;
         state.error = action.payload ?? "Failed to get permissions by device";
       });
+
     builder
       .addCase(getAccessibleDevice.pending, (state) => {
         state.loading = true;
