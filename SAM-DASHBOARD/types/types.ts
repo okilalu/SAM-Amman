@@ -199,6 +199,7 @@ export interface LocationResponse {
 // User-Device State
 export interface UserDevice {
   userId: string;
+  samId?: string;
   deviceId: string | string[];
 }
 export interface UserDeviceState {
