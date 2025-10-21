@@ -1,3 +1,4 @@
+import { getToken, removeToken, saveToken } from "./../../../utils/auth";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import { uri } from "../../../utils/uri";
@@ -7,32 +8,6 @@ import type {
   UserResponse,
   UserState,
 } from "../../../types/types";
-
-const saveToken = (data: { token: string; user: any }) => {
-  try {
-    localStorage.setItem("auth", JSON.stringify(data));
-  } catch (error) {
-    console.error("Error saving token", error);
-  }
-};
-
-const removeToken = () => {
-  try {
-    localStorage.removeItem("token");
-  } catch (error) {
-    console.error("Error removing token", error);
-  }
-};
-
-const getToken = (): { token: string; user: any } | null => {
-  try {
-    const auth = localStorage.getItem("auth");
-    return auth ? JSON.parse(auth) : null;
-  } catch (error) {
-    console.error("Error reading token:", error);
-    return null;
-  }
-};
 
 // Register
 export const createUser = createAsyncThunk<UserResponse, User>(
@@ -53,7 +28,6 @@ export const login = createAsyncThunk<UserResponse, User>(
   async (data, { rejectWithValue }) => {
     try {
       const response = await axios.post(`${uri}/api/v1/login/user`, data);
-      console.log(response);
 
       const token = response.data?.data?.token;
       const user = response.data?.data?.user;
@@ -73,7 +47,6 @@ export const currentUser = createAsyncThunk<UserResponse>(
   async (_, { rejectWithValue }) => {
     try {
       const token = getToken();
-      console.log(token?.token);
 
       if (!token?.token) throw new Error("No token found");
 
