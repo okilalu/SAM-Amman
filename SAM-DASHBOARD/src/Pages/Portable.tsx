@@ -1,35 +1,41 @@
 import { useCallback, useEffect, useState } from "react";
 import { useData } from "../hooks/useDataHooks";
-import { useDeviceData } from "../hooks/useDeviceHooks";
 import type { Datas, SelectOption } from "../../types/types";
 import { CustomInputs } from "@/components/CustomInputs";
 import { CustomSelects } from "@/components/CustomSelects";
 import { CustomPagination } from "@/components/CustomPagination";
+import { useUserDeviceData } from "@/hooks/useUserDeviceHooks";
 
 export default function Portable() {
   const { data, handleFilterData, handleGetAllData, isLoading } = useData();
-  const { devices, fetchAllDevices } = useDeviceData({});
+  const { accessible, fetchAllAccessible } = useUserDeviceData({});
 
-  const option =
-    (Array.isArray(devices) &&
-      devices.map((item) => ({
-        label: item.samId || "",
-        value: item.samId || "",
-      }))) ||
-    [];
+  const options: SelectOption[] =
+    accessible?.map((item) => ({
+      label: item.samId || "",
+      value: item.samId || "",
+    })) || [];
 
   const [startDate, setStartDate] = useState("2025-10-16");
-  const [endDate, setEndDate] = useState("2025-10-18");
+  const [endDate, setEndDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
   const [speedFrom, setSpeedFrom] = useState<number>(1);
   const [speedTo, setSpeedTo] = useState<number>(99);
   const [status, setStatus] = useState<"all" | "over speed">("all");
-  const [selectedDevice, setSelectedDevice] = useState<SelectOption | null>(
-    null
-  );
+  const [selectedDevice, setSelectedDevice] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  console.log(selectedDevice);
+  useEffect(() => {
+    fetchAllAccessible();
+  }, []);
+
+  useEffect(() => {
+    if (accessible.length > 0 && !selectedDevice) {
+      setSelectedDevice(accessible[0].samId || null);
+    }
+  }, [accessible, selectedDevice]);
 
   const handleSearch = useCallback(() => {
     if (!selectedDevice) return;
@@ -66,24 +72,18 @@ export default function Portable() {
   };
 
   useEffect(() => {
-    fetchAllDevices();
-  }, []);
-
-  useEffect(() => {
     if (selectedDevice) handleGetAllData({ samId: selectedDevice });
-    console.log(selectedDevice);
   }, [selectedDevice]);
 
-  const handleDeviceSelect = (selectedOption: any) => {
-    setSelectedDevice(selectedOption);
+  const handleDeviceSelect = (val: SelectOption | null) => {
+    setSelectedDevice(val?.value ?? null);
   };
+
   const paginatedDatas = data.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-  const handlePageCHange = (page: number) => {
-    setCurrentPage(page);
-  };
+  const handlePageChange = (page: number) => setCurrentPage(page);
 
   return (
     <div className="flex gap-3">
@@ -129,6 +129,7 @@ export default function Portable() {
                 </button>
               </div>
             </div>
+
             <div className="flex flex-col gap-5 flex-1">
               <CustomInputs
                 label="End date"
@@ -145,9 +146,11 @@ export default function Portable() {
                 type="number"
               />
               <CustomSelects
-                value={selectedDevice}
-                onChange={handleDeviceSelect}
-                options={option}
+                value={
+                  options.find((opt) => opt.value === selectedDevice) ?? null
+                }
+                onChange={() => handleDeviceSelect}
+                options={options}
                 label="Device"
                 flex="flex-row"
                 labelClass="items-center gap-3"
@@ -171,12 +174,13 @@ export default function Portable() {
           </div>
         </div>
 
+        {/* Table Section */}
         <div className="bg-white shadow rounded-xl p-6">
           {isLoading ? (
             <div className="p-5 text-center text-gray-500 border border-dashed rounded-lg">
               Loading Data...
             </div>
-          ) : paginatedDatas && paginatedDatas.length > 0 ? (
+          ) : paginatedDatas.length > 0 ? (
             <table className="table w-full text-sm shadow rounded-sm">
               <thead className="bg-gray-200 text-black text-center">
                 <tr className="bg-gray-100">
@@ -206,12 +210,13 @@ export default function Portable() {
           )}
         </div>
 
+        {/* Pagination */}
         <div className="mt-3">
           <CustomPagination
             currentPage={currentPage}
             itemsPerPage={itemsPerPage}
-            totalItems={data ? data!.length : 0}
-            onPageChange={handlePageCHange}
+            totalItems={data.length}
+            onPageChange={handlePageChange}
           />
         </div>
       </div>

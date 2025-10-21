@@ -68,7 +68,7 @@ export function useData() {
       setIsLoading(true);
       setError("");
       setSuccess("");
-
+      setChartData([]);
       try {
         const res = await dispatch(
           getAllFilter({
@@ -80,14 +80,17 @@ export function useData() {
           })
         ).unwrap();
 
-        const newChartData =
-          res?.data && Array.isArray(res.data) ? res.data : [];
-        setChartData(newChartData);
-        setSuccess("Filter chart data loaded successfully");
+        const filteredData = Array.isArray(res?.data)
+          ? res.data
+          : Array.isArray(res?.data?.data)
+          ? res.data.data
+          : [];
+
+        setChartData(filteredData);
       } catch (err) {
-        console.error(err);
-        const msg = "Gagal memuat data chart filter";
-        setError(msg);
+        console.log(err);
+        setError("Gagal memuat data filter");
+        setChartData([]);
       } finally {
         setIsLoading(false);
       }

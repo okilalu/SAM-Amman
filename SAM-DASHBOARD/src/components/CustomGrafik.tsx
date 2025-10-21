@@ -9,115 +9,94 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useData } from "../hooks/useDataHooks";
-import { useDeviceData } from "../hooks/useDeviceHooks";
 import type { SelectOption } from "../../types/types";
 import { CustomSelects } from "./CustomSelects";
+import { useUserDeviceData } from "@/hooks/useUserDeviceHooks";
 
 export default function CustomGrafik() {
   const { chartData, handleGetAllFilter, isLoading } = useData();
-  const { devices, fetchAllDevices } = useDeviceData({});
+  const { accessible, fetchAllAccessible } = useUserDeviceData({});
   const [samId, setSamId] = useState<string>("");
   const [filterType, setFilterType] = useState<"day" | "month" | "year">("day");
   const [selectedDate, setSelectedDate] = useState<string>("");
-  const [selectedDevice, setSelectedDevice] = useState<SelectOption | null>(
-    null
-  );
+  const [selectedDevice, setSelectedDevice] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchAllDevices();
+    fetchAllAccessible();
   }, []);
 
   useEffect(() => {
-    if (devices.length > 0 && !samId) {
-      const firstSamId = devices[0].samId || "";
+    if (accessible.length > 0 && !samId) {
+      const firstSamId = accessible[0].samId || "";
       setSamId(firstSamId);
-      setSelectedDevice({ label: firstSamId, value: firstSamId });
+      setSelectedDevice(firstSamId);
+      fetchChartData(firstSamId, filterType, selectedDate);
     }
-  }, [devices]);
+  }, [accessible]);
 
-  const getDateRange = (type: "day" | "month" | "year", baseDate: string) => {
-    const date = baseDate ? new Date(baseDate) : new Date();
-    let startDate: Date;
-    let endDate: Date;
+  const formattedMonthYear = selectedDate
+    ? new Date(selectedDate).toLocaleDateString("id-ID", {
+        month: "long",
+        year: "numeric",
+      })
+    : "";
 
-    if (type === "day") {
-      startDate = new Date(date);
-      endDate = new Date(date);
-    } else if (type === "month") {
-      startDate = new Date(date.getFullYear(), date.getMonth(), 1);
-      endDate = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-    } else {
-      startDate = new Date(date.getFullYear(), 0, 1);
-      endDate = new Date(date.getFullYear(), 11, 31);
+  const fetchChartData = (
+    samIdParam: string,
+    filterTypeParam: "day" | "month" | "year",
+    dateParam?: string
+  ) => {
+    if (!samIdParam) return;
+
+    let filterValue: string | undefined = undefined;
+
+    if (filterTypeParam === "day" && dateParam) {
+      filterValue = dateParam;
+    } else if (filterTypeParam === "month" && dateParam) {
+      const date = new Date(dateParam);
+      filterValue = `${date.getFullYear()}-${String(
+        date.getMonth() + 1
+      ).padStart(2, "0")}`;
+    } else if (filterTypeParam === "year" && dateParam) {
+      filterValue = `${new Date(dateParam).getFullYear()}`;
     }
-
-    return {
-      startDate: startDate.toISOString().split("T")[0],
-      endDate: endDate.toISOString().split("T")[0],
-    };
-  };
-
-  const getFormattedMonthYear = (dateStr?: string) => {
-    const date = dateStr ? new Date(dateStr) : new Date();
-    return date.toLocaleDateString("id-ID", { month: "long", year: "numeric" });
-  };
-
-  const formattedMonthYear = getFormattedMonthYear(selectedDate);
-
-  const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const dateValue = event.target.value;
-    setSelectedDate(dateValue);
-    if (!samId) return;
-
-    const { startDate, endDate } = getDateRange(filterType, dateValue);
 
     handleGetAllFilter({
-      samId,
-      filterType,
-      filterValue: { startDate, endDate },
-    } as any);
+      samId: samIdParam,
+      filterType: filterTypeParam,
+      filterValue,
+    });
   };
 
-  // === Handler untuk ganti filter ===
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const dateValue = e.target.value;
+    setSelectedDate(dateValue);
+    if (!samId) return;
+    fetchChartData(samId, filterType, dateValue);
+  };
+
   const handleFilterChange = (type: "day" | "month" | "year") => {
     setFilterType(type);
     if (!samId) return;
-
-    const { startDate, endDate } = getDateRange(
-      type,
-      selectedDate || new Date().toISOString()
-    );
-
-    handleGetAllFilter({
-      samId,
-      filterType: type,
-      filterValue: { startDate, endDate },
-    } as any);
+    fetchChartData(samId, type, selectedDate);
   };
 
-  const handleDeviceSelect = (selectedOption: SelectOption | null) => {
+  const handleDeviceSelect = (selectedOption: string | null) => {
     setSelectedDevice(selectedOption);
     if (selectedOption) {
-      setSamId(selectedOption.value);
-      if (selectedDate) {
-        const { startDate, endDate } = getDateRange(filterType, selectedDate);
-        handleGetAllFilter({
-          samId: selectedOption.value,
-          filterType,
-          filterValue: { startDate, endDate },
-        } as any);
-      }
+      setSamId(selectedOption);
+      fetchChartData(selectedOption, filterType, selectedDate);
     }
   };
 
-  const option: SelectOption[] = Array.isArray(devices)
-    ? devices.map((item) => ({
+  const option: SelectOption[] = Array.isArray(accessible)
+    ? accessible.map((item) => ({
         label: item.samId || "",
         value: item.samId || "",
       }))
     : [];
 
-  const downsampleData = (rawData: any[], maxPoints: number) => {
+  const downSampleData = (rawData: any[], maxPoints: number) => {
     if (!rawData || rawData.length <= maxPoints) return rawData;
     const step = Math.ceil(rawData.length / maxPoints);
     return rawData.filter((_, i) => i % step === 0);
@@ -130,7 +109,7 @@ export default function CustomGrafik() {
           uv: d?.speed || 0,
         }))
       : [];
-    return downsampleData(mapped, 500);
+    return downSampleData(mapped, 500);
   }, [chartData]);
 
   return (
@@ -142,9 +121,10 @@ export default function CustomGrafik() {
       <div className="flex justify-between rounded-md p-3 gap-5 mb-6 bg-gray-50">
         <div className="rounded-none w-xs">
           <CustomSelects
-            value={selectedDevice}
-            onChange={handleDeviceSelect}
+            value={option.find((opt) => opt.value === selectedDevice) || null}
+            onChange={(val) => handleDeviceSelect(val)}
             options={option}
+            disabled={isLoading}
           />
         </div>
         <div className="text-center">
@@ -218,7 +198,6 @@ export default function CustomGrafik() {
                 dot={false}
                 activeDot={{ r: 5 }}
               />
-              {/* <Brush dataKey="name" height={30} stroke="#63b1bb" /> */}
             </LineChart>
           </ResponsiveContainer>
         ) : (
