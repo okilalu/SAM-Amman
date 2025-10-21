@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import CustomButton from "../components/CustomButton";
 import CustomModal from "../components/CustomModal";
 import CustomTable from "../components/CustomTable";
@@ -225,6 +225,17 @@ export default function ManageDevice() {
     handleOpenModal("modal_update");
   };
 
+  const locationsOption = useMemo(
+    () =>
+      locations
+        .filter((d) => d.location && d.location.trim() !== "")
+        .map((d) => ({
+          value: d.location!,
+          label: d.location!,
+        })),
+    [locations]
+  );
+
   return (
     <div className="flex gap-3">
       <div className="flex-1 text-sm text-black">
@@ -410,23 +421,16 @@ export default function ManageDevice() {
                   onChange={(e) => setCameraType(e.target.value)}
                 />
 
-                {/* Dropdown lokasi */}
-                <select
-                  className="select w-full bg-gray-200 mb-3"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                >
-                  <option value="">-- Pilih Lokasi --</option>
-                  {Array.isArray(locations) && locations.length > 0 ? (
-                    locations.map((item, idx) => (
-                      <option key={idx} value={item.location}>
-                        {item.location}
-                      </option>
-                    ))
-                  ) : (
-                    <option disabled>Tidak ada data lokasi</option>
-                  )}
-                </select>
+                <CustomSelects
+                  value={
+                    locationsOption.find((opt) => opt.value === location) ||
+                    null
+                  }
+                  onChange={(val) => setLocation(val)}
+                  options={locationsOption}
+                  flex="flex-row"
+                  background="bg-gray-200 border-none text-black"
+                />
               </div>
             </CustomModal>
 
@@ -502,23 +506,16 @@ export default function ManageDevice() {
                   onChange={(e) => setCameraType(e.target.value)}
                 />
 
-                {/* Dropdown lokasi untuk update */}
-                <select
-                  className="select w-full bg-gray-200 mb-3"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                >
-                  <option value="">-- Pilih Lokasi --</option>
-                  {Array.isArray(locations) && locations.length > 0 ? (
-                    locations.map((item, idx) => (
-                      <option key={idx} value={item.location}>
-                        {item.location}
-                      </option>
-                    ))
-                  ) : (
-                    <option disabled>Tidak ada data lokasi</option>
-                  )}
-                </select>
+                <CustomSelects
+                  value={
+                    locationsOption.find((opt) => opt.value === location) ||
+                    null
+                  }
+                  onChange={(val) => setLocation(val)}
+                  options={locationsOption}
+                  flex="flex-row"
+                  background="bg-gray-200 border-none text-black"
+                />
               </div>
             </CustomModal>
 

@@ -10,6 +10,7 @@ interface CustomSelectProps {
   labelClass?: string;
   flex?: "flex-col" | "flex-row";
   placeholder?: string;
+  background?: string;
   disabled?: boolean;
 }
 
@@ -22,6 +23,7 @@ export const CustomSelects: React.FC<CustomSelectProps> = ({
   flex = "flex-col",
   placeholder = "Pilih opsi",
   disabled = false,
+  background = "bg-white",
 }) => {
   const [open, setOpen] = useState(false);
 
@@ -50,7 +52,7 @@ export const CustomSelects: React.FC<CustomSelectProps> = ({
           type="button"
           disabled={disabled}
           onClick={() => setOpen((prev) => !prev)}
-          className={`w-full flex justify-between items-center border border-gray-300 rounded-md px-3 py-2 text-sm bg-white ${
+          className={`w-full flex justify-between items-center border border-gray-300 rounded-md px-3 py-2 text-sm ${background} ${
             disabled ? "bg-gray-100 cursor-not-allowed" : "cursor-pointer"
           } duration-300 ease-in-out group`}
         >

@@ -103,7 +103,6 @@ export default function ManageUser() {
       alert("User tidak ditemukan");
       return;
     }
-    console.log(selectedUser);
 
     if (password.length < 8) {
       alert("Password Harus memiliki minimal 8 karakter");
@@ -173,6 +172,17 @@ export default function ManageUser() {
     {
       label: "Desc",
       value: "desc",
+    },
+  ];
+
+  const optionCredentials = [
+    {
+      label: "Admin",
+      value: "Admin",
+    },
+    {
+      label: "Operator",
+      value: "Operator",
     },
   ];
 
@@ -321,15 +331,18 @@ export default function ManageUser() {
                       Password harus memiliki minimal 8 karakter
                     </span>
                   )}
-                  <select
-                    className="w-full bg-gray-200 rounded-md p-2 mt-2"
-                    value={credential}
-                    onChange={(e) => setCredential(e.target.value)}
-                  >
-                    <option value="">Choose Role</option>
-                    <option value="Admin">Admin</option>
-                    <option value="Guest">Operator</option>
-                  </select>
+
+                  <CustomSelects
+                    value={
+                      optionCredentials.find(
+                        (opt) => opt.value === credential
+                      ) || null
+                    }
+                    onChange={(val) => setCredential(val)}
+                    options={optionCredentials}
+                    flex="flex-row"
+                    background="bg-gray-200 border-none text-black"
+                  />
                 </div>
               </CustomModal>
 
@@ -364,15 +377,17 @@ export default function ManageUser() {
                       Password harus memiliki minimal 8 karakter
                     </span>
                   )}
-                  <select
-                    className="w-full bg-gray-200 rounded-md p-2"
-                    value={credential}
-                    onChange={(e) => setCredential(e.target.value)}
-                  >
-                    <option value="">Choose Role</option>
-                    <option value="Admin">Admin</option>
-                    <option value="Guest">Operator</option>
-                  </select>
+                  <CustomSelects
+                    value={
+                      optionCredentials.find(
+                        (opt) => opt.value === credential
+                      ) || null
+                    }
+                    onChange={(val) => setCredential(val)}
+                    options={optionCredentials}
+                    flex="flex-row"
+                    background="bg-gray-200 border-none text-black"
+                  />
                 </div>
               </CustomModal>
 
