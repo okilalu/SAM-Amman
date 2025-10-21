@@ -7,6 +7,7 @@ import {
   deletePermission,
   getAllPermissionsByUserId,
   getAllPermissionsByDeviceId,
+  getAccessibleDevice,
 } from "../Redux/slices/userDeviceSlice";
 
 interface UserDeviceDataProps {
@@ -15,6 +16,7 @@ interface UserDeviceDataProps {
 export function useUserDeviceData({ closeModal }: UserDeviceDataProps) {
   const dispatch = useDispatch<AppDispatch>();
   const [permissions, setPermissions] = useState<UserDevice[]>([]);
+  const [accessible, setAccessible] = useState<UserDevice[]>([]);
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -33,12 +35,11 @@ export function useUserDeviceData({ closeModal }: UserDeviceDataProps) {
     try {
       const res = await dispatch(addPermission({ deviceId, userId })).unwrap();
 
-      setPermissions((prev) => [...prev, res.data]);
+      setPermissions((prev) => [...prev, res.data] as UserDevice[]);
       alert("Berhasil menambahkan permission");
       setSuccess("Permissions created successfully");
 
       await getAllPermissionsByUserId({ userId });
-      console.log(res);
 
       closeModal?.();
       return res;
@@ -131,6 +132,32 @@ export function useUserDeviceData({ closeModal }: UserDeviceDataProps) {
     }
   };
 
+  const fetchAllAccessible = async () => {
+    setIsLoading(true);
+    setError("");
+    setSuccess("");
+    setAccessible([]);
+
+    try {
+      const res = await dispatch(getAccessibleDevice()).unwrap();
+
+      if (res && Array.isArray(res.data)) {
+        setAccessible(res.data);
+      } else {
+        setAccessible([]);
+      }
+      setSuccess(res?.message ?? "Fetched");
+
+      return res;
+    } catch (err: any) {
+      console.error("❌ Fetch Locations Error:", err);
+      setError(err?.message || "Gagal memuat daftar lokasi");
+      return undefined;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     permissions,
     isLoading,
@@ -140,5 +167,7 @@ export function useUserDeviceData({ closeModal }: UserDeviceDataProps) {
     fetchAllPermissionsByUserId,
     handleDeletePermission,
     fetchAllPermissionsByDeviceId,
+    fetchAllAccessible,
+    accessible,
   };
 }

@@ -1,15 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
-import type {
-  UserDevice,
-  UserDeviceResponse,
-  UserDeviceState,
-} from "../../../types/types";
+import type { UserDeviceResponse, UserDeviceState } from "../../../types/types";
 import { uri } from "../../../utils/uri";
+import { getToken } from "../../../utils/auth";
 
-// ==========================
-// 🔹 ADD PERMISSION
-// ==========================
 export const addPermission = createAsyncThunk<
   UserDeviceResponse,
   { deviceId: string | string[]; userId: string },
@@ -28,9 +22,6 @@ export const addPermission = createAsyncThunk<
   }
 });
 
-// ==========================
-// 🔹 DELETE PERMISSION
-// ==========================
 export const deletePermission = createAsyncThunk<
   UserDeviceResponse,
   { userId: string; deviceId: string },
@@ -48,9 +39,6 @@ export const deletePermission = createAsyncThunk<
   }
 });
 
-// ==========================
-// 🔹 GET ALL PERMISSIONS BY USER ID
-// ==========================
 export const getAllPermissionsByUserId = createAsyncThunk<
   UserDeviceResponse,
   { userId: string },
@@ -68,9 +56,6 @@ export const getAllPermissionsByUserId = createAsyncThunk<
   }
 });
 
-// ==========================
-// 🔹 GET ALL PERMISSIONS BY DEVICE ID
-// ==========================
 export const getAllPermissionsByDeviceId = createAsyncThunk<
   UserDeviceResponse,
   { deviceId: string },
@@ -88,26 +73,37 @@ export const getAllPermissionsByDeviceId = createAsyncThunk<
   }
 });
 
-// ==========================
-// 🧩 INITIAL STATE
-// ==========================
+export const getAccessibleDevice = createAsyncThunk<UserDeviceResponse, void>(
+  "user-device/accessible",
+  async (_, { rejectWithValue }) => {
+    const auth = getToken();
+
+    if (!auth?.token) throw new Error("No token found");
+    try {
+      const response = await axios.get(
+        `${uri}/api/v9/user-device/get/accessible/device`,
+        { headers: { Authorization: `Bearer ${auth.token}` } }
+      );
+      return response.data as UserDeviceResponse;
+    } catch (error: any) {
+      return rejectWithValue(
+        error?.response?.data?.message || "Failed to get permissions by device"
+      );
+    }
+  }
+);
+
 const initialState: UserDeviceState = {
   data: [],
   loading: false,
   error: null,
 };
 
-// ==========================
-// 🧩 SLICE
-// ==========================
 const userDeviceSlice = createSlice({
   name: "userDevice",
   initialState,
   reducers: {},
   extraReducers: (builder) => {
-    // =====================
-    // ADD PERMISSION
-    // =====================
     builder
       .addCase(addPermission.pending, (state) => {
         state.loading = true;
@@ -116,7 +112,6 @@ const userDeviceSlice = createSlice({
       .addCase(addPermission.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload?.data) {
-          // pastikan payload ada data-nya
           state.data = Array.isArray(action.payload.data)
             ? action.payload.data
             : [...state.data, action.payload.data];
@@ -127,9 +122,6 @@ const userDeviceSlice = createSlice({
         state.error = action.payload ?? "Failed to add permission";
       });
 
-    // =====================
-    // DELETE PERMISSION
-    // =====================
     builder
       .addCase(deletePermission.pending, (state) => {
         state.loading = true;
@@ -138,12 +130,16 @@ const userDeviceSlice = createSlice({
       .addCase(deletePermission.fulfilled, (state, action) => {
         state.loading = false;
         if (action.payload?.data) {
-          const deleted = action.payload.data as UserDevice;
+          const deleted = Array.isArray(action.payload.data)
+            ? action.payload.data
+            : [action.payload.data];
+
           state.data = state.data.filter(
             (item) =>
-              !(
-                item.userId === deleted.userId &&
-                item.deviceId === deleted.deviceId
+              !deleted.some(
+                (deleted) =>
+                  item.userId === deleted.userId &&
+                  item.deviceId === deleted.deviceId
               )
           );
         }
@@ -153,9 +149,6 @@ const userDeviceSlice = createSlice({
         state.error = action.payload ?? "Failed to delete permission";
       });
 
-    // =====================
-    // GET ALL BY USER ID
-    // =====================
     builder
       .addCase(getAllPermissionsByUserId.pending, (state) => {
         state.loading = true;
@@ -170,9 +163,6 @@ const userDeviceSlice = createSlice({
         state.error = action.payload ?? "Failed to get permissions by user";
       });
 
-    // =====================
-    // GET ALL BY DEVICE ID
-    // =====================
     builder
       .addCase(getAllPermissionsByDeviceId.pending, (state) => {
         state.loading = true;
@@ -185,6 +175,20 @@ const userDeviceSlice = createSlice({
       .addCase(getAllPermissionsByDeviceId.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload ?? "Failed to get permissions by device";
+      });
+    builder
+      .addCase(getAccessibleDevice.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getAccessibleDevice.fulfilled, (state, action) => {
+        state.loading = false;
+        state.data = action.payload?.data ?? [];
+      })
+      .addCase(getAccessibleDevice.rejected, (state, action) => {
+        state.loading = false;
+        state.error =
+          (action.payload as any) ?? "Failed to get permissions by device";
       });
   },
 });
