@@ -103,8 +103,8 @@ export function useUserData({ closeModal }: UserDataProps) {
     setIsLoading(true);
     try {
       const res = await dispatch(login(payload)).unwrap();
+      navigate("/");
       alert("Login berhasil");
-      setIsLoggedIn(true);
       return res.data as User;
     } catch (error) {
       console.log("Failed to login user", error);
@@ -116,7 +116,9 @@ export function useUserData({ closeModal }: UserDataProps) {
   const validateUser = async () => {
     try {
       const res = await dispatch(currentUser()).unwrap();
-      setUsers(res?.data?.user ?? null);
+      const current = res?.data?.user ?? null;
+      setUsers(current);
+      setIsLoggedIn(!!current);
     } catch (error) {
       console.log(error);
     }
@@ -146,13 +148,13 @@ export function useUserData({ closeModal }: UserDataProps) {
 
     try {
       await dispatch(logout()).unwrap();
+      navigate("/login");
       setSuccess("Successfully logout");
     } catch (error) {
       console.log(error);
       setError("Failed to logout");
     } finally {
       closeModal?.();
-      navigate("/home");
     }
   };
   return {
@@ -161,13 +163,13 @@ export function useUserData({ closeModal }: UserDataProps) {
     user,
     allUsers,
     isLoading,
+    isLoggedIn,
     error,
     success,
     warning,
     setWarning,
     setError,
     setSuccess,
-    isLoggedIn,
     handleLogout,
     registerUser,
     updateUsers,

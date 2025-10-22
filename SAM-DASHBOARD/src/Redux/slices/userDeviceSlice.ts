@@ -79,7 +79,8 @@ export const getAccessibleDevice = createAsyncThunk<UserDeviceResponse, void>(
   async (_, { rejectWithValue }) => {
     try {
       const response = await axios.get(
-        `${uri}/api/v9/user-device/get/accessible/device`
+        `${uri}/api/v9/user-device/get/accessible/device`,
+        { withCredentials: true }
       );
       return response.data as UserDeviceResponse;
     } catch (error: any) {

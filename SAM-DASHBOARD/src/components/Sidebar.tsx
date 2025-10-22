@@ -53,16 +53,22 @@ export default function Sidebar() {
   const [activeMenu, setActiveMenu] = useState("Home");
   const { handleLogout, validateUser, user, isLoggedIn } = useUserData({});
 
+  // useEffect(() => {
+  //   // const token = getToken();
+  //   // if (!token) {
+  //   //   navigate("/login");
+  //   // } else {
+  //   validateUser();
+  //   // setIsLoggedIn(true);
+  //   // }
+  // }, []);
+
   useEffect(() => {
-    // const token = getToken();
-    if (!isLoggedIn) {
-      navigate("/login");
-    } else {
-      navigate("/");
-      validateUser();
-      // setIsLoggedIn(true);
-    }
-  }, [navigate]);
+    validateUser();
+  }, []);
+
+  console.log(isLoggedIn);
+  console.log(user);
 
   const handleOpenModal = (id: string) => {
     const modal = document.getElementById(id) as HTMLDialogElement;
@@ -77,7 +83,7 @@ export default function Sidebar() {
   const Logout = async () => {
     try {
       const res = await handleLogout();
-      // localStorage.removeItem("auth");
+      localStorage.removeItem("auth");
       console.log(res);
       navigate("/login");
       handleCloseModal("modal_logout");
