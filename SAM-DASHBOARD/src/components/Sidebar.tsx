@@ -33,6 +33,7 @@ import {
   PiDoorOpenFill,
   PiDoor,
 } from "react-icons/pi";
+import CustomModal from "./CustomModal";
 
 const getToken = () => {
   try {
@@ -48,27 +49,39 @@ const getToken = () => {
 
 export default function Sidebar() {
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [activeMenu, setActiveMenu] = useState("Home");
-  const { handleLogout, validateUser, user } = useUserData({});
+  const { handleLogout, validateUser, user, isLoggedIn } = useUserData({});
 
   useEffect(() => {
-    const token = getToken();
-    if (!token) {
+    // const token = getToken();
+    if (!isLoggedIn) {
       navigate("/login");
     } else {
+      navigate("/");
       validateUser();
-      setIsLoggedIn(true);
+      // setIsLoggedIn(true);
     }
   }, [navigate]);
+
+  const handleOpenModal = (id: string) => {
+    const modal = document.getElementById(id) as HTMLDialogElement;
+    modal?.showModal();
+  };
+
+  const handleCloseModal = (id: string) => {
+    const modal = document.getElementById(id) as HTMLDialogElement;
+    modal?.close();
+  };
 
   const Logout = async () => {
     try {
       const res = await handleLogout();
-      localStorage.removeItem("auth");
+      // localStorage.removeItem("auth");
       console.log(res);
       navigate("/login");
-      alert("Anda telah logout!");
+      handleCloseModal("modal_logout");
+      // alert("Anda telah logout!");
     } catch (error) {
       console.log(error);
     }
@@ -169,7 +182,7 @@ export default function Sidebar() {
         <div className="px-6 py-5 flex flex-col gap-3">
           {isLoggedIn && (
             <button
-              onClick={Logout}
+              onClick={() => handleOpenModal("modal_logout")}
               className="flex items-center cursor-pointer group ease-in-out hover:text-[#de5757] duration-300 gap-3"
             >
               <div className="relative w-5 h-5">
@@ -207,6 +220,14 @@ export default function Sidebar() {
             })()}
           />
         </div>
+        <CustomModal
+          title="Logout"
+          id="modal_logout"
+          confirmText="Logout"
+          onSubmit={Logout}
+        >
+          <p className="text-black px-3">Apakah anda yakin ingin logout?</p>
+        </CustomModal>
 
         <main className="flex-1 overflow-y-auto bg-gray-50 p-6">
           {renderContent()}

@@ -12,6 +12,7 @@ interface CustomModalProps {
   confirmText?: string;
   cancelText?: string;
   width?: string;
+  className?: string;
 }
 export default function ModalRegister({
   id,
@@ -24,6 +25,7 @@ export default function ModalRegister({
   title,
   children,
   width = "max-2-xl",
+  className,
 }: CustomModalProps) {
   const handleClose = () => {
     const modal = document.getElementById(id) as HTMLDialogElement;
@@ -44,19 +46,23 @@ export default function ModalRegister({
           <button
             type="button"
             onClick={handleClose}
-            className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+            className="btn btn-sm btn-circle btn-ghost absolute right-5 top-8"
           >
             ✕
           </button>
         </form>
         <div className="">
-          <h2 className="text-xl font-semibold px-2 py-3 bg-gray-100 w-full rounded-md">
+          <h2 className="text-xl text-black font-semibold px-3 py-3 bg-gray-100 w-full rounded-md">
             {title}
           </h2>
           <div className="mt-5">{children}</div>
           {showFooter && (
-            <div className="mt-20 flex gap-5 items-end justify-end">
-              <CustomButton text={cancelText} onClick={handleClose} />
+            <div className="mt-10 flex gap-5 items-end justify-end">
+              <CustomButton
+                text={cancelText}
+                onClick={handleClose}
+                className="btn btn-outline hover:bg-white border-[#35567b] text-gray-800"
+              />
               <CustomButton text={confirmText} onClick={handleSubmit} />
             </div>
           )}
