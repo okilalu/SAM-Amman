@@ -5,7 +5,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useState } from "react";
 
 export default function Login() {
-  const { loginUser } = useUserData({});
+  const { loginUser, isLoading } = useUserData({});
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -44,6 +44,14 @@ export default function Login() {
   const handleShowPass = () => {
     setShow(!show);
   };
+  if (isLoading) {
+    return (
+      <div className="bg-white flex flex-1 flex-col justify-center items-center h-screen">
+        <span className="loading loading-spinner loading-xl text-blue-400"></span>
+        <p className="ml-3 text-gray-700 text-lg">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gray-100 min-h-screen flex items-center justify-center px-6">
