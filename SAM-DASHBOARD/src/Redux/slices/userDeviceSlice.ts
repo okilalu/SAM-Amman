@@ -77,13 +77,9 @@ export const getAllPermissionsByDeviceId = createAsyncThunk<
 export const getAccessibleDevice = createAsyncThunk<UserDeviceResponse, void>(
   "user-device/accessible",
   async (_, { rejectWithValue }) => {
-    const auth = getToken();
-
-    if (!auth?.token) throw new Error("No token found");
     try {
       const response = await axios.get(
-        `${uri}/api/v9/user-device/get/accessible/device`,
-        { headers: { Authorization: `Bearer ${auth.token}` } }
+        `${uri}/api/v9/user-device/get/accessible/device`
       );
       return response.data as UserDeviceResponse;
     } catch (error: any) {

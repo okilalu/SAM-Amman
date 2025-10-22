@@ -19,6 +19,7 @@ export function useEmailData({ closeModal }: UseEmailProps = {}) {
   const [emails, setEmails] = useState<Email[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [warning, setWarning] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   // Fetch all (safe handler)
@@ -26,8 +27,8 @@ export function useEmailData({ closeModal }: UseEmailProps = {}) {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await dispatch(getAllEmail()).unwrap(); // res: EmailsResponse
-      console.log("RAW getAllEmail response:", res);
+      const res = await dispatch(getAllEmail()).unwrap();
+
       if (res && Array.isArray(res.data)) {
         setEmails(res.data);
       } else {
@@ -47,6 +48,7 @@ export function useEmailData({ closeModal }: UseEmailProps = {}) {
   // Create
   const handleCreateEmail = async (payload: Partial<Email>) => {
     setIsLoading(true);
+    setSuccess(null);
     setError(null);
 
     try {
@@ -65,7 +67,7 @@ export function useEmailData({ closeModal }: UseEmailProps = {}) {
         });
       }
       setSuccess(res?.message ?? "Created");
-      await fetchAllEmails(); // sync final dengan server
+      await fetchAllEmails();
       closeModal?.();
       return res;
     } catch (err: any) {
@@ -78,14 +80,16 @@ export function useEmailData({ closeModal }: UseEmailProps = {}) {
   // Update
   const handleUpdateEmail = async (id: number, emailName: string) => {
     setIsLoading(true);
+    setSuccess(null);
+    setWarning(null);
     setError(null);
     try {
       const res = await dispatch(updateEmail({ id, emailName })).unwrap();
       if (res && Array.isArray(res.data)) {
-        // update local state with returned items (if any)
         setEmails((prev) =>
           prev.map((e) => {
             const found = res.data.find((u) => u.id === e.id);
+            setWarning(res.message || "Pilih salah satu email terlebih dahulu");
             return found ?? e;
           })
         );
@@ -104,7 +108,9 @@ export function useEmailData({ closeModal }: UseEmailProps = {}) {
   // Delete
   const handleDeleteEmail = async (id: number) => {
     setIsLoading(true);
+    setSuccess(null);
     setError(null);
+    setWarning(null);
     try {
       const res = await dispatch(deleteEmail({ id })).unwrap(); // returns { id }
       setEmails((prev) => prev.filter((e) => e.id !== res.id));
@@ -113,6 +119,7 @@ export function useEmailData({ closeModal }: UseEmailProps = {}) {
       closeModal?.();
       return res;
     } catch (err: any) {
+      console.log(err);
       setError(err?.message || "Gagal menghapus email");
     } finally {
       setIsLoading(false);
@@ -128,5 +135,8 @@ export function useEmailData({ closeModal }: UseEmailProps = {}) {
     handleCreateEmail,
     handleUpdateEmail,
     handleDeleteEmail,
+    setError,
+    warning,
+    setWarning,
   };
 }

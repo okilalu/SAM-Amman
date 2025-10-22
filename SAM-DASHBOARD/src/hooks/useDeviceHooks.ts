@@ -37,7 +37,6 @@ export function useDeviceData({
       ).unwrap();
 
       setDevices((prev) => [...prev, res.data.device as Device]);
-      alert("Berhasil menambahkan perangkat");
       setSuccess("Device created successfully");
 
       await fetchAllDevices();
@@ -123,6 +122,7 @@ export function useDeviceData({
     isLoading,
     error,
     success,
+    setError,
     handleGenerateDevice,
     fetchAllDevices,
     handleUpdateDevice,

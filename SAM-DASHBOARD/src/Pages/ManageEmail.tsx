@@ -6,6 +6,10 @@ import { useEmailData } from "../hooks/useEmailHooks";
 import { CustomInputs } from "@/components/CustomInputs";
 import { CustomSelects } from "@/components/CustomSelects";
 import { CustomPagination } from "@/components/CustomPagination";
+import { CustomAlert } from "@/components/CustomAlert";
+import { FaCheckCircle } from "react-icons/fa";
+import { IoWarningOutline } from "react-icons/io5";
+import { MdErrorOutline } from "react-icons/md";
 
 export default function ManageEmail() {
   const {
@@ -15,6 +19,9 @@ export default function ManageEmail() {
     handleDeleteEmail,
     handleUpdateEmail,
     isLoading,
+    success,
+    error,
+    setError,
   } = useEmailData();
 
   const [filter, setFilter] = useState("");
@@ -24,10 +31,18 @@ export default function ManageEmail() {
   const dataPerPage = 5;
   const itemsPerPage = 5;
   const [selectOption, setSelectOption] = useState<string>("asc");
+  const [warning, setWarning] = useState<string | null>(null);
 
   useEffect(() => {
     fetchAllEmails();
   }, []);
+
+  useEffect(() => {
+    if (warning) {
+      const timer = setTimeout(() => setWarning(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [warning]);
 
   const filteredEmails = (emails ?? [])
     .filter((email) =>
@@ -67,21 +82,20 @@ export default function ManageEmail() {
 
   const handleRegister = async () => {
     if (!emailName) {
-      alert("Nama email harus diisi!");
-      return;
+      setWarning("Lengkapi semua field!");
     }
     await handleCreateEmail({ emailName });
     handleCloseModal("modal_register");
   };
 
   const handleUpdate = async () => {
+    setWarning(null);
     if (selectedIds.length !== 1) {
-      alert("Pilih tepat satu email untuk diupdate!");
       return;
     }
     const id = selectedIds[0];
     if (!emailName) {
-      alert("Nama email harus diisi!");
+      setError("Gagal memperbarui email ");
       return;
     }
     await handleUpdateEmail(id, emailName);
@@ -90,8 +104,9 @@ export default function ManageEmail() {
   };
 
   const handleDelete = async () => {
+    setWarning(null);
     if (selectedIds.length === 0) {
-      alert("Pilih email yang ingin dihapus terlebih dahulu!");
+      setWarning("Choose at least one email");
       return;
     }
     for (const id of selectedIds) {
@@ -117,150 +132,174 @@ export default function ManageEmail() {
   ];
 
   const handlePrefillUpdate = () => {
+    setWarning(null);
     if (selectedIds.length !== 1) {
-      alert("Pilih satu email untuk diupdate");
+      setWarning("Choose at least one email");
       return;
     }
     const selectedEmail = emails?.find((u) => u.id === selectedIds[0]);
-    if (!selectedEmail) return alert("User tidak ditemukan");
+    if (!selectedEmail) return;
     setEmailName(selectedEmail.emailName || "");
     handleOpenModal("modal_update");
   };
 
   return (
-    <div className="flex gap-3">
-      <div className="flex-1 text-sm text-black">
-        <div className="flex flex-col gap-5 flex-1">
-          <CustomInputs
-            label="Filter email"
-            placeholder="Cari email"
-            onChange={(val) => setFilter(val)}
-            helperText="x"
-            helper={() => setFilter("")}
-            value={filter}
-          />
-          <CustomSelects
-            value={option.find((opt) => opt.value === selectOption) || null}
-            onChange={handleSelectOption}
-            options={option}
-            label="Sort"
-            flex="flex-row"
-            labelClass="items-center gap-3"
-          />
-        </div>
-
-        <div className="pt-5 min-h-[270px]">
-          <CustomTable headers={["Select", "ID", "Email Name"]}>
-            {isLoading ? (
-              <tr>
-                <td colSpan={3} className="text-center text-gray-500 py-4">
-                  Memuat data...
-                </td>
-              </tr>
-            ) : paginatedEmails.length > 0 ? (
-              paginatedEmails.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50 text-center">
-                  <td>
-                    <input
-                      type="checkbox"
-                      className="checkbox checkbox-error"
-                      checked={selectedIds.includes(item.id!)}
-                      onChange={() => handleSelectEmail(item.id!)}
-                    />
-                  </td>
-                  <td>{item.id}</td>
-                  <td>{item.emailName}</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={3} className="text-center text-gray-500 py-4">
-                  Tidak ada data ditemukan
-                </td>
-              </tr>
-            )}
-          </CustomTable>
-        </div>
-
-        <CustomPagination
-          currentPage={currentPage}
-          itemsPerPage={itemsPerPage}
-          totalItems={emails ? emails!.length : 0}
-          onPageChange={handlePageChange}
+    <>
+      {error && (
+        <CustomAlert
+          title={error}
+          status="alert-error"
+          icon={<MdErrorOutline />}
         />
+      )}
+      {success && (
+        <CustomAlert
+          title={success}
+          status="alert-success"
+          icon={<FaCheckCircle />}
+        />
+      )}
+      {warning && (
+        <CustomAlert
+          title={warning}
+          status="alert-warning"
+          icon={<IoWarningOutline />}
+        />
+      )}
+      <div className="flex gap-3">
+        <div className="flex-1 text-sm text-black">
+          <div className="flex flex-col gap-5 flex-1">
+            <CustomInputs
+              label="Filter email"
+              placeholder="Cari email"
+              onChange={(val) => setFilter(val)}
+              helperText="x"
+              helper={() => setFilter("")}
+              value={filter}
+            />
+            <CustomSelects
+              value={option.find((opt) => opt.value === selectOption) || null}
+              onChange={handleSelectOption}
+              options={option}
+              label="Sort"
+              flex="flex-row"
+              labelClass="items-center gap-3"
+            />
+          </div>
 
-        {/* 🔹 Action Buttons */}
-        <div className="pt-5 flex gap-3 justify-end">
-          <CustomButton
-            text="Add Email"
-            onClick={() => handleOpenModal("modal_register")}
-            className="btn-success"
+          <div className="pt-5 min-h-[270px]">
+            <CustomTable headers={["Select", "ID", "Email Name"]}>
+              {isLoading ? (
+                <tr>
+                  <td colSpan={3} className="text-center text-gray-500 py-4">
+                    Memuat data...
+                  </td>
+                </tr>
+              ) : paginatedEmails.length > 0 ? (
+                paginatedEmails.map((item) => (
+                  <tr key={item.id} className="hover:bg-gray-50 text-center">
+                    <td>
+                      <input
+                        type="checkbox"
+                        className="checkbox checkbox-error"
+                        checked={selectedIds.includes(item.id!)}
+                        onChange={() => handleSelectEmail(item.id!)}
+                      />
+                    </td>
+                    <td>{item.id}</td>
+                    <td>{item.emailName}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={3} className="text-center text-gray-500 py-4">
+                    Tidak ada data ditemukan
+                  </td>
+                </tr>
+              )}
+            </CustomTable>
+          </div>
+
+          <CustomPagination
+            currentPage={currentPage}
+            itemsPerPage={itemsPerPage}
+            totalItems={emails ? emails!.length : 0}
+            onPageChange={handlePageChange}
           />
-          <CustomButton
-            text="Update"
-            onClick={handlePrefillUpdate}
-            className="btn-info"
-          />
-          <CustomButton
-            text="Delete"
-            onClick={() => handleOpenModal("modal_delete")}
-            className="btn-error"
-          />
-        </div>
 
-        {/* 🔹 Modal Create */}
-        <div className="pt-5">
-          <CustomModal
-            title="Tambah Email"
-            id="modal_register"
-            confirmText="Simpan"
-            onSubmit={handleRegister}
-          >
-            <div className="flex flex-col">
-              <input
-                type="text"
-                placeholder="Masukkan nama email"
-                className="mb-4 w-full bg-gray-200 rounded-md p-2"
-                value={emailName}
-                onChange={(e) => setEmailName(e.target.value)}
-              />
-            </div>
-          </CustomModal>
+          {/* 🔹 Action Buttons */}
+          <div className="pt-5 flex gap-3 justify-end">
+            <CustomButton
+              text="Add Email"
+              onClick={() => handleOpenModal("modal_register")}
+              className="btn-success"
+            />
+            <CustomButton
+              text="Update"
+              onClick={handlePrefillUpdate}
+              className="btn-info"
+            />
+            <CustomButton
+              text="Delete"
+              onClick={() => handleOpenModal("modal_delete")}
+              className="btn-error"
+            />
+          </div>
 
-          {/* 🔹 Modal Update */}
-          <CustomModal
-            title="Update Email"
-            id="modal_update"
-            confirmText="Update"
-            onSubmit={handleUpdate}
-          >
-            <div className="flex flex-col">
-              <input
-                type="text"
-                placeholder="Masukkan nama email"
-                className="mb-4 w-full bg-gray-200 rounded-md p-2"
-                value={emailName}
-                onChange={(e) => setEmailName(e.target.value)}
-              />
-            </div>
-          </CustomModal>
+          {/* 🔹 Modal Create */}
+          <div className="pt-5">
+            <CustomModal
+              title="Tambah Email"
+              id="modal_register"
+              confirmText="Simpan"
+              onSubmit={handleRegister}
+            >
+              <div className="flex flex-col">
+                <input
+                  type="text"
+                  placeholder="Masukkan nama email"
+                  className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                  value={emailName}
+                  onChange={(e) => setEmailName(e.target.value)}
+                />
+              </div>
+            </CustomModal>
 
-          {/* 🔹 Modal Delete */}
-          <CustomModal
-            title="Hapus Email"
-            id="modal_delete"
-            confirmText="Hapus"
-            onSubmit={handleDelete}
-          >
-            <div className="flex flex-col text-center">
-              <p>
-                Apakah anda yakin ingin menghapus{" "}
-                <strong>{selectedIds.length}</strong> email?
-              </p>
-            </div>
-          </CustomModal>
+            {/* 🔹 Modal Update */}
+            <CustomModal
+              title="Update Email"
+              id="modal_update"
+              confirmText="Update"
+              onSubmit={handleUpdate}
+            >
+              <div className="flex flex-col">
+                <input
+                  type="text"
+                  placeholder="Masukkan nama email"
+                  className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                  value={emailName}
+                  onChange={(e) => setEmailName(e.target.value)}
+                />
+              </div>
+            </CustomModal>
+
+            {/* 🔹 Modal Delete */}
+            <CustomModal
+              title="Hapus Email"
+              id="modal_delete"
+              confirmText="Hapus"
+              onSubmit={handleDelete}
+            >
+              <div className="flex flex-col text-center">
+                <p>
+                  Apakah anda yakin ingin menghapus{" "}
+                  <strong>{selectedIds.length}</strong> email?
+                </p>
+              </div>
+            </CustomModal>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

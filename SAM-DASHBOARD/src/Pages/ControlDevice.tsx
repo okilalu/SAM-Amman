@@ -8,11 +8,21 @@ import { useUserDeviceData } from "../hooks/useUserDeviceHooks";
 import { CustomPagination } from "@/components/CustomPagination";
 import { CustomInputs } from "@/components/CustomInputs";
 import { CustomSelects } from "@/components/CustomSelects";
+import { CustomAlert } from "@/components/CustomAlert";
+import { MdErrorOutline } from "react-icons/md";
+import { FaCheckCircle } from "react-icons/fa";
 
 export default function ControlDevice() {
   const { devices, fetchAllDevices } = useDeviceData({});
   const { allUsers, validateAllUsers } = useUserData({});
-  const { handleAddPermission, handleDeletePermission } = useUserDeviceData({});
+  const {
+    handleAddPermission,
+    handleDeletePermission,
+    error,
+    success,
+    setError,
+    setSuccess,
+  } = useUserDeviceData({});
   const [userId, setUserId] = useState("");
   const [deviceId, setDeviceId] = useState<string[]>([]);
   const [filter, setFilter] = useState("");
@@ -22,6 +32,7 @@ export default function ControlDevice() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [itemsPerPage, setItemsPerPage] = useState<number>(5);
   const [selectOption, setSelectOption] = useState<string>("asc");
+  const [warning, setWarning] = useState<string | null>(null);
 
   const filteredUsers = (allUsers ?? [])
     .filter((u) =>
@@ -76,21 +87,23 @@ export default function ControlDevice() {
   // Add Access
   const handlePermission = async () => {
     if (!userId) {
-      alert("Pilih user terlebih dahulu!");
+      setWarning("Choose at least one user");
       return;
     }
     if (deviceId.length === 0) {
-      alert("Pilih device terlebih dahulu!");
+      setWarning("Choose at least one device");
       return;
     }
     setIsProcessing(true);
     try {
       await handleAddPermission({ userId, deviceId });
+      setSuccess("Permissions created successfully");
       handleCloseModal("modal_register");
 
       setUserId("");
       setSelectedIds([]);
     } catch (error) {
+      setError("Failed to add permissions");
       console.log(error);
     } finally {
       setIsProcessing(false);
@@ -100,7 +113,8 @@ export default function ControlDevice() {
   // Delete Access
   const handleRevokePermission = async () => {
     if (selectedIds.length === 0) {
-      alert("Pilih user yang ingin dicabut aksesnya!");
+      // alert("Pilih user yang ingin dicabut aksesnya!");
+      setWarning("Choose one device revoke an access");
       return;
     }
     setIsProcessing(true);
@@ -111,17 +125,27 @@ export default function ControlDevice() {
       setSelectedIds([]);
       handleCloseModal("modal_delete");
     } catch (error) {
+      setError("Failed to revoke permissions");
       console.log(error);
     }
   };
 
   useEffect(() => {
     fetchAllDevices();
+    setSuccess("Successfully fetch device");
   }, []);
 
   useEffect(() => {
     validateAllUsers();
+    setSuccess("Successfully fetch user");
   }, []);
+
+  useEffect(() => {
+    if (warning) {
+      const timer = setTimeout(() => setWarning(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [warning]);
 
   const handleSelectOption = (selected: string) => {
     setSelectOption(selected);
@@ -139,156 +163,180 @@ export default function ControlDevice() {
   ];
 
   return (
-    <div className="gap-3">
-      <div className="flex-1 gap-5 text-sm text-black flex overflow-auto">
-        <div className="flex-1 bg-white shadow rounded-sm p-3 pt-0">
-          <div className="flex items-center gap-5 justify-between p-3">
-            <div className="flex flex-col gap-5 flex-1">
-              <CustomInputs
-                label="Filter"
-                placeholder="Masukkan username"
-                onChange={(val) => setFilter(val)}
-                helperText="x"
-                helper={() => setFilter("")}
-                value={filter}
-              />
+    <>
+      {error && (
+        <CustomAlert
+          title={error}
+          status="alert-error"
+          icon={<MdErrorOutline />}
+        />
+      )}
+      {success && (
+        <CustomAlert
+          title={success}
+          status="alert-success"
+          icon={<FaCheckCircle />}
+        />
+      )}
+      <div className="gap-3">
+        <div className="flex-1 gap-5 text-sm text-black flex overflow-auto">
+          <div className="flex-1 bg-white shadow rounded-sm p-3 pt-0">
+            <div className="flex items-center gap-5 justify-between p-3">
+              <div className="flex flex-col gap-5 flex-1">
+                <CustomInputs
+                  label="Filter"
+                  placeholder="Masukkan username"
+                  onChange={(val) => setFilter(val)}
+                  helperText="x"
+                  helper={() => setFilter("")}
+                  value={filter}
+                />
 
-              <CustomSelects
-                value={option.find((opt) => opt.value === selectOption) || null}
-                onChange={handleSelectOption}
-                options={option}
-                label="Sort"
-                flex="flex-row"
-                labelClass="items-center gap-3"
-              />
+                <CustomSelects
+                  value={
+                    option.find((opt) => opt.value === selectOption) || null
+                  }
+                  onChange={handleSelectOption}
+                  options={option}
+                  label="Sort"
+                  flex="flex-row"
+                  labelClass="items-center gap-3"
+                />
+              </div>
+              <div className="flex flex-col gap-5 flex-1">
+                <CustomInputs
+                  label="Sort"
+                  placeholder="Masukkan device portable"
+                  onChange={(val) => setSort(val)}
+                  helperText="x"
+                  helper={() => setSort("")}
+                  value={sort}
+                />
+                <CustomInputs
+                  label="Per Page"
+                  placeholder="Masukkan jumlah page"
+                  onChange={(val) => setItemsPerPage(Number(val))}
+                  value={Number(itemsPerPage)}
+                  type="number"
+                />
+              </div>
             </div>
-            <div className="flex flex-col gap-5 flex-1">
-              <CustomInputs
-                label="Sort"
-                placeholder="Masukkan device portable"
-                onChange={(val) => setSort(val)}
-                helperText="x"
-                helper={() => setSort("")}
-                value={sort}
-              />
-              <CustomInputs
-                label="Per Page"
-                placeholder="Masukkan jumlah page"
-                onChange={(val) => setItemsPerPage(Number(val))}
-                value={Number(itemsPerPage)}
-                type="number"
-              />
-            </div>
-          </div>
 
-          <div className="pt-5 flex flex-col gap-3">
-            <div className="min-h-[250px]">
-              <CustomTable headers={["Select", "UserId", "UserName"]}>
-                {paginatedUsers && paginatedUsers.length > 0 ? (
-                  paginatedUsers.map((item, idx) => (
-                    <tr key={idx} className="hover:bg-gray-50 text-center">
-                      <td>
-                        <input
-                          type="checkbox"
-                          className="checkbox checkbox-neutral"
-                          checked={userId.includes(item.userId!)}
-                          onChange={() => setUserId(item.userId!)}
-                        />
+            <div className="pt-5 flex flex-col gap-3">
+              <div className="min-h-[250px]">
+                <CustomTable headers={["Select", "UserId", "UserName"]}>
+                  {paginatedUsers && paginatedUsers.length > 0 ? (
+                    paginatedUsers.map((item, idx) => (
+                      <tr key={idx} className="hover:bg-gray-50 text-center">
+                        <td>
+                          <input
+                            type="checkbox"
+                            className="checkbox checkbox-neutral"
+                            checked={userId.includes(item.userId!)}
+                            onChange={() => setUserId(item.userId!)}
+                          />
+                        </td>
+                        <td>{idx + 1}</td>
+                        <td>{item.username}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan={4}
+                        className="text-center text-gray-500 py-4"
+                      >
+                        Tidak ada data ditemukan
                       </td>
-                      <td>{idx + 1}</td>
-                      <td>{item.username}</td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={4} className="text-center text-gray-500 py-4">
-                      Tidak ada data ditemukan
+                  )}
+                </CustomTable>
+              </div>
+
+              <CustomPagination
+                currentPage={currentPage}
+                itemsPerPage={itemsPerPage}
+                totalItems={allUsers ? allUsers!.length : 0}
+                onPageChange={handlePageCHange}
+              />
+            </div>
+          </div>
+
+          <div className="flex-1">
+            <CustomTable
+              headers={["Select", "PortableDeviceId", "LocationName"]}
+            >
+              {filteredDevices.length > 0 ? (
+                filteredDevices.map((item) => (
+                  <tr className="hover:bg-gray-50 text-center">
+                    <td>
+                      <input
+                        type="checkbox"
+                        className="checkbox checkbox-error"
+                        checked={deviceId.includes(item.deviceId!)}
+                        onChange={() => handleSelectDevice(item.deviceId!)}
+                      />
                     </td>
+                    <td>{item.samId}</td>
+                    <td>{item.location}</td>
                   </tr>
-                )}
-              </CustomTable>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={4} className="text-center text-gray-500 py-4">
+                    Tidak ada data ditemukan
+                  </td>
+                </tr>
+              )}
+            </CustomTable>
+
+            <div className="pt-5 flex gap-3 justify-end">
+              <CustomButton
+                text="Add Access"
+                onClick={() => handleOpenModal("modal_register")}
+                className="btn-success"
+              />
+              <CustomButton
+                text="Delete"
+                onClick={() => handleOpenModal("modal_delete")}
+                className="btn-error"
+              />
             </div>
 
-            <CustomPagination
-              currentPage={currentPage}
-              itemsPerPage={itemsPerPage}
-              totalItems={allUsers ? allUsers!.length : 0}
-              onPageChange={handlePageCHange}
-            />
-          </div>
-        </div>
-
-        <div className="flex-1">
-          <CustomTable headers={["Select", "PortableDeviceId", "LocationName"]}>
-            {filteredDevices.length > 0 ? (
-              filteredDevices.map((item) => (
-                <tr className="hover:bg-gray-50 text-center">
-                  <td>
-                    <input
-                      type="checkbox"
-                      className="checkbox checkbox-error"
-                      checked={deviceId.includes(item.deviceId!)}
-                      onChange={() => handleSelectDevice(item.deviceId!)}
-                    />
-                  </td>
-                  <td>{item.samId}</td>
-                  <td>{item.location}</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={4} className="text-center text-gray-500 py-4">
-                  Tidak ada data ditemukan
-                </td>
-              </tr>
-            )}
-          </CustomTable>
-
-          <div className="pt-5 flex gap-3 justify-end">
-            <CustomButton
-              text="Add Access"
-              onClick={() => handleOpenModal("modal_register")}
-              className="btn-success"
-            />
-            <CustomButton
-              text="Delete"
-              onClick={() => handleOpenModal("modal_delete")}
-              className="btn-error"
-            />
-          </div>
-
-          <div>
-            <CustomModal
-              title="Register New Location"
-              id="modal_register"
-              confirmText={isProcessing ? "Processing..." : "OK"}
-              onSubmit={handlePermission}
-            >
-              <p>
-                Apakah anda akan memberikan akses ke user{" "}
-                <strong>{selectedIds.length}</strong> untuk mendapatkan
-                activitas dari Portable Device Id <strong>{deviceId}</strong> ?
-              </p>
-            </CustomModal>
-
-            <CustomModal
-              title="Delete"
-              id="modal_delete"
-              confirmText={isProcessing ? "Processing..." : "OK"}
-              onSubmit={handleRevokePermission}
-            >
-              <div className="flex flex-col">
+            <div>
+              <CustomModal
+                title="Register New Location"
+                id="modal_register"
+                confirmText={isProcessing ? "Processing..." : "OK"}
+                onSubmit={handlePermission}
+              >
                 <p>
-                  Apakah anda akan mencabut akses ke user{" "}
+                  Apakah anda akan memberikan akses ke user{" "}
                   <strong>{selectedIds.length}</strong> untuk mendapatkan
                   activitas dari Portable Device Id <strong>{deviceId}</strong>{" "}
                   ?
                 </p>
-              </div>
-            </CustomModal>
+              </CustomModal>
+
+              <CustomModal
+                title="Delete"
+                id="modal_delete"
+                confirmText={isProcessing ? "Processing..." : "OK"}
+                onSubmit={handleRevokePermission}
+              >
+                <div className="flex flex-col">
+                  <p>
+                    Apakah anda akan mencabut akses ke user{" "}
+                    <strong>{selectedIds.length}</strong> untuk mendapatkan
+                    activitas dari Portable Device Id{" "}
+                    <strong>{deviceId}</strong> ?
+                  </p>
+                </div>
+              </CustomModal>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -19,6 +19,7 @@ export function useUserDeviceData({ closeModal }: UserDeviceDataProps) {
   const [accessible, setAccessible] = useState<UserDevice[]>([]);
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
+  const [warning, setWarning] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleAddPermission = async ({
@@ -36,7 +37,6 @@ export function useUserDeviceData({ closeModal }: UserDeviceDataProps) {
       const res = await dispatch(addPermission({ deviceId, userId })).unwrap();
 
       setPermissions((prev) => [...prev, res.data] as UserDevice[]);
-      alert("Berhasil menambahkan permission");
       setSuccess("Permissions created successfully");
 
       await getAllPermissionsByUserId({ userId });
@@ -44,6 +44,7 @@ export function useUserDeviceData({ closeModal }: UserDeviceDataProps) {
       closeModal?.();
       return res;
     } catch (err: any) {
+      setError("Failed to add permissions");
       console.log(err);
     } finally {
       setIsLoading(false);
@@ -65,12 +66,12 @@ export function useUserDeviceData({ closeModal }: UserDeviceDataProps) {
 
     try {
       await dispatch(deletePermission({ userId, deviceId })).unwrap();
-      setSuccess("Lokasi berhasil dihapus");
+      setSuccess("Successfully deleted permission");
       await getAllPermissionsByUserId({ userId });
       closeModal?.();
     } catch (err: any) {
       console.error("❌ Delete Location Error:", err);
-      setError(err?.message || "Gagal menghapus lokasi");
+      setError(err?.message || "Failed to deleted permission");
     } finally {
       setIsLoading(false);
     }
@@ -97,7 +98,7 @@ export function useUserDeviceData({ closeModal }: UserDeviceDataProps) {
       return res;
     } catch (err: any) {
       console.error("❌ Fetch Locations Error:", err);
-      setError(err?.message || "Gagal memuat daftar lokasi");
+      setError(err?.message || "Failed to fetching all permissions");
       return undefined;
     } finally {
       setIsLoading(false);
@@ -125,7 +126,7 @@ export function useUserDeviceData({ closeModal }: UserDeviceDataProps) {
       return res;
     } catch (err: any) {
       console.error("❌ Fetch Locations Error:", err);
-      setError(err?.message || "Gagal memuat daftar lokasi");
+      setError(err?.message || "Failed to fetching all permissions");
       return undefined;
     } finally {
       setIsLoading(false);
@@ -151,7 +152,7 @@ export function useUserDeviceData({ closeModal }: UserDeviceDataProps) {
       return res;
     } catch (err: any) {
       console.error("❌ Fetch Locations Error:", err);
-      setError(err?.message || "Gagal memuat daftar lokasi");
+      setError(err?.message || "Failed to fetching all permissions");
       return undefined;
     } finally {
       setIsLoading(false);
@@ -163,6 +164,10 @@ export function useUserDeviceData({ closeModal }: UserDeviceDataProps) {
     isLoading,
     error,
     success,
+    warning,
+    setError,
+    setWarning,
+    setSuccess,
     handleAddPermission,
     fetchAllPermissionsByUserId,
     handleDeletePermission,

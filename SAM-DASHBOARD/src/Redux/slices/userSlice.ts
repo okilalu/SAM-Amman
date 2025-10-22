@@ -27,15 +27,14 @@ export const login = createAsyncThunk<UserResponse, User>(
   "user/login",
   async (data, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${uri}/api/v1/login/user`, data);
+      const response = await axios.post(`${uri}/api/v1/login/user`, data, {
+        withCredentials: true,
+      });
 
-      const token = response.data?.data?.token;
-      const user = response.data?.data?.user;
-      if (token && user) {
-        saveToken({ token, user });
-      }
       return response.data;
     } catch (error: any) {
+      console.log(error);
+
       return rejectWithValue(error.response?.data || "Login Failed");
     }
   }
@@ -46,12 +45,8 @@ export const currentUser = createAsyncThunk<UserResponse>(
   "user/current",
   async (_, { rejectWithValue }) => {
     try {
-      const token = getToken();
-
-      if (!token?.token) throw new Error("No token found");
-
       const response = await axios.get(`${uri}/api/v1/current/user`, {
-        headers: { Authorization: `Bearer ${token.token}` },
+        withCredentials: true,
       });
 
       return response.data;
@@ -69,7 +64,10 @@ export const logout = createAsyncThunk<void>(
   "user/logout",
   async (_, { rejectWithValue }) => {
     try {
-      removeToken();
+      const response = await axios.post(`${uri}/api/v1/logout`, {
+        withCredentials: true,
+      });
+      return response.data;
     } catch (error) {
       return rejectWithValue("Failed to log out");
     }
@@ -81,12 +79,8 @@ export const getAllUser = createAsyncThunk<MultiUserResponse>(
   "user/getAll",
   async (_, { rejectWithValue }) => {
     try {
-      const token = getToken();
-      console.log(token?.token);
-
-      if (!token?.token) throw new Error("No token found");
       const response = await axios.get(`${uri}/api/v1/getAll/user`, {
-        headers: { Authorization: `Bearer ${token.token}` },
+        withCredentials: true,
       });
       console.log(response);
       return response.data;

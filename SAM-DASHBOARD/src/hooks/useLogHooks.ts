@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import type { AppDispatch } from "../Redux/store";
@@ -13,6 +13,7 @@ export const useLogs = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [warning, setWarning] = useState<string | null>(null);
 
   const getLogs = async () => {
     setLoading(true);
@@ -32,8 +33,8 @@ export const useLogs = () => {
 
       return res;
     } catch (err: any) {
-      console.error("❌ Fetch Locations Error:", err);
-      setError(err?.message || "Gagal memuat daftar lokasi");
+      console.error("❌ Fetch Logs Error:", err);
+      setError(err?.message || "Gagal memuat daftar logs");
       return undefined;
     } finally {
       setLoading(false);
@@ -75,6 +76,9 @@ export const useLogs = () => {
     loading,
     error,
     success,
+    setError,
+    warning,
+    setWarning,
     getLogs,
     navigate,
   };

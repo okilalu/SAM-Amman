@@ -19,11 +19,12 @@ export function useLocationData({ closeModal }: UseLocationProps = {}) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [warning, setWarning] = useState<string | null>(null);
 
   const handleCreateLocation = async ({ value }: { value: string }) => {
     setLoading(true);
-    setError("");
-    setSuccess("");
+    setError(null);
+    setSuccess(null);
 
     console.log(value);
     try {
@@ -37,6 +38,7 @@ export function useLocationData({ closeModal }: UseLocationProps = {}) {
       return res;
     } catch (err: any) {
       console.error("❌ Create Location Error:", err);
+      setError(err?.message || "Gagal menambah lokasi");
     } finally {
       setLoading(false);
     }
@@ -48,9 +50,13 @@ export function useLocationData({ closeModal }: UseLocationProps = {}) {
     setLoading(true);
     setError(null);
     setSuccess(null);
+    setWarning(null);
 
     try {
       const res = await dispatch(updateLocation({ id, location })).unwrap();
+
+      setWarning(res.message || "Pilih salah satu email terlebih dahulu");
+
       if (res.status) {
         setSuccess(res.message || "Lokasi berhasil diperbarui");
         await fetchAllLocations();
@@ -73,6 +79,7 @@ export function useLocationData({ closeModal }: UseLocationProps = {}) {
     setLoading(true);
     setError(null);
     setSuccess(null);
+    setWarning(null);
 
     try {
       await dispatch(deleteLocation({ id })).unwrap();
@@ -106,7 +113,6 @@ export function useLocationData({ closeModal }: UseLocationProps = {}) {
 
       return res;
     } catch (err: any) {
-      console.error("❌ Fetch Locations Error:", err);
       setError(err?.message || "Gagal memuat daftar lokasi");
       return undefined;
     } finally {
@@ -119,6 +125,9 @@ export function useLocationData({ closeModal }: UseLocationProps = {}) {
     loading,
     error,
     success,
+    warning,
+    setWarning,
+    setError,
     handleCreateLocation,
     handleUpdateLocation,
     handleDeleteLocation,
