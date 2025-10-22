@@ -34,41 +34,26 @@ import {
   PiDoor,
 } from "react-icons/pi";
 import CustomModal from "./CustomModal";
-
-const getToken = () => {
-  try {
-    const auth = localStorage.getItem("auth");
-    if (!auth) return null;
-    const parsed = JSON.parse(auth);
-    return parsed?.token || null;
-  } catch (error) {
-    console.error("Error reading token:", error);
-    return null;
-  }
-};
+import { CustomMainLoading } from "./CustomMainLoading";
 
 export default function Sidebar() {
   const navigate = useNavigate();
-  // const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [activeMenu, setActiveMenu] = useState("Home");
   const { handleLogout, validateUser, user, isLoggedIn } = useUserData({});
-
-  // useEffect(() => {
-  //   // const token = getToken();
-  //   // if (!token) {
-  //   //   navigate("/login");
-  //   // } else {
-  //   validateUser();
-  //   // setIsLoggedIn(true);
-  //   // }
-  // }, []);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isMenuLoading, setIsMenuLoading] = useState(false);
 
   useEffect(() => {
-    validateUser();
+    const fetchUser = async () => {
+      try {
+        setIsInitialLoading(true);
+        await validateUser();
+      } finally {
+        setIsInitialLoading(false);
+      }
+    };
+    fetchUser();
   }, []);
-
-  console.log(isLoggedIn);
-  console.log(user);
 
   const handleOpenModal = (id: string) => {
     const modal = document.getElementById(id) as HTMLDialogElement;
@@ -82,12 +67,9 @@ export default function Sidebar() {
 
   const Logout = async () => {
     try {
-      const res = await handleLogout();
-      localStorage.removeItem("auth");
-      console.log(res);
+      await handleLogout();
       navigate("/login");
       handleCloseModal("modal_logout");
-      // alert("Anda telah logout!");
     } catch (error) {
       console.log(error);
     }
@@ -126,11 +108,7 @@ export default function Sidebar() {
             icon: PiUsersThree,
             iconFill: PiUsersThreeFill,
           },
-          {
-            name: "Manage Email",
-            icon: PiAt,
-            iconFill: PiAtFill,
-          },
+          { name: "Manage Email", icon: PiAt, iconFill: PiAtFill },
           { name: "Manage Device", icon: PiDevices, iconFill: PiDevicesFill },
           { name: "Manage Location", icon: PiGpsFix, iconFill: PiGpsFixFill },
           {
@@ -148,6 +126,10 @@ export default function Sidebar() {
   const activeColor = "#63b0ba";
   const inactiveColor = "#000000";
 
+  if (isInitialLoading) {
+    return <CustomMainLoading />;
+  }
+
   return (
     <div className="w-full h-screen flex">
       <aside className="fixed left-0 top-0 h-screen w-[20%] bg-gray-300 text-black flex flex-col justify-between shadow-lg">
@@ -164,7 +146,11 @@ export default function Sidebar() {
                 return (
                   <li
                     key={item.name}
-                    onClick={() => setActiveMenu(item.name)}
+                    onClick={() => {
+                      setIsMenuLoading(true);
+                      setActiveMenu(item.name);
+                      setTimeout(() => setIsMenuLoading(false), 500);
+                    }}
                     className={`px-6 py-3 flex items-center gap-3 cursor-pointer rounded-md transition-all duration-200 ${
                       isActive
                         ? "text-[#63b0ba]"
@@ -236,7 +222,7 @@ export default function Sidebar() {
         </CustomModal>
 
         <main className="flex-1 overflow-y-auto bg-gray-50 p-6">
-          {renderContent()}
+          {isMenuLoading ? <CustomMainLoading /> : renderContent()}
         </main>
       </div>
     </div>
