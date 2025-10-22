@@ -104,7 +104,6 @@ export function useUserData({ closeModal }: UserDataProps) {
     try {
       const res = await dispatch(login(payload)).unwrap();
       navigate("/");
-      alert("Login berhasil");
       return res.data as User;
     } catch (error) {
       console.log("Failed to login user", error);

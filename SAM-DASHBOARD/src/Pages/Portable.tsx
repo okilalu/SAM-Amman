@@ -75,8 +75,8 @@ export default function Portable() {
     if (selectedDevice) handleGetAllData({ samId: selectedDevice });
   }, [selectedDevice]);
 
-  const handleDeviceSelect = (val: SelectOption | null) => {
-    setSelectedDevice(val?.value ?? null);
+  const handleDeviceSelect = (val: string | null) => {
+    setSelectedDevice(val);
   };
 
   const paginatedDatas = data.slice(
@@ -149,7 +149,7 @@ export default function Portable() {
                 value={
                   options.find((opt) => opt.value === selectedDevice) ?? null
                 }
-                onChange={() => handleDeviceSelect}
+                onChange={(val) => handleDeviceSelect(val)}
                 options={options}
                 label="Device"
                 flex="flex-row"

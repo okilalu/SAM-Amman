@@ -11,6 +11,7 @@ import { CustomSelects } from "@/components/CustomSelects";
 import { CustomAlert } from "@/components/CustomAlert";
 import { MdErrorOutline } from "react-icons/md";
 import { FaCheckCircle } from "react-icons/fa";
+import { IoWarningOutline } from "react-icons/io5";
 
 export default function ControlDevice() {
   const { devices, fetchAllDevices } = useDeviceData({});
@@ -58,6 +59,8 @@ export default function ControlDevice() {
     console.log("Pindah ke halaman: ", page);
   };
 
+  console.log(userId);
+
   const paginatedUsers =
     filteredUsers &&
     filteredUsers!.slice(
@@ -97,6 +100,7 @@ export default function ControlDevice() {
     setIsProcessing(true);
     try {
       await handleAddPermission({ userId, deviceId });
+      // alert("berhasil memberikan akses");
       setSuccess("Permissions created successfully");
       handleCloseModal("modal_register");
 
@@ -112,8 +116,8 @@ export default function ControlDevice() {
 
   // Delete Access
   const handleRevokePermission = async () => {
+    setSuccess("");
     if (selectedIds.length === 0) {
-      // alert("Pilih user yang ingin dicabut aksesnya!");
       setWarning("Choose one device revoke an access");
       return;
     }
@@ -122,6 +126,7 @@ export default function ControlDevice() {
       for (const id of deviceId) {
         await handleDeletePermission({ userId, deviceId: id });
       }
+      setSuccess("Succefully revoke permissions");
       setSelectedIds([]);
       handleCloseModal("modal_delete");
     } catch (error) {
@@ -176,6 +181,13 @@ export default function ControlDevice() {
           title={success}
           status="alert-success"
           icon={<FaCheckCircle />}
+        />
+      )}
+      {warning && (
+        <CustomAlert
+          title={warning}
+          status="alert-warning"
+          icon={<IoWarningOutline />}
         />
       )}
       <div className="gap-3">
