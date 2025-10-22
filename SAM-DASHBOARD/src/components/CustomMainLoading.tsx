@@ -51,19 +51,27 @@ export const CustomMainLoading: React.FC<CustomMainLoadingProps> = ({
 
   if (variant === "chart") {
     return (
-      <div className="p-4 space-y-4 rounded-lg border border-gray-200 bg-white shadow-sm">
+      <div className="rounded-lg space-y-4 bg-white">
         <div className="flex justify-between items-center">
-          <SkeletonShimmer className="h-6 w-1/3 rounded" />
-          <SkeletonShimmer className="h-6 w-24 rounded" />
+          <SkeletonShimmer className="h-10 w-1/3 rounded" />
+          <SkeletonShimmer className="h-10 w-24 rounded" />
+        </div>
+        <div className="flex justify-between items-center">
+          <SkeletonShimmer className="h-10 w-1/4 rounded" />
+          <div className="flex items-center">
+            <SkeletonShimmer className="h-10 w-18 rounded" />
+            <SkeletonShimmer className="h-10 w-18 rounded" />
+            <SkeletonShimmer className="h-10 w-18 rounded" />
+          </div>
         </div>
 
         <SkeletonShimmer className="h-64 w-full rounded-md" />
 
-        <div className="flex gap-3 pt-2">
+        {/* <div className="flex gap-3 pt-2">
           {[...Array(3)].map((_, i) => (
             <SkeletonShimmer key={i} className="h-4 w-20 rounded" />
           ))}
-        </div>
+        </div> */}
       </div>
     );
   }
