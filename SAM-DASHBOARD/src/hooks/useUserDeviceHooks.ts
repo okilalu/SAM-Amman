@@ -56,7 +56,7 @@ export function useUserDeviceData({ closeModal }: UserDeviceDataProps) {
     deviceId,
   }: {
     userId: string;
-    deviceId: string;
+    deviceId: string | string[];
   }) => {
     if (!userId) return alert("❌ UserId tidak ditemukan");
 

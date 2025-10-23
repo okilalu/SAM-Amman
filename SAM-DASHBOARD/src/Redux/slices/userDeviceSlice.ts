@@ -24,7 +24,7 @@ export const addPermission = createAsyncThunk<
 
 export const deletePermission = createAsyncThunk<
   UserDeviceResponse,
-  { userId: string; deviceId: string },
+  { userId: string; deviceId: string | string[] },
   { rejectValue: string }
 >("user-device/delete", async ({ userId, deviceId }, { rejectWithValue }) => {
   try {

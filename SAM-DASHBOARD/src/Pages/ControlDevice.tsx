@@ -80,7 +80,6 @@ export default function ControlDevice() {
   };
 
   // Checkbox handler
-
   const handleSelectDevice = (id: string) => {
     setDeviceId((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
@@ -100,7 +99,6 @@ export default function ControlDevice() {
     setIsProcessing(true);
     try {
       await handleAddPermission({ userId, deviceId });
-      // alert("berhasil memberikan akses");
       setSuccess("Permissions created successfully");
       handleCloseModal("modal_register");
 
@@ -117,18 +115,20 @@ export default function ControlDevice() {
   // Delete Access
   const handleRevokePermission = async () => {
     setSuccess("");
-    if (selectedIds.length === 0) {
-      setWarning("Choose one device revoke an access");
+    if (!userId) {
+      setWarning("Choose at least one user");
+      return;
+    }
+    if (deviceId.length === 0) {
+      setWarning("Choose at least one device");
       return;
     }
     setIsProcessing(true);
     try {
-      for (const id of deviceId) {
-        await handleDeletePermission({ userId, deviceId: id });
-      }
+      await handleDeletePermission({ userId, deviceId });
       setSuccess("Succefully revoke permissions");
-      setSelectedIds([]);
       handleCloseModal("modal_delete");
+      setSelectedIds([]);
     } catch (error) {
       setError("Failed to revoke permissions");
       console.log(error);
@@ -317,29 +317,31 @@ export default function ControlDevice() {
 
             <div>
               <CustomModal
-                title="Register New Location"
+                title="Add Access Control"
                 id="modal_register"
                 confirmText={isProcessing ? "Processing..." : "OK"}
                 onSubmit={handlePermission}
               >
-                <p>
-                  Apakah anda akan memberikan akses ke user{" "}
-                  <strong>{selectedIds.length}</strong> untuk mendapatkan
-                  activitas dari Portable Device Id <strong>{deviceId}</strong>{" "}
-                  ?
-                </p>
+                <div className="px-3 py-2">
+                  <p>
+                    Apakah anda akan memberikan akses ke user{" "}
+                    <strong>{setSelectedIds.length}</strong> untuk mendapatkan
+                    activitas dari Portable Device Id{" "}
+                    <strong>{deviceId}</strong> ?
+                  </p>
+                </div>
               </CustomModal>
 
               <CustomModal
-                title="Delete"
+                title="Delete Access Control"
                 id="modal_delete"
-                confirmText={isProcessing ? "Processing..." : "OK"}
+                confirmText={isProcessing ? "Processing..." : "Delete"}
                 onSubmit={handleRevokePermission}
               >
-                <div className="flex flex-col">
+                <div className="flex flex-col px-3 py-2">
                   <p>
                     Apakah anda akan mencabut akses ke user{" "}
-                    <strong>{selectedIds.length}</strong> untuk mendapatkan
+                    <strong>{setSelectedIds.length}</strong> untuk mendapatkan
                     activitas dari Portable Device Id{" "}
                     <strong>{deviceId}</strong> ?
                   </p>
