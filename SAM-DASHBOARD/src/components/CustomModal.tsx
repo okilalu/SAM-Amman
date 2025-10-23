@@ -61,9 +61,13 @@ export default function ModalRegister({
               <CustomButton
                 text={cancelText}
                 onClick={handleClose}
-                className="btn btn-outline hover:bg-white border-[#35567b] text-gray-800"
+                className="btn btn-outline hover:bg-white hover:text-[#63b1bb]   text-[#63b1bb]"
               />
-              <CustomButton text={confirmText} onClick={handleSubmit} />
+              <CustomButton
+                text={confirmText}
+                onClick={handleSubmit}
+                className="btn text-white bg-[#35567b] hover:bg-[#35567b] hover:text-white"
+              />
             </div>
           )}
         </div>

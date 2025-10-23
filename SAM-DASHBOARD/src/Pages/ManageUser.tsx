@@ -8,7 +8,7 @@ import { CustomSelects } from "@/components/CustomSelects";
 import { CustomPagination } from "@/components/CustomPagination";
 import { CustomAlert } from "@/components/CustomAlert";
 import { MdErrorOutline } from "react-icons/md";
-import { FaCheckCircle } from "react-icons/fa";
+import { FaCheckCircle, FaEye, FaEyeSlash } from "react-icons/fa";
 import { IoWarningOutline } from "react-icons/io5";
 
 export default function ManageUser() {
@@ -33,6 +33,11 @@ export default function ManageUser() {
   const [loading, setLoading] = useState<boolean>(false);
   const [selectOption, setSelectOption] = useState<string>("asc");
   const [warning, setWarning] = useState<string | null>(null);
+  const [show, setShow] = useState("false");
+
+  const handleShowPass = () => {
+    setShow(!show);
+  };
 
   const filteredUsers = (allUsers ?? [])
     .filter((u) =>
@@ -58,6 +63,11 @@ export default function ManageUser() {
     const modal = document.getElementById(id) as HTMLDialogElement;
     modal?.close();
   };
+
+  const isValid =
+    username.length >= 8 &&
+    username.length <= 30 &&
+    /^[A-Za-z][A-Za-z0-9-]*$/.test(username);
 
   // 🔸 Checkbox handler
   const handleSelectUser = (id: string) => {
@@ -126,7 +136,7 @@ export default function ManageUser() {
       setLoading(true);
       const payload = {
         username,
-        password,
+        // password,
         credential,
       };
       await updateUsers(String(selectedUser.userId!), payload);
@@ -329,13 +339,6 @@ export default function ManageUser() {
                 <CustomButton
                   text="Update"
                   onClick={handlePrefillUpdate}
-                  // onClick={() => {
-                  //   const selectedUser = allUsers?.find(
-                  //     (u) => u.userId === selectedIds[0]
-                  //   );
-                  //   if (selectedUser) handleOpenModal("modal_update");
-                  //   else alert("Pilih user terlebih dahulu!");
-                  // }}
                   className="btn-info"
                 />
                 <CustomButton
@@ -353,26 +356,60 @@ export default function ManageUser() {
                   onSubmit={handleRegister}
                 >
                   <div className="flex flex-col">
-                    <input
-                      type="text"
-                      placeholder="Enter Username"
-                      className="mb-4 w-full bg-gray-200 rounded-md p-2"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                    />
-                    <input
-                      type="password"
-                      placeholder="Enter Password (min 8 karakter)"
-                      className={`mb-2 w-full rounded-md p-2 ${
-                        password.length > 0 && password.length < 8
-                          ? "bg-red-100 border border-red-500"
-                          : "bg-gray-200"
+                    <label className="input validator w-full bg-gray-200 rounded-md p-2">
+                      <input
+                        type="text"
+                        placeholder="Enter Username"
+                        required
+                        minLength={8}
+                        maxLength={30}
+                        title="Only letters, numbers or dash"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        className={`transition-all duration-300 ${
+                          username && !isValid
+                            ? "border-red-400 focus:ring-red-300"
+                            : "border-gray-300"
+                        }`}
+                      />
+                    </label>
+                    <p
+                      className={`text-xs mt-1 transition-all duration-300 ${
+                        username && !isValid
+                          ? "text-red-600 opacity-100 translate-y-0"
+                          : "opacity-0 -translate-y-2"
                       }`}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
+                    >
+                      Must be 8–30 characters and contain only letters, numbers,
+                      or dashes.
+                    </p>
+
+                    <div className="mb-2">
+                      <div className="flex">
+                        <input
+                          type={`${show ? "password" : "text"}`}
+                          placeholder="Enter Password (min 8 karakter)"
+                          className={`mb-2 w-full rounded-md p-2 ${
+                            password.length > 0 && password.length < 8
+                              ? "bg-red-100 "
+                              : "bg-gray-200"
+                          }`}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                        />
+                        {password.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={handleShowPass}
+                            className="rounded-lg text-gray-700 px-3 py-2 items-center"
+                          >
+                            {show ? <FaEye /> : <FaEyeSlash />}
+                          </button>
+                        )}
+                      </div>
+                    </div>
                     {password.length > 0 && password.length < 8 && (
-                      <span className="text-red-500 text-sm mb-2">
+                      <span className="text-red-500 text-sm mb-2 -mt-2">
                         Password harus memiliki minimal 8 karakter
                       </span>
                     )}
@@ -399,14 +436,27 @@ export default function ManageUser() {
                   onSubmit={handleUpdate}
                 >
                   <div className="flex flex-col">
-                    <input
-                      type="text"
-                      placeholder="Enter Username"
-                      className="mb-4 w-full bg-gray-200 rounded-md p-2"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                    />
-                    <input
+                    <label className="input validator w-full mb-2 bg-gray-200 rounded-md p-2">
+                      <input
+                        type="text"
+                        placeholder="Enter Username"
+                        required
+                        pattern="[A-Za-z][A-Za-z0-9\-]*"
+                        minLength={8}
+                        maxLength={30}
+                        title="Only letters, numbers or dash"
+                        className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                      />
+                    </label>
+                    {username.length < 8 && (
+                      <p className="validator-hint mb-2">
+                        Must be 8 to 30 characters containing only letters,
+                        numbers, or dash
+                      </p>
+                    )}
+                    {/* <input
                       type="password"
                       placeholder="Enter Password (min 8 karakter)"
                       className={`mb-2 w-full rounded-md p-2 ${
@@ -421,7 +471,7 @@ export default function ManageUser() {
                       <span className="text-red-500 text-sm mb-2">
                         Password harus memiliki minimal 8 karakter
                       </span>
-                    )}
+                    )} */}
                     <CustomSelects
                       value={
                         optionCredentials.find(
@@ -443,7 +493,7 @@ export default function ManageUser() {
                   confirmText="Delete"
                   onSubmit={handleDelete}
                 >
-                  <div className="flex flex-col text-center">
+                  <div className="flex flex-col px-3 py-2">
                     <p>
                       Apakah anda yakin ingin menghapus{" "}
                       <strong>{selectedIds.length}</strong> user?

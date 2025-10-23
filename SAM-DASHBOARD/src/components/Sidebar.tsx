@@ -217,6 +217,7 @@ export default function Sidebar() {
           id="modal_logout"
           confirmText="Logout"
           onSubmit={Logout}
+          className="btn bg-red-600 text-white hover:bg-red-700"
         >
           <p className="text-black px-3">Apakah anda yakin ingin logout?</p>
         </CustomModal>
