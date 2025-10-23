@@ -3,7 +3,7 @@ import { SkeletonShimmer } from "./SkeletonShimmer";
 
 type LoadingVariant = "dashboard" | "table" | "form" | "chart";
 type LoadingContent =
-  | "dashboard"
+  | "home"
   | "device"
   | "user"
   | "portable"
@@ -21,8 +21,8 @@ interface CustomMainLoadingProps {
 export const CustomMainLoading: React.FC<CustomMainLoadingProps> = ({
   variant = "dashboard",
   contentLines = 6,
-  contents,
-  menuLines = 5,
+  contents = "home",
+  menuLines = 4,
 }) => {
   const shimmerClass =
     "relative overflow-hidden bg-gray-300 rounded dark:bg-gray-400 before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_1.5s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/50 before:to-transparent";
@@ -77,19 +77,28 @@ export const CustomMainLoading: React.FC<CustomMainLoadingProps> = ({
   }
 
   return (
-    <div className="p-4 flex flex-col gap-4">
-      <div className="grid grid-cols-2 gap-3">
+    <div
+      className={`p-4 flex flex-col ${
+        contents === "home" ? "gap-10" : "gap-4"
+      }`}
+    >
+      <div className="grid grid-cols-4 gap-3">
         {[...Array(menuLines)].map((_, i) => (
           <SkeletonShimmer
             key={i}
-            className={`h-10 w-full ${i === 4 ? "col-start-2" : ""}`}
+            className={`${contents === "home" ? "h-32" : "h-10"} w-full ${
+              i === 4 ? "col-start-2" : ""
+            }`}
           />
         ))}
       </div>
 
-      <div className="flex-1 grid grid-cols-2 gap-4">
+      <div className={`flex-1 grid grid-cols-1 gap-4`}>
         {[...Array(contentLines)].map((_, i) => (
-          <SkeletonShimmer key={i} className="h-32 w-full" />
+          <SkeletonShimmer
+            key={i}
+            className={`${contents === "home" ? "h-72" : "h-32"} w-full`}
+          />
         ))}
       </div>
     </div>

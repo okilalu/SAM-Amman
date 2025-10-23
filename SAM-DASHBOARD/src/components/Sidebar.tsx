@@ -223,7 +223,16 @@ export default function Sidebar() {
         </CustomModal>
 
         <main className="flex-1 overflow-y-auto bg-gray-50 p-6">
-          {isMenuLoading ? <CustomMainLoading /> : renderContent()}
+          {isMenuLoading ? (
+            <CustomMainLoading
+              contents="home"
+              contentLines={
+                activeMenu === "Portable" || activeMenu === "Home" ? 1 : 5
+              }
+            />
+          ) : (
+            renderContent()
+          )}
         </main>
       </div>
     </div>
