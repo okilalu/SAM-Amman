@@ -89,6 +89,10 @@ export default function ManageUser() {
       return;
     }
 
+    if (username.length < 8) {
+      setWarning("Username Harus memiliki minimal 8 karakter");
+      return;
+    }
     if (password.length < 8) {
       setWarning("Password Harus memiliki minimal 8 karakter");
       return;
@@ -128,8 +132,8 @@ export default function ManageUser() {
       return;
     }
 
-    if (password.length < 8) {
-      setWarning("Password Harus memiliki minimal 8 karakter");
+    if (username.length < 8) {
+      setWarning("Username Harus memiliki minimal 8 karakter");
       return;
     }
 
@@ -356,7 +360,7 @@ export default function ManageUser() {
                   onSubmit={handleRegister}
                 >
                   <div className="flex flex-col">
-                    <label className="input validator w-full bg-gray-200 rounded-md p-2">
+                    <label className="input validator w-full bg-gray-200 rounded-md">
                       <input
                         type="text"
                         placeholder="Enter Username"
@@ -374,7 +378,7 @@ export default function ManageUser() {
                       />
                     </label>
                     <p
-                      className={`text-xs mt-1 transition-all duration-300 ${
+                      className={`text-xs px-1 py-1 transition-all duration-300 ${
                         username && !isValid
                           ? "text-red-600 opacity-100 translate-y-0"
                           : "opacity-0 -translate-y-2"
@@ -384,35 +388,37 @@ export default function ManageUser() {
                       or dashes.
                     </p>
 
-                    <div className="mb-2">
-                      <div className="flex">
+                    <div className="mb-3">
+                      <div className="relative w-full">
                         <input
-                          type={`${show ? "password" : "text"}`}
+                          type={show ? "text" : "password"}
                           placeholder="Enter Password (min 8 karakter)"
-                          className={`mb-2 w-full rounded-md p-2 ${
+                          className={`w-full rounded-md px-3 py-3 pr-10 border transition-all duration-300 ${
                             password.length > 0 && password.length < 8
-                              ? "bg-red-100 "
+                              ? "bg-red-100"
                               : "bg-gray-200"
                           }`}
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                         />
+
                         {password.length > 0 && (
                           <button
                             type="button"
                             onClick={handleShowPass}
-                            className="rounded-lg text-gray-700 px-3 py-2 items-center"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-900 transition"
                           >
                             {show ? <FaEye /> : <FaEyeSlash />}
                           </button>
                         )}
                       </div>
+
+                      {password.length > 0 && password.length < 8 && (
+                        <span className="text-red-500 text-xs -mt-4 px-1">
+                          Password harus memiliki minimal 8 karakter
+                        </span>
+                      )}
                     </div>
-                    {password.length > 0 && password.length < 8 && (
-                      <span className="text-red-500 text-sm mb-2 -mt-2">
-                        Password harus memiliki minimal 8 karakter
-                      </span>
-                    )}
 
                     <CustomSelects
                       value={
@@ -436,41 +442,39 @@ export default function ManageUser() {
                   onSubmit={handleUpdate}
                 >
                   <div className="flex flex-col">
-                    <label className="input validator w-full mb-2 bg-gray-200 rounded-md p-2">
+                    <label className="input validator w-full bg-gray-200 rounded-md p-2">
                       <input
                         type="text"
                         placeholder="Enter Username"
                         required
-                        pattern="[A-Za-z][A-Za-z0-9\-]*"
                         minLength={8}
                         maxLength={30}
                         title="Only letters, numbers or dash"
-                        className="mb-4 w-full bg-gray-200 rounded-md p-2"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
+                        // className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                        className={`transition-all duration-300 ${
+                          username && !isValid
+                            ? "border-red-400 focus:ring-red-300"
+                            : "border-gray-300"
+                        }`}
                       />
                     </label>
-                    {username.length < 8 && (
+                    <p
+                      className={`text-xs px-1 py-1 transition-all duration-300 ${
+                        username && !isValid
+                          ? "text-red-600 opacity-100 translate-y-0"
+                          : "opacity-0 -translate-y-2"
+                      }`}
+                    >
+                      Must be 8–30 characters and contain only letters, numbers,
+                      or dashes.
+                    </p>
+                    {/* {username.length < 8 && (
                       <p className="validator-hint mb-2">
                         Must be 8 to 30 characters containing only letters,
                         numbers, or dash
                       </p>
-                    )}
-                    {/* <input
-                      type="password"
-                      placeholder="Enter Password (min 8 karakter)"
-                      className={`mb-2 w-full rounded-md p-2 ${
-                        password.length > 0 && password.length < 8
-                          ? "bg-red-100 border border-red-500"
-                          : "bg-gray-200"
-                      }`}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                    {password.length > 0 && password.length < 8 && (
-                      <span className="text-red-500 text-sm mb-2">
-                        Password harus memiliki minimal 8 karakter
-                      </span>
                     )} */}
                     <CustomSelects
                       value={
