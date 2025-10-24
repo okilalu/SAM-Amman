@@ -51,6 +51,7 @@ export default function Sidebar() {
         await validateUser();
       } catch (err) {
         navigate("/login", { replace: true });
+        console.log(err);
       } finally {
         setIsInitialLoading(false);
       }
@@ -135,10 +136,6 @@ export default function Sidebar() {
 
   const activeColor = "#63b0ba";
   const inactiveColor = "#000000";
-
-  if (isInitialLoading) {
-    return <CustomMainLoading />;
-  }
 
   return (
     <div className="w-full h-screen flex">
