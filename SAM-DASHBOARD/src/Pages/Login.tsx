@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useUserData } from "../hooks/useUserHooks";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useState } from "react";
+import { CustomSelects } from "@/components/CustomSelects";
 
 export default function Login() {
   const { loginUser, isLoading } = useUserData({});
@@ -11,10 +12,10 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [credential, setCredential] = useState("");
   const [error, setError] = useState("");
-  const [show, setShow] = useState("false");
+  const [show, setShow] = useState(false);
 
-  const handleLogin = async (e) => {
-    e.preventDefault(); // ✅ cegah reload halaman
+  const handleLogin = async (e: any) => {
+    e.preventDefault();
 
     if (!username || !password || !credential) {
       setError("Lengkapi semua field!");
@@ -44,6 +45,22 @@ export default function Login() {
   const handleShowPass = () => {
     setShow(!show);
   };
+
+  const option = [
+    {
+      label: "Admin",
+      value: "Admin",
+    },
+    {
+      label: "Operator",
+      value: "Operator",
+    },
+    {
+      label: "Superadmin",
+      value: "Superadmin",
+    },
+  ];
+
   if (isLoading) {
     return (
       <div className="bg-white flex flex-1 flex-col justify-center items-center h-screen">
@@ -56,7 +73,6 @@ export default function Login() {
   return (
     <div className="bg-gray-100 min-h-screen flex items-center justify-center px-6">
       <div className="bg-white shadow-xl rounded-2xl w-full max-w-md px-10 py-10 border border-gray-200">
-        {/* Header */}
         <div className="flex flex-col items-center text-gray-700 mb-6">
           <div className="bg-gray-300 p-3 rounded-full mb-4 shadow-inner">
             <MdLockOutline size={30} className="text-gray-700" />
@@ -67,9 +83,7 @@ export default function Login() {
           </p>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleLogin} className="flex flex-col gap-5">
-          {/* Username */}
           <div className="text-black">
             <label className="block text-sm font-medium text-gray-600 mb-1">
               Username
@@ -125,7 +139,6 @@ export default function Login() {
             </div>
           </div>
 
-          {/* Pesan Error */}
           {error && (
             <p className="text-red-500 text-sm text-center font-medium -mt-2">
               {error}
@@ -134,19 +147,17 @@ export default function Login() {
 
           {/* Credential */}
           <div className="text-black">
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              Credential
-            </label>
-            <select
-              value={credential}
-              onChange={(e) => setCredential(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white transition-all duration-200"
-            >
-              <option value="">Pilih Credential</option>
-              <option value="Admin">Admin</option>
-              <option value="Operator">Operator</option>
-              <option value="Superadmin">Superadmin</option>
-            </select>
+            <CustomSelects
+              value={option.find((opt) => opt.value === credential) || null}
+              onChange={(val) => setCredential(val)}
+              options={option}
+              label="Credential"
+              flex="flex-col"
+              items="items-start"
+              gap="gap-2"
+              labelClass="items-center gap-3"
+              background="bg-gray-100"
+            />
           </div>
 
           {/* Tombol Login */}

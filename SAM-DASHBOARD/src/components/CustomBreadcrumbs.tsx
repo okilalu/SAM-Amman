@@ -1,7 +1,7 @@
 import React, { type ReactElement } from "react";
 import { PiGlobeHemisphereWestFill, PiUser } from "react-icons/pi";
-import CutomButton from "./CustomButton";
 import { useNavigate } from "react-router-dom";
+import { CustomButton } from "./CustomButton";
 
 interface CustomBreadcrumbsProps {
   label?: string;
@@ -40,7 +40,7 @@ export const CustomBreadcrumbs: React.FC<CustomBreadcrumbsProps> = ({
       </div>
       {!isLoggedIn ? (
         <div>
-          <CutomButton
+          <CustomButton
             onClick={() => navigate("/login")}
             text="Sign In"
             className="bg-transparent border-none shadow-none font-bold text-[#63b1bb]"

@@ -8,7 +8,9 @@ interface CustomSelectProps {
   value: SelectOption | null;
   onChange: (value: string) => void;
   labelClass?: string;
-  flex?: "flex-col" | "flex-row";
+  flex?: string;
+  items?: string;
+  gap?: string;
   placeholder?: string;
   background?: string;
   disabled?: boolean;
@@ -20,7 +22,9 @@ export const CustomSelects: React.FC<CustomSelectProps> = ({
   value,
   onChange,
   labelClass = "",
-  flex = "flex-col",
+  flex = "flex-col items-center gap-5",
+  items = "items-center",
+  gap = "gap-5",
   placeholder = "Pilih opsi",
   disabled = false,
   background = "bg-white",
@@ -38,7 +42,7 @@ export const CustomSelects: React.FC<CustomSelectProps> = ({
       : value?.label || placeholder;
 
   return (
-    <div className={`w-full ${flex} flex gap-5 items-center`}>
+    <div className={`w-full ${flex} ${items} ${gap} flex`}>
       {label && (
         <label
           className={`text-sm font-medium min-w-24 text-gray-600 ${labelClass}`}

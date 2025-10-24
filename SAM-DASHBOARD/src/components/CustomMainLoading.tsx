@@ -15,6 +15,7 @@ interface CustomMainLoadingProps {
   variant?: LoadingVariant;
   menuLines?: number;
   contentLines?: number;
+  headerLines?: number;
   contents?: LoadingContent;
 }
 
@@ -23,17 +24,47 @@ export const CustomMainLoading: React.FC<CustomMainLoadingProps> = ({
   contentLines = 6,
   contents = "home",
   menuLines = 4,
+  headerLines = 5,
 }) => {
-  const shimmerClass =
-    "relative overflow-hidden bg-gray-300 rounded dark:bg-gray-400 before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_1.5s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/50 before:to-transparent";
-
   if (variant === "table") {
     return (
-      <div className="space-y-3 p-4">
-        <div className={`${shimmerClass} h-6 w-1/3`}></div>
-        {[...Array(menuLines)].map((_, i) => (
-          <SkeletonShimmer key={i} className="h-12 w-full" />
-        ))}
+      <div
+        className={`space-y-1 ${
+          contents === "user" || contents === "email" ? "pt-5" : ""
+        }`}
+      >
+        <div
+          className="grid gap-1.5"
+          style={{
+            gridTemplateColumns: `repeat(${headerLines}, minmax(0, 1fr))`,
+          }}
+        >
+          {[...Array(headerLines)].map((_, i) => (
+            <SkeletonShimmer
+              key={`head-${i}`}
+              className="h-10 w-full rounded"
+            />
+          ))}
+        </div>
+
+        <div className="space-y-2">
+          {[...Array(menuLines)].map((_, rowIdx) => (
+            <div
+              key={`row-${rowIdx}`}
+              className="grid gap-1.5"
+              style={{
+                gridTemplateColumns: `repeat(${headerLines}, minmax(0, 1fr))`,
+              }}
+            >
+              {[...Array(headerLines)].map((_, colIdx) => (
+                <SkeletonShimmer
+                  key={`cell-${rowIdx}-${colIdx}`}
+                  className="h-10 w-full rounded"
+                />
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
     );
   }

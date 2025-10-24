@@ -1,5 +1,5 @@
 import React, { type ReactElement } from "react";
-import CustomButton from "./CustomButton";
+import { CustomButton } from "./CustomButton";
 
 interface CustomModalProps {
   onSubmit?: () => void;

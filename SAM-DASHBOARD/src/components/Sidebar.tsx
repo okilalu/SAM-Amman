@@ -35,6 +35,7 @@ import {
 } from "react-icons/pi";
 import CustomModal from "./CustomModal";
 import { CustomMainLoading } from "./CustomMainLoading";
+import { CustomButton } from "./CustomButton";
 
 export default function Sidebar() {
   const navigate = useNavigate();
@@ -44,16 +45,25 @@ export default function Sidebar() {
   const [isMenuLoading, setIsMenuLoading] = useState(false);
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const checkUser = async () => {
+      setIsInitialLoading(true);
       try {
-        setIsInitialLoading(true);
         await validateUser();
+      } catch (err) {
+        navigate("/login", { replace: true });
       } finally {
         setIsInitialLoading(false);
       }
     };
-    fetchUser();
-  }, []);
+
+    checkUser();
+  }, [navigate]);
+
+  useEffect(() => {
+    if (!isInitialLoading && !user) {
+      navigate("/login", { replace: true });
+    }
+  }, [isInitialLoading, user, navigate]);
 
   const handleOpenModal = (id: string) => {
     const modal = document.getElementById(id) as HTMLDialogElement;
@@ -223,18 +233,29 @@ export default function Sidebar() {
         </CustomModal>
 
         <main className="flex-1 overflow-y-auto bg-gray-50 p-6">
-          {isMenuLoading ? (
+          {isMenuLoading && activeMenu === "Home" ? (
             <CustomMainLoading
               contents="home"
-              contentLines={
-                activeMenu === "Portable" || activeMenu === "Home" ? 1 : 5
-              }
+              contentLines={activeMenu === "Home" ? 1 : 5}
             />
           ) : (
             renderContent()
           )}
         </main>
       </div>
+      {!isLoggedIn && (
+        <div className="absolute inset-0 z-50 bg-black/5 backdrop-blur-sm flex flex-col items-center justify-center">
+          <h2 className="text-2xl font-semibold mb-4 text-gray-800">
+            Session expired or not logged in
+          </h2>
+          <CustomButton
+            justify="justify-center"
+            className="cursor-pointer border-none bg-[#63b0ba] text-white px-5 py-2 rounded-lg hover:bg-[#549aa3]"
+            onClick={() => navigate("/login")}
+            text="Sign In"
+          />
+        </div>
+      )}
     </div>
   );
 }
