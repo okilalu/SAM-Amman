@@ -27,11 +27,8 @@ export default function ManageDevice() {
   const { locations, fetchAllLocations } = useLocationData({});
   const [samId, setSamId] = useState("");
   const [deviceIP, setDeviceIP] = useState("");
-  const [deviceUsername, setDeviceUsername] = useState("");
   const [deviceRootFolder, setDeviceRootFolder] = useState("");
   const [cameraIP, setCameraIP] = useState("");
-  const [cameraUsername, setCameraUsername] = useState("");
-  const [cameraPassword, setCameraPassword] = useState("");
   const [cameraRootFolder, setCameraRootFolder] = useState("");
   const [cameraType, setCameraType] = useState("");
   const [location, setLocation] = useState("");
@@ -43,6 +40,8 @@ export default function ManageDevice() {
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState<boolean>(true);
   const [warning, setWarning] = useState<string | null>(null);
+  const [selectUTC, setSelectUTC] = useState<boolean>(true);
+  const [timezone, setTimezone] = useState<number>(0);
 
   const filteredDevice = (devices ?? [])
     .filter((item) =>
@@ -75,6 +74,18 @@ export default function ManageDevice() {
     );
   };
 
+  const handleUTCChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const isChecked = e.target.checked;
+    setSelectUTC(isChecked);
+
+    // Jika user aktifkan UTC, otomatis set timezone ke 0
+    if (isChecked) setTimezone(0);
+  };
+
+  const handleTimezoneChange = (timezone: number) => {
+    setTimezone(timezone);
+  };
+
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
@@ -83,11 +94,8 @@ export default function ManageDevice() {
     if (
       !samId ||
       !deviceIP ||
-      !deviceUsername ||
       !deviceRootFolder ||
       !cameraIP ||
-      !cameraUsername ||
-      !cameraPassword ||
       !cameraRootFolder ||
       !cameraType ||
       !location
@@ -101,11 +109,8 @@ export default function ManageDevice() {
       await handleGenerateDevice({
         samId,
         deviceIP,
-        deviceUsername,
         deviceRootFolder,
         cameraIP,
-        cameraUsername,
-        cameraPassword,
         cameraRootFolder,
         cameraType,
         location,
@@ -116,11 +121,8 @@ export default function ManageDevice() {
 
       setSamId("");
       setDeviceIP("");
-      setDeviceUsername("");
       setDeviceRootFolder("");
       setCameraIP("");
-      setCameraUsername("");
-      setCameraPassword("");
       setCameraRootFolder("");
       setCameraType("");
       setLocation("");
@@ -150,11 +152,8 @@ export default function ManageDevice() {
       await handleUpdateDevice(String(selectedDevice.deviceId!), {
         samId,
         deviceIP,
-        deviceUsername,
         deviceRootFolder,
         cameraIP,
-        cameraUsername,
-        cameraPassword,
         cameraRootFolder,
         cameraType,
         location,
@@ -233,11 +232,8 @@ export default function ManageDevice() {
     if (!selectedDevice) return;
     setSamId(selectedDevice.samId || "");
     setDeviceIP(selectedDevice.deviceIP || "");
-    setDeviceUsername(selectedDevice.deviceUsername || "");
     setDeviceRootFolder(selectedDevice.deviceRootFolder || "");
     setCameraIP(selectedDevice.cameraIP || "");
-    setCameraUsername(selectedDevice.cameraUsername || "");
-    setCameraPassword(selectedDevice.cameraPassword || "");
     setCameraRootFolder(selectedDevice.cameraRootFolder || "");
     setCameraType(selectedDevice.cameraType || "");
     setLocation(selectedDevice.location || "");
@@ -284,7 +280,7 @@ export default function ManageDevice() {
             <div className="flex flex-col gap-5 flex-1">
               <CustomInputs
                 label="Filter"
-                placeholder="Masukkan username"
+                placeholder="Cari Portable Device..."
                 onChange={(val) => setFilter(val)}
                 helperText="x"
                 helper={() => setFilter("")}
@@ -399,67 +395,46 @@ export default function ManageDevice() {
                 confirmText="Register"
                 onSubmit={handleRegister}
               >
-                <div className="flex flex-col">
+                <div className="flex flex-col gap-2">
                   <input
                     type="text"
                     placeholder="Portable Device ID"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                    className="w-full bg-gray-200 rounded-md p-2"
                     value={samId}
                     onChange={(e) => setSamId(e.target.value)}
                   />
                   <input
                     type="text"
                     placeholder="Device Address"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                    className="w-full bg-gray-200 rounded-md p-2"
                     value={deviceIP}
                     onChange={(e) => setDeviceIP(e.target.value)}
                   />
                   <input
                     type="text"
-                    placeholder="Device Username"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2"
-                    value={deviceUsername}
-                    onChange={(e) => setDeviceUsername(e.target.value)}
-                  />
-                  <input
-                    type="text"
                     placeholder="Device Root Folder"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                    className="w-full bg-gray-200 rounded-md p-2"
                     value={deviceRootFolder}
                     onChange={(e) => setDeviceRootFolder(e.target.value)}
                   />
                   <input
                     type="text"
                     placeholder="Camera IP"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                    className="w-full bg-gray-200 rounded-md p-2"
                     value={cameraIP}
                     onChange={(e) => setCameraIP(e.target.value)}
                   />
                   <input
                     type="text"
-                    placeholder="Camera Username"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2"
-                    value={cameraUsername}
-                    onChange={(e) => setCameraUsername(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Camera Password"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2"
-                    value={cameraPassword}
-                    onChange={(e) => setCameraPassword(e.target.value)}
-                  />
-                  <input
-                    type="text"
                     placeholder="Camera Root Folder"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                    className="w-full bg-gray-200 rounded-md p-2"
                     value={cameraRootFolder}
                     onChange={(e) => setCameraRootFolder(e.target.value)}
                   />
                   <input
                     type="text"
                     placeholder="Camera Type"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                    className="w-full bg-gray-200 rounded-md p-2"
                     value={cameraType}
                     onChange={(e) => setCameraType(e.target.value)}
                   />
@@ -474,6 +449,30 @@ export default function ManageDevice() {
                     flex="flex-row"
                     background="bg-gray-200 border-none text-black"
                   />
+
+                  <div className="flex justify-between">
+                    <div className="flex items-center flex-row gap-2">
+                      <input
+                        type="checkbox"
+                        className="checkbox checkbox-error"
+                        checked={selectUTC}
+                        onChange={(val) => handleUTCChange(val)}
+                      />
+                      <label htmlFor="">UTC</label>
+                    </div>
+
+                    <CustomInputs
+                      label="Timezone"
+                      type="number"
+                      value={timezone}
+                      onChange={(val) => handleTimezoneChange(Number(val))}
+                      placeholder="Time Zone"
+                      disabled={selectUTC}
+                      min={-12}
+                      max={14}
+                      step={1}
+                    />
+                  </div>
                 </div>
               </CustomModal>
 
@@ -501,13 +500,6 @@ export default function ManageDevice() {
                   />
                   <input
                     type="text"
-                    placeholder="Device Username"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2"
-                    value={deviceUsername}
-                    onChange={(e) => setDeviceUsername(e.target.value)}
-                  />
-                  <input
-                    type="text"
                     placeholder="Device Root Folder"
                     className="mb-4 w-full bg-gray-200 rounded-md p-2"
                     value={deviceRootFolder}
@@ -519,20 +511,6 @@ export default function ManageDevice() {
                     className="mb-4 w-full bg-gray-200 rounded-md p-2"
                     value={cameraIP}
                     onChange={(e) => setCameraIP(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Camera Username"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2"
-                    value={cameraUsername}
-                    onChange={(e) => setCameraUsername(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Camera Password"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2"
-                    value={cameraPassword}
-                    onChange={(e) => setCameraPassword(e.target.value)}
                   />
                   <input
                     type="text"
@@ -559,6 +537,30 @@ export default function ManageDevice() {
                     flex="flex-row"
                     background="bg-gray-200 border-none text-black"
                   />
+
+                  <div className="flex justify-between">
+                    <div className="flex items-center flex-row gap-2">
+                      <input
+                        type="checkbox"
+                        className="checkbox checkbox-error"
+                        checked={selectUTC}
+                        onChange={(val) => handleUTCChange(val)}
+                      />
+                      <label htmlFor="">UTC</label>
+                    </div>
+
+                    <CustomInputs
+                      label="Timezone"
+                      type="number"
+                      value={timezone}
+                      onChange={(val) => handleTimezoneChange(Number(val))}
+                      placeholder="Time Zone"
+                      disabled={selectUTC}
+                      min={-12}
+                      max={14}
+                      step={1}
+                    />
+                  </div>
                 </div>
               </CustomModal>
 
