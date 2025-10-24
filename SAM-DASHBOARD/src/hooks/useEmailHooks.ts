@@ -17,7 +17,7 @@ interface UseEmailProps {
 export function useEmailData({ closeModal }: UseEmailProps = {}) {
   const dispatch = useDispatch<AppDispatch>();
   const [emails, setEmails] = useState<Email[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [warning, setWarning] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -54,9 +54,7 @@ export function useEmailData({ closeModal }: UseEmailProps = {}) {
     try {
       const res = await dispatch(createEmail({ data: payload })).unwrap(); // EmailsResponse
       if (res && Array.isArray(res.data)) {
-        // tambahkan created items ke local state (hindari nested)
         setEmails((prev) => {
-          // hindari duplikat: kalau id sudah ada, replace
           const newList = [...prev];
           for (const item of res.data) {
             const idx = newList.findIndex((e) => e.id === item.id);

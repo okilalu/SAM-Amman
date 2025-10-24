@@ -10,7 +10,7 @@ export function useData() {
   const [chartData, setChartData] = useState<any[]>([]);
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const handleFilterData = async ({
     samId,
