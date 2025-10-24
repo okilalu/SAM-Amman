@@ -30,7 +30,7 @@ export default function ControlDevice() {
   const [deviceId, setDeviceId] = useState<string[]>([]);
   const [filter, setFilter] = useState("");
   const [sort, setSort] = useState("");
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  // const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
   const [itemsPerPage, setItemsPerPage] = useState<number>(5);
@@ -98,7 +98,7 @@ export default function ControlDevice() {
       setDeviceId([]);
       setUserId("");
     } catch (error) {
-      setError("Failed to add permissions");
+      setError("Failed to add permissions" + error);
     } finally {
       setIsProcessing(false);
     }
@@ -121,7 +121,7 @@ export default function ControlDevice() {
       setDeviceId([]);
       setUserId("");
     } catch (error) {
-      setError("Failed to revoke permissions");
+      setError("Failed to revoke permissions" + error);
     } finally {
       setIsProcessing(false);
     }
