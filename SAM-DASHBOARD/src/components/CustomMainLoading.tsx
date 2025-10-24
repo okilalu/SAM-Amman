@@ -34,7 +34,7 @@ export const CustomMainLoading: React.FC<CustomMainLoadingProps> = ({
         }`}
       >
         <div
-          className="grid gap-1.5"
+          className="grid"
           style={{
             gridTemplateColumns: `repeat(${headerLines}, minmax(0, 1fr))`,
           }}
@@ -42,7 +42,7 @@ export const CustomMainLoading: React.FC<CustomMainLoadingProps> = ({
           {[...Array(headerLines)].map((_, i) => (
             <SkeletonShimmer
               key={`head-${i}`}
-              className="h-10 w-full rounded"
+              className="h-10 w-full rounded bg-gray-200 dark:bg-gray-300"
             />
           ))}
         </div>
