@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import CustomTable from "../components/CustomTable";
-import CustomButton from "../components/CustomButton";
 import CustomModal from "../components/CustomModal";
 import { useEmailData } from "../hooks/useEmailHooks";
 import { CustomInputs } from "@/components/CustomInputs";
@@ -10,6 +9,8 @@ import { CustomAlert } from "@/components/CustomAlert";
 import { FaCheckCircle } from "react-icons/fa";
 import { IoWarningOutline } from "react-icons/io5";
 import { MdErrorOutline } from "react-icons/md";
+import { CustomButton } from "@/components/CustomButton";
+import { CustomMainLoading } from "@/components/CustomMainLoading";
 
 export default function ManageEmail() {
   const {
@@ -186,39 +187,41 @@ export default function ManageEmail() {
               labelClass="items-center gap-3"
             />
           </div>
-
-          <div className="pt-5 min-h-[270px]">
-            <CustomTable headers={["Select", "ID", "Email Name"]}>
-              {isLoading ? (
-                <tr>
-                  <td colSpan={3} className="text-center text-gray-500 py-4">
-                    Memuat data...
-                  </td>
-                </tr>
-              ) : paginatedEmails.length > 0 ? (
-                paginatedEmails.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50 text-center">
-                    <td>
-                      <input
-                        type="checkbox"
-                        className="checkbox checkbox-error"
-                        checked={selectedIds.includes(item.id!)}
-                        onChange={() => handleSelectEmail(item.id!)}
-                      />
+          {isLoading ? (
+            <CustomMainLoading
+              variant="table"
+              headerLines={3}
+              contents="email"
+              menuLines={itemsPerPage}
+            />
+          ) : (
+            <div className="pt-5 min-h-[270px]">
+              <CustomTable headers={["Select", "ID", "Email Name"]}>
+                {paginatedEmails.length > 0 ? (
+                  paginatedEmails.map((item) => (
+                    <tr key={item.id} className="hover:bg-gray-50 text-center">
+                      <td>
+                        <input
+                          type="checkbox"
+                          className="checkbox checkbox-error"
+                          checked={selectedIds.includes(item.id!)}
+                          onChange={() => handleSelectEmail(item.id!)}
+                        />
+                      </td>
+                      <td>{item.id}</td>
+                      <td>{item.emailName}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={3} className="text-center text-gray-500 py-4">
+                      Tidak ada data ditemukan
                     </td>
-                    <td>{item.id}</td>
-                    <td>{item.emailName}</td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={3} className="text-center text-gray-500 py-4">
-                    Tidak ada data ditemukan
-                  </td>
-                </tr>
-              )}
-            </CustomTable>
-          </div>
+                )}
+              </CustomTable>
+            </div>
+          )}
 
           <CustomPagination
             currentPage={currentPage}
@@ -227,7 +230,6 @@ export default function ManageEmail() {
             onPageChange={handlePageChange}
           />
 
-          {/* 🔹 Action Buttons */}
           <div className="pt-5 flex gap-3 justify-end">
             <CustomButton
               text="Add Email"

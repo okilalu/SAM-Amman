@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import CustomButton from "../components/CustomButton";
 import CustomModal from "../components/CustomModal";
 import CustomTable from "../components/CustomTable";
 import { useLocationData } from "../hooks/useLocationHooks";
@@ -10,6 +9,8 @@ import { CustomAlert } from "@/components/CustomAlert";
 import { MdErrorOutline } from "react-icons/md";
 import { FaCheckCircle } from "react-icons/fa";
 import { IoWarningOutline } from "react-icons/io5";
+import { CustomButton } from "@/components/CustomButton";
+import { CustomMainLoading } from "@/components/CustomMainLoading";
 
 export default function ManageLocation() {
   const {
@@ -18,21 +19,22 @@ export default function ManageLocation() {
     handleCreateLocation,
     handleUpdateLocation,
     handleDeleteLocation,
-    setError,
     error,
     success,
+    setError,
   } = useLocationData({});
+
   const [filter, setFilter] = useState("");
-  const [location, setLocation] = useState<string>("");
+  const [location, setLocation] = useState("");
   const [sort, setSort] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectOption, setSelectOption] = useState<string>("asc");
+  const [selectOption, setSelectOption] = useState<"asc" | "desc">("asc");
   const [itemsPerPage, setItemsPerPage] = useState<number>(5);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [warning, setWarning] = useState<string | null>(null);
 
-  const filteredLocation = (locations ?? [])
+  const filteredLocations = (locations ?? [])
     .filter((item) =>
       (item.location ?? "").toLowerCase().includes(filter.toLowerCase())
     )
@@ -42,12 +44,10 @@ export default function ManageLocation() {
         : (b.id ?? 0) - (a.id ?? 0)
     );
 
-  const paginatedUsers =
-    filteredLocation &&
-    filteredLocation!.slice(
-      (currentPage - 1) * itemsPerPage,
-      currentPage * itemsPerPage
-    );
+  const paginatedLocations = filteredLocations.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const handleOpenModal = (id: string) => {
     const modal = document.getElementById(id) as HTMLDialogElement;
@@ -65,67 +65,94 @@ export default function ManageLocation() {
     );
   };
 
-  // Pagination
-  const handlePageCHange = (page: number) => {
-    setCurrentPage(page);
-    console.log("Pindah ke halaman: ", page);
-  };
+  const handlePageChange = (page: number) => setCurrentPage(page);
 
   const handleRegister = async () => {
-    if (!location) {
+    if (!location.trim()) {
       setWarning("Lengkapi semua field!");
       return;
     }
-    await handleCreateLocation({ value: location });
-    handleCloseModal("modal_register");
+    try {
+      setLoading(true);
+      await handleCreateLocation({ value: location.trim() });
+      setLocation("");
+      handleCloseModal("modal_register");
+      await fetchAllLocations();
+    } catch {
+      setError("Gagal menambahkan lokasi baru");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePrefillUpdate = () => {
+    if (selectedIds.length !== 1) {
+      setWarning("Pilih tepat satu lokasi untuk diperbarui");
+      return;
+    }
+    const selectedLoc = locations?.find(
+      (loc) => loc.id === Number(selectedIds[0])
+    );
+    if (!selectedLoc) return;
+    setLocation(selectedLoc.location || "");
+    handleOpenModal("modal_update");
   };
 
   const handleUpdate = async () => {
-    setWarning(null);
     if (selectedIds.length !== 1) {
+      setWarning("Pilih tepat satu lokasi untuk diperbarui");
       return;
     }
-    const selectedId = selectedIds[0];
-    const selectedLoc = locations?.find((d) => d.id === Number(selectedId));
-    console.log(selectedLoc);
-    setError("Gagal menambahkan email baru");
+    const selectedId = Number(selectedIds[0]);
+    if (!location.trim()) {
+      setWarning("Nama lokasi tidak boleh kosong");
+      return;
+    }
 
     try {
       setLoading(true);
-      await handleUpdateLocation(selectedLoc!.id!, location);
-
+      await handleUpdateLocation(selectedId, location.trim());
       handleCloseModal("modal_update");
-      fetchAllLocations();
+      setLocation("");
+      await fetchAllLocations();
       setSelectedIds([]);
-    } catch (error) {
-      console.log(error);
+    } catch {
+      setError("Gagal memperbarui lokasi");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async () => {
-    setWarning(null);
     if (selectedIds.length === 0) {
-      setWarning("Choose at least one location");
+      setWarning("Pilih minimal satu lokasi untuk dihapus");
       return;
     }
     try {
       setLoading(true);
-      await handleDeleteLocation(Number(selectedIds));
-
+      for (const id of selectedIds) {
+        await handleDeleteLocation(Number(id));
+      }
       handleCloseModal("modal_delete");
+      await fetchAllLocations();
       setSelectedIds([]);
-      fetchAllLocations();
-    } catch (error) {
-      console.log(error);
+    } catch {
+      setError("Gagal menghapus lokasi");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchAllLocations();
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        await fetchAllLocations();
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
   }, []);
 
   useEffect(() => {
@@ -135,31 +162,10 @@ export default function ManageLocation() {
     }
   }, [warning]);
 
-  const handleSelectOption = (selected: string) => {
-    setSelectOption(selected);
-  };
-
-  const option = [
-    {
-      label: "Asc",
-      value: "asc",
-    },
-    {
-      label: "Desc",
-      value: "desc",
-    },
+  const sortOptions = [
+    { label: "Ascending", value: "asc" },
+    { label: "Descending", value: "desc" },
   ];
-
-  const handlePrefillUpdate = () => {
-    if (selectedIds.length !== 1) {
-      setWarning("Choose at least one location");
-      return;
-    }
-    const selectedLoc = locations?.find((u) => u.id === Number(selectedIds[0]));
-    if (!selectedLoc) return;
-    setLocation(selectedLoc.location || "");
-    handleOpenModal("modal_update");
-  };
 
   return (
     <>
@@ -184,13 +190,14 @@ export default function ManageLocation() {
           icon={<IoWarningOutline />}
         />
       )}
+
       <div className="flex gap-3">
         <div className="flex-1 text-sm text-black">
           <div className="flex items-center gap-5 justify-between p-3">
             <div className="flex flex-col gap-5 flex-1">
               <CustomInputs
                 label="Filter"
-                placeholder="Masukkan username"
+                placeholder="Cari lokasi..."
                 onChange={(val) => setFilter(val)}
                 helperText="x"
                 helper={() => setFilter("")}
@@ -198,54 +205,64 @@ export default function ManageLocation() {
               />
 
               <CustomSelects
-                value={option.find((opt) => opt.value === selectOption) || null}
-                onChange={handleSelectOption}
-                options={option}
-                label="Sort"
+                value={
+                  sortOptions.find((opt) => opt.value === selectOption) || null
+                }
+                onChange={(selected) =>
+                  setSelectOption(selected as "asc" | "desc")
+                }
+                options={sortOptions}
+                label="Urutkan"
                 flex="flex-row"
                 labelClass="items-center gap-3"
               />
             </div>
+
             <div className="flex flex-col gap-5 flex-1">
               <CustomInputs
-                label="Sort"
-                placeholder="Masukkan device portable"
+                label="Sort Field"
+                placeholder="(opsional)"
                 onChange={(val) => setSort(val)}
                 helperText="x"
                 helper={() => setSort("")}
                 value={sort}
               />
               <CustomInputs
+                placeholder=""
                 label="Per Page"
-                placeholder="Masukkan jumlah page"
-                onChange={(val) => setItemsPerPage(Number(val))}
-                value={Number(itemsPerPage)}
                 type="number"
+                onChange={(val) => setItemsPerPage(Number(val) || 5)}
+                value={itemsPerPage}
               />
             </div>
           </div>
 
           {loading ? (
-            <div className="flex flex-col justify-center items-center h-64">
-              <span className="loading loading-bars loading-xl text-blue-400 "></span>
-              <p className="ml-3 text-gray-700 text-lg">
-                Memuat data perangkat...
-              </p>
-            </div>
+            <CustomMainLoading
+              variant="table"
+              headerLines={3}
+              contents="email"
+              menuLines={itemsPerPage}
+            />
           ) : (
             <>
-              <div className="pt-5 min-h-[270px] ">
-                <CustomTable headers={["Select", "LocationId", "LocationName"]}>
-                  {paginatedUsers && paginatedUsers.length > 0 ? (
-                    paginatedUsers.map((item, idx) => (
-                      <tr key={idx} className="hover:bg-gray-50 text-center">
+              <div className="pt-5 min-h-[270px]">
+                <CustomTable
+                  headers={["Select", "Location ID", "Location Name"]}
+                >
+                  {paginatedLocations.length > 0 ? (
+                    paginatedLocations.map((item) => (
+                      <tr
+                        key={item.id}
+                        className="hover:bg-gray-50 text-center"
+                      >
                         <td>
                           <input
                             type="checkbox"
                             className="checkbox checkbox-error"
-                            checked={selectedIds.includes(String(item.id!))}
+                            checked={selectedIds.includes(String(item.id))}
                             onChange={() =>
-                              handleSelectLocation(String(item.id!))
+                              handleSelectLocation(String(item.id))
                             }
                           />
                         </td>
@@ -256,7 +273,7 @@ export default function ManageLocation() {
                   ) : (
                     <tr>
                       <td
-                        colSpan={4}
+                        colSpan={3}
                         className="text-center text-gray-500 py-4"
                       >
                         Tidak ada data ditemukan
@@ -269,8 +286,8 @@ export default function ManageLocation() {
               <CustomPagination
                 currentPage={currentPage}
                 itemsPerPage={itemsPerPage}
-                totalItems={locations ? locations!.length : 0}
-                onPageChange={handlePageCHange}
+                totalItems={filteredLocations.length}
+                onPageChange={handlePageChange}
               />
 
               <div className="pt-5 flex gap-3 justify-end">
@@ -291,6 +308,7 @@ export default function ManageLocation() {
                 />
               </div>
 
+              {/* ===== MODALS ===== */}
               <div className="pt-5">
                 <CustomModal
                   title="Register New Location"
@@ -298,15 +316,13 @@ export default function ManageLocation() {
                   confirmText="Register"
                   onSubmit={handleRegister}
                 >
-                  <div className="flex flex-col">
-                    <input
-                      type="text"
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
-                      className="bg-gray-200 w-full rounded-md p-2"
-                      placeholder="Location"
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    className="bg-gray-200 w-full rounded-md p-2"
+                    placeholder="Location Name"
+                  />
                 </CustomModal>
 
                 <CustomModal
@@ -315,15 +331,13 @@ export default function ManageLocation() {
                   confirmText="Update"
                   onSubmit={handleUpdate}
                 >
-                  <div className="flex flex-col">
-                    <input
-                      type="text"
-                      placeholder="Update Location"
-                      className="mb-4 w-full bg-gray-200 rounded-md p-2 "
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    placeholder="Update Location"
+                    className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                  />
                 </CustomModal>
 
                 <CustomModal
@@ -332,11 +346,7 @@ export default function ManageLocation() {
                   confirmText="Delete"
                   onSubmit={handleDelete}
                 >
-                  <div className="flex flex-col">
-                    <p className="">
-                      Apakah anda yakin ingin menghapus data ini?
-                    </p>
-                  </div>
+                  <p>Apakah anda yakin ingin menghapus lokasi yang dipilih?</p>
                 </CustomModal>
               </div>
             </>

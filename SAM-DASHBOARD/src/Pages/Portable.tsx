@@ -5,6 +5,7 @@ import { CustomInputs } from "@/components/CustomInputs";
 import { CustomSelects } from "@/components/CustomSelects";
 import { CustomPagination } from "@/components/CustomPagination";
 import { useUserDeviceData } from "@/hooks/useUserDeviceHooks";
+import { CustomMainLoading } from "@/components/CustomMainLoading";
 
 export default function Portable() {
   const { data, handleFilterData, handleGetAllData, isLoading } = useData();
@@ -59,6 +60,27 @@ export default function Portable() {
     handleFilterData,
   ]);
 
+  const handleChangeStatus = useCallback(
+    (val: string) => {
+      if (!selectedDevice) return;
+
+      const newStatus = val === "over speed" ? "over speed" : "all";
+      setStatus(newStatus);
+
+      handleFilterData({
+        samId: selectedDevice,
+        data: {
+          minSpeed: speedFrom,
+          maxSpeed: speedTo,
+          startDate,
+          endDate,
+          category: newStatus,
+        } as unknown as Datas,
+      });
+    },
+    [selectedDevice, speedFrom, speedTo, startDate, endDate, handleFilterData]
+  );
+
   const handleClear = async () => {
     setStartDate("");
     setEndDate("");
@@ -88,7 +110,6 @@ export default function Portable() {
   return (
     <div className="flex gap-3">
       <div className="flex-1 text-sm text-black">
-        {/* Filter Section */}
         <div className="bg-white shadow rounded-xl p-6 mb-8">
           <div className="flex items-center gap-5 justify-between p-3">
             <div className="flex flex-col gap-5 flex-1">
@@ -108,7 +129,7 @@ export default function Portable() {
               />
               <div className="flex border border-[#63b1bb] rounded-xl overflow-hidden cursor-pointer self-end">
                 <button
-                  onClick={() => setStatus("all")}
+                  onClick={() => handleChangeStatus("all")}
                   className={`px-6 py-2 cursor-pointer font-semibold ${
                     status === "all"
                       ? "bg-[#63b1bb] text-white"
@@ -118,7 +139,7 @@ export default function Portable() {
                   All
                 </button>
                 <button
-                  onClick={() => setStatus("over speed")}
+                  onClick={() => handleChangeStatus("over speed")}
                   className={`px-6 py-2 cursor-pointer font-semibold ${
                     status === "over speed"
                       ? "bg-[#63b1bb] text-white"
@@ -174,12 +195,9 @@ export default function Portable() {
           </div>
         </div>
 
-        {/* Table Section */}
         <div className="bg-white shadow rounded-xl p-6">
           {isLoading ? (
-            <div className="p-5 text-center text-gray-500 border border-dashed rounded-lg">
-              Loading Data...
-            </div>
+            <CustomMainLoading variant="table" menuLines={itemsPerPage} />
           ) : paginatedDatas.length > 0 ? (
             <table className="table w-full text-sm shadow rounded-sm">
               <thead className="bg-gray-200 text-black text-center">

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import CustomTable from "../components/CustomTable";
-import CustomButton from "../components/CustomButton";
 import CustomModal from "../components/CustomModal";
 import { useUserData } from "../hooks/useUserHooks";
 import { CustomInputs } from "@/components/CustomInputs";
@@ -10,6 +9,8 @@ import { CustomAlert } from "@/components/CustomAlert";
 import { MdErrorOutline } from "react-icons/md";
 import { FaCheckCircle, FaEye, FaEyeSlash } from "react-icons/fa";
 import { IoWarningOutline } from "react-icons/io5";
+import { CustomButton } from "@/components/CustomButton";
+import { CustomMainLoading } from "@/components/CustomMainLoading";
 
 export default function ManageUser() {
   const {
@@ -30,10 +31,10 @@ export default function ManageUser() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [selectOption, setSelectOption] = useState<string>("asc");
   const [warning, setWarning] = useState<string | null>(null);
-  const [show, setShow] = useState("false");
+  const [show, setShow] = useState(false);
 
   const handleShowPass = () => {
     setShow(!show);
@@ -275,12 +276,11 @@ export default function ManageUser() {
           </div>
 
           {loading ? (
-            <div className="flex flex-col justify-center items-center h-64">
-              <span className="loading loading-bars loading-xl text-blue-400"></span>
-              <p className="ml-3 text-gray-700 text-lg">
-                Memuat data pengguna...
-              </p>
-            </div>
+            <CustomMainLoading
+              variant="table"
+              contents="user"
+              menuLines={itemsPerPage}
+            />
           ) : (
             <>
               <div className="pt-5 min-h-[270px] ">

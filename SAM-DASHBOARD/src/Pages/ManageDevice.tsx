@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import CustomButton from "../components/CustomButton";
 import CustomModal from "../components/CustomModal";
 import CustomTable from "../components/CustomTable";
 import { useDeviceData } from "../hooks/useDeviceHooks";
@@ -11,6 +10,8 @@ import { CustomAlert } from "@/components/CustomAlert";
 import { MdErrorOutline } from "react-icons/md";
 import { FaCheckCircle } from "react-icons/fa";
 import { IoWarningOutline } from "react-icons/io5";
+import { CustomButton } from "@/components/CustomButton";
+import { CustomMainLoading } from "@/components/CustomMainLoading";
 
 export default function ManageDevice() {
   const {
@@ -40,7 +41,7 @@ export default function ManageDevice() {
   const [itemsPerPage, setItemsPerPage] = useState<number>(5);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [warning, setWarning] = useState<string | null>(null);
 
   const filteredDevice = (devices ?? [])
@@ -319,12 +320,12 @@ export default function ManageDevice() {
           </div>
 
           {loading ? (
-            <div className="flex flex-col justify-center items-center h-64">
-              <span className="loading loading-bars loading-xl text-blue-400"></span>
-              <p className="ml-3 text-gray-700 text-lg">
-                Memuat data perangkat...
-              </p>
-            </div>
+            <CustomMainLoading
+              variant="table"
+              headerLines={5}
+              contents="email"
+              menuLines={itemsPerPage}
+            />
           ) : (
             <>
               <div className="pt-5 min-h-[270px] ">
@@ -392,7 +393,6 @@ export default function ManageDevice() {
                 />
               </div>
 
-              {/* === MODAL REGISTER === */}
               <CustomModal
                 title="Register Device"
                 id="modal_register"
