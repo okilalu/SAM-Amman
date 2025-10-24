@@ -11,6 +11,10 @@ interface CustomInputsProps {
   helperText?: string;
   id?: string;
   value: string | number;
+  disabled?: boolean;
+  min?: number;
+  max?: number;
+  step?: number;
 }
 
 export const CustomInputs: React.FC<CustomInputsProps> = ({
@@ -23,6 +27,10 @@ export const CustomInputs: React.FC<CustomInputsProps> = ({
   helperText,
   value,
   id,
+  disabled,
+  min,
+  max,
+  step,
 }) => {
   const inputId = id || `input-${label.replace(/\s+/g, "-").toLowerCase()}`;
   const hasHelper = String(value)?.length > 0 && helper;
@@ -46,6 +54,10 @@ export const CustomInputs: React.FC<CustomInputsProps> = ({
           className={`flex-1 p-2 py-1.5 border rounded-md border-gray-300 focus:outline-none focus:ring-0 ${
             hasHelper && type !== "date" ? "pr-12" : ""
           }`}
+          disabled={disabled}
+          min={min}
+          max={max}
+          step={step}
         />
 
         {type === "date" && (
