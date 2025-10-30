@@ -114,7 +114,7 @@ export default function Login() {
               }`}
             >
               <input
-                type={`${show ? "password" : "text"}`}
+                type={show ? "text" : "password"}
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value);
