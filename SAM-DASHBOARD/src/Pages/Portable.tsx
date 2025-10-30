@@ -196,7 +196,7 @@ export default function Portable() {
         </div>
 
         <div className="bg-white shadow rounded-xl p-6">
-          {isLoading ? (
+          {isLoading && paginatedDatas.length < 0 ? (
             <CustomMainLoading variant="table" menuLines={itemsPerPage} />
           ) : paginatedDatas.length > 0 ? (
             <table className="table w-full text-sm shadow rounded-sm">

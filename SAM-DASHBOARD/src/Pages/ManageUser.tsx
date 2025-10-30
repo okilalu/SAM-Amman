@@ -65,10 +65,15 @@ export default function ManageUser() {
     modal?.close();
   };
 
-  const isValid =
-    username.length >= 8 &&
-    username.length <= 30 &&
-    /^[A-Za-z][A-Za-z0-9-]*$/.test(username);
+  const handleOpenRegister = () => {
+    setUsername("");
+    setPassword("");
+    setCredential("");
+    setSelectedIds([]); // reset pilihan checkbox biar gak keikut
+    handleOpenModal("modal_register");
+  };
+
+  const isValid = username.length >= 8;
 
   // 🔸 Checkbox handler
   const handleSelectUser = (id: string) => {
@@ -230,7 +235,7 @@ export default function ManageUser() {
     if (!selectedUser) return;
 
     setUsername(selectedUser.username || "");
-    setPassword(selectedUser.password || "");
+    setPassword("");
     setCredential(selectedUser.credential || "");
     handleOpenModal("modal_update");
   };
@@ -337,7 +342,8 @@ export default function ManageUser() {
               <div className="pt-5 flex gap-3 justify-end">
                 <CustomButton
                   text="Add User"
-                  onClick={() => handleOpenModal("modal_register")}
+                  // onClick={() => handleOpenModal("modal_register")}
+                  onClick={handleOpenRegister}
                   className="btn-success"
                 />
                 <CustomButton
@@ -366,7 +372,6 @@ export default function ManageUser() {
                         placeholder="Enter Username"
                         required
                         minLength={8}
-                        maxLength={30}
                         title="Only letters, numbers or dash"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
@@ -384,8 +389,8 @@ export default function ManageUser() {
                           : "opacity-0 -translate-y-2"
                       }`}
                     >
-                      Must be 8–30 characters and contain only letters, numbers,
-                      or dashes.
+                      Must be 8 characters and contain only letters, numbers, or
+                      dashes.
                     </p>
 
                     <div className="mb-3">
@@ -467,8 +472,8 @@ export default function ManageUser() {
                           : "opacity-0 -translate-y-2"
                       }`}
                     >
-                      Must be 8–30 characters and contain only letters, numbers,
-                      or dashes.
+                      Must be 8 characters and contain only letters, numbers, or
+                      dashes.
                     </p>
                     {/* {username.length < 8 && (
                       <p className="validator-hint mb-2">

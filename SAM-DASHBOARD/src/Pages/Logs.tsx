@@ -23,6 +23,10 @@ export default function Logs() {
     });
   };
 
+  const sortedLogs = [...logs].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+
   return (
     <>
       {success && (
@@ -46,11 +50,17 @@ export default function Logs() {
             {loading && <p>Memuat data...</p>}
             {error && <p className="text-red-500">{error}</p>}
             {!loading && logs.length === 0 && <p>Tidak ada data log.</p>}
-            {!loading && logs.length > 0 && (
+
+            {!loading && sortedLogs.length > 0 && (
               <div className="">
-                {logs.map((log: any, index: number) => (
-                  <div key={log.id} className="">
-                    {formatDate(log.createdAt).split("/").join("-")} {" - "}{" "}
+                {sortedLogs.map((log: any, index: number) => (
+                  <div
+                    key={log.id}
+                    className=" p-1 border-gray-700 text-gray-700"
+                  >
+                    <span className="font-medium text-gray-900">
+                      {formatDate(log.createdAt).split("/").join("-")} {" - "}{" "}
+                    </span>
                     {log.activity}
                   </div>
                 ))}

@@ -70,6 +70,12 @@ export default function ManageEmail() {
     modal?.close();
   };
 
+  const handleOpenRegister = () => {
+    setEmailName("");
+    setSelectedIds([]); // reset pilihan checkbox biar gak keikut
+    handleOpenModal("modal_register");
+  };
+
   const handleSelectEmail = (id: number) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
@@ -233,7 +239,8 @@ export default function ManageEmail() {
           <div className="pt-5 flex gap-3 justify-end">
             <CustomButton
               text="Add Email"
-              onClick={() => handleOpenModal("modal_register")}
+              onClick={handleOpenRegister}
+              // onClick={() => handleOpenModal("modal_register")}
               className="btn-success"
             />
             <CustomButton

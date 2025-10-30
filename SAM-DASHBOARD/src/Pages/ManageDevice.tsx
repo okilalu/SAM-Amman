@@ -68,6 +68,18 @@ export default function ManageDevice() {
     modal?.close();
   };
 
+  const handleOpenRegister = () => {
+    setSamId("");
+    setDeviceIP("");
+    setDeviceRootFolder("");
+    setCameraIP("");
+    setCameraRootFolder("");
+    setCameraType("");
+    setLocation("");
+    setSelectedIds([]); // reset pilihan checkbox biar gak keikut
+    handleOpenModal("modal_register");
+  };
+
   const handleSelectPortable = (id: string) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
@@ -374,7 +386,8 @@ export default function ManageDevice() {
               <div className="pt-5 flex gap-3 justify-end">
                 <CustomButton
                   text="Add Device"
-                  onClick={() => handleOpenModal("modal_register")}
+                  onClick={handleOpenRegister}
+                  // onClick={() => handleOpenModal("modal_register")}
                   className="btn-success"
                 />
                 <CustomButton
