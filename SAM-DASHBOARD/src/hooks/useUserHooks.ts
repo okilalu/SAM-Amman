@@ -87,7 +87,7 @@ export function useUserData({ closeModal }: UserDataProps) {
       setSuccess("Successfuly deleted user");
       await validateAllUsers();
       closeModal?.();
-    } catch (err: any) {
+    } catch (err) {
       console.log(err);
       setError("Failed to deleted user");
     } finally {

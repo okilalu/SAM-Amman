@@ -1,4 +1,4 @@
-import { getToken, removeToken, saveToken } from "./../../../utils/auth";
+// import { getToken, removeToken, saveToken } from "./../../../utils/auth";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import { uri } from "../../../utils/uri";
@@ -16,8 +16,10 @@ export const createUser = createAsyncThunk<UserResponse, User>(
     try {
       const response = await axios.post(`${uri}/api/v1/register/user`, data);
       return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data || "Registration failed");
+    } catch (error) {
+      console.log(error);
+      return rejectWithValue("Registration failed");
+      // return rejectWithValue(error.response?.data || "Registration failed");
     }
   }
 );
@@ -32,10 +34,10 @@ export const login = createAsyncThunk<UserResponse, User>(
       });
 
       return response.data;
-    } catch (error: any) {
+    } catch (error) {
       console.log(error);
-
-      return rejectWithValue(error.response?.data || "Login Failed");
+      return rejectWithValue("Login Failed");
+      // return rejectWithValue(error.response?.data || "Login Failed");
     }
   }
 );
@@ -50,11 +52,12 @@ export const currentUser = createAsyncThunk<UserResponse>(
       });
 
       return response.data;
-    } catch (error: any) {
+    } catch (error) {
       console.log(error);
-      return rejectWithValue(
-        error.response?.data || "Failed to fetch current user"
-      );
+      return rejectWithValue("Failed to fetch current user");
+      // return rejectWithValue(
+      //   error.response?.data || "Failed to fetch current user"
+      // );
     }
   }
 );
@@ -73,6 +76,7 @@ export const logout = createAsyncThunk<void>(
       );
       return response.data;
     } catch (error) {
+      console.log(error);
       return rejectWithValue("Failed to log out");
     }
   }
@@ -88,8 +92,10 @@ export const getAllUser = createAsyncThunk<MultiUserResponse>(
       });
       console.log(response);
       return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data ?? error.message);
+    } catch (error) {
+      console.log(error);
+      return rejectWithValue("getAll user Failed");
+      // return rejectWithValue(error.response?.data ?? error.message);
     }
   }
 );
@@ -100,14 +106,18 @@ export const updateUser = createAsyncThunk<
   { userId: string; data: Partial<User> }
 >("user/update", async ({ userId, data }, { rejectWithValue }) => {
   try {
-    // const token = getToken();
     const response = await axios.put(
       `${uri}/api/v1/update/user/${userId}`,
-      data
+      data,
+      {
+        withCredentials: true,
+      }
     );
     return response.data;
-  } catch (error: any) {
-    return rejectWithValue(error.response?.data ?? error.message);
+  } catch (error) {
+    console.log(error);
+    return rejectWithValue("Updated Failed");
+    // return rejectWithValue(error.response?.data ?? error.message);
   }
 });
 // Delete User
@@ -115,11 +125,14 @@ export const deleteUser = createAsyncThunk(
   "history/deleteHistory",
   async ({ data }: { data: string }, thunkAPI) => {
     try {
-      // const token = await localStorage.getItem("token");
-      const response = await axios.delete(`${uri}/api/v1/delete/user/${data}`);
+      const response = await axios.delete(`${uri}/api/v1/delete/user/${data}`, {
+        withCredentials: true,
+      });
       return response.data;
-    } catch (err: any) {
-      return thunkAPI.rejectWithValue(err.response?.data || err.message);
+    } catch (err) {
+      console.log(err);
+      return thunkAPI.rejectWithValue("Deleted User Failed");
+      // return thunkAPI.rejectWithValue(err.response?.data || err.message);
     }
   }
 );
