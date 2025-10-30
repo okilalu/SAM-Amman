@@ -115,7 +115,7 @@ export default function CustomGrafik() {
 
   return (
     <div className="bg-white rounded-xl shadow p-6">
-      {isLoading ? (
+      {isLoading && dataValue.length < 0 ? (
         <CustomMainLoading variant="chart" />
       ) : (
         <>
