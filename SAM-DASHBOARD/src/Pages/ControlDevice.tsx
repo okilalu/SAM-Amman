@@ -38,6 +38,8 @@ export default function ControlDevice() {
   const [warning, setWarning] = useState<string | null>(null);
   const [isDeviceLoading, setIsDeviceLoading] = useState(true);
   const [isUserLoading, setIsUserLoading] = useState(true);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [selectedDevices, setSelectedDevices] = useState<any[]>([]);
 
   // Filter & sort
   const filteredUsers =
@@ -75,11 +77,29 @@ export default function ControlDevice() {
   const handleCloseModal = (id: string) =>
     (document.getElementById(id) as HTMLDialogElement)?.close();
 
-  const handleSelectDevice = (id: string) => {
+  const handleSelectDevice = (deviceId: string) => {
+    const selectedDevice = devices.find((d) => d.deviceId === deviceId);
     setDeviceId((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+      prev.includes(deviceId)
+        ? prev.filter((x) => x !== deviceId)
+        : [...prev, deviceId]
     );
+    setSelectedDevices((prev) => {
+      const exists = prev.find((d) => d.deviceId === deviceId);
+      if (exists) {
+        return prev.filter((d) => d.deviceId !== deviceId);
+      } else if (selectedDevice) {
+        return [...prev, selectedDevice];
+      }
+      return prev;
+    });
   };
+
+  // const handleSelectDevice = (id: string) => {
+  //   setDeviceId((prev) =>
+  //     prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+  //   );
+  // };
 
   const handlePermission = async () => {
     if (!userId) {
@@ -101,6 +121,11 @@ export default function ControlDevice() {
       setError("Failed to add permissions" + error);
     } finally {
       setIsProcessing(false);
+
+      setDeviceId([]);
+      setUserId("");
+      setSelectedUser(null);
+      setSelectedDevices([]);
     }
   };
 
@@ -124,6 +149,11 @@ export default function ControlDevice() {
       setError("Failed to revoke permissions" + error);
     } finally {
       setIsProcessing(false);
+
+      setDeviceId([]);
+      setUserId("");
+      setSelectedUser(null);
+      setSelectedDevices([]);
     }
   };
 
@@ -257,11 +287,14 @@ export default function ControlDevice() {
                             type="checkbox"
                             className="checkbox checkbox-neutral"
                             checked={userId === item.userId}
-                            onChange={() =>
+                            onChange={() => {
                               setUserId((prev) =>
                                 prev === item.userId ? "" : item.userId!
-                              )
-                            }
+                              );
+                              setSelectedUser((prev: any) =>
+                                prev?.userId === item.userId ? null : item
+                              );
+                            }}
                           />
                         </td>
                         <td>{idx + 1}</td>
@@ -361,8 +394,16 @@ export default function ControlDevice() {
                 <div className="px-3 py-2">
                   <p>
                     Apakah anda akan memberikan akses ke user{" "}
-                    <strong>{userId}</strong> untuk device{" "}
-                    <strong>{deviceId.join(", ")}</strong>?
+                    <strong>
+                      {selectedUser?.username || "Tidak ada user dipilih"}
+                    </strong>{" "}
+                    untuk device{" "}
+                    <strong>
+                      {selectedDevices.length > 0
+                        ? selectedDevices.map((d) => d.samId).join(", ")
+                        : "Tidak ada device dipilih"}
+                    </strong>
+                    ?
                   </p>
                 </div>
               </CustomModal>
@@ -376,8 +417,16 @@ export default function ControlDevice() {
                 <div className="px-3 py-2">
                   <p>
                     Apakah anda akan mencabut akses user{" "}
-                    <strong>{userId}</strong> dari device{" "}
-                    <strong>{deviceId.join(", ")}</strong>?
+                    <strong>
+                      {selectedUser?.username || "Tidak ada user dipilih"}
+                    </strong>{" "}
+                    dari device{" "}
+                    <strong>
+                      {selectedDevices.length > 0
+                        ? selectedDevices.map((d) => d.samId).join(", ")
+                        : "Tidak ada device dipilih"}
+                    </strong>
+                    ?
                   </p>
                 </div>
               </CustomModal>
