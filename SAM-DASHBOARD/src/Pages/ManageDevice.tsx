@@ -155,7 +155,7 @@ export default function ManageDevice() {
     const selectedDevice = devices?.find((d) => d.samId === selectedId);
 
     if (!selectedDevice) {
-      setWarning("Device tidak ditemukan");
+      setWarning("Can't find device");
       return;
     }
 
@@ -408,50 +408,70 @@ export default function ManageDevice() {
                 confirmText="Register"
                 onSubmit={handleRegister}
               >
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col">
+                  <label className="px-1 text-sm font-medium text-gray-600 mb-1">
+                    Portable Device Id
+                  </label>
                   <input
                     type="text"
                     placeholder="Portable Device ID"
-                    className="w-full bg-gray-200 rounded-md p-2"
+                    className="mb-2 w-full bg-gray-200 rounded-md p-2"
                     value={samId}
                     onChange={(e) => setSamId(e.target.value)}
                   />
+                  <label className="px-1 text-sm font-medium text-gray-600 mb-1">
+                    Device Address
+                  </label>
                   <input
                     type="text"
                     placeholder="Device Address"
-                    className="w-full bg-gray-200 rounded-md p-2"
+                    className="mb-2 w-full bg-gray-200 rounded-md p-2"
                     value={deviceIP}
                     onChange={(e) => setDeviceIP(e.target.value)}
                   />
+                  <label className="px-1 text-sm font-medium text-gray-600 mb-1">
+                    Device Root Folder
+                  </label>
                   <input
                     type="text"
                     placeholder="Device Root Folder"
-                    className="w-full bg-gray-200 rounded-md p-2"
+                    className="mb-2 w-full bg-gray-200 rounded-md p-2"
                     value={deviceRootFolder}
                     onChange={(e) => setDeviceRootFolder(e.target.value)}
                   />
+                  <label className="px-1 text-sm font-medium text-gray-600 mb-1">
+                    Camera IP
+                  </label>
                   <input
                     type="text"
                     placeholder="Camera IP"
-                    className="w-full bg-gray-200 rounded-md p-2"
+                    className="mb-2 w-full bg-gray-200 rounded-md p-2"
                     value={cameraIP}
                     onChange={(e) => setCameraIP(e.target.value)}
                   />
+                  <label className="px-1 text-sm font-medium text-gray-600 mb-1">
+                    Camera Root Folder
+                  </label>
                   <input
                     type="text"
                     placeholder="Camera Root Folder"
-                    className="w-full bg-gray-200 rounded-md p-2"
+                    className="mb-2 w-full bg-gray-200 rounded-md p-2"
                     value={cameraRootFolder}
                     onChange={(e) => setCameraRootFolder(e.target.value)}
                   />
+                  <label className="px-1 text-sm font-medium text-gray-600 mb-1">
+                    Camera Type
+                  </label>
                   <input
                     type="text"
                     placeholder="Camera Type"
-                    className="w-full bg-gray-200 rounded-md p-2"
+                    className="mb-2 w-full bg-gray-200 rounded-md p-2"
                     value={cameraType}
                     onChange={(e) => setCameraType(e.target.value)}
                   />
-
+                  <label className="px-1 text-sm font-medium text-gray-600 mb-1">
+                    Location
+                  </label>
                   <CustomSelects
                     value={
                       locationsOption.find((opt) => opt.value === location) ||
@@ -463,7 +483,7 @@ export default function ManageDevice() {
                     background="bg-gray-200 border-none text-black"
                   />
 
-                  <div className="flex justify-between">
+                  <div className="flex justify-between mt-4">
                     <div className="flex items-center flex-row gap-2">
                       <input
                         type="checkbox"
@@ -497,49 +517,69 @@ export default function ManageDevice() {
                 onSubmit={handleUpdate}
               >
                 <div className="flex flex-col">
+                  <label className="px-1 text-sm font-medium text-gray-600 mb-1">
+                    Portable Device Id
+                  </label>
                   <input
                     type="text"
                     placeholder="Portable Device ID"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                    className="mb-2 w-full bg-gray-200 rounded-md p-2"
                     value={samId}
                     onChange={(e) => setSamId(e.target.value)}
                   />
+                  <label className="px-1 text-sm font-medium text-gray-600 mb-1">
+                    Device Address
+                  </label>
                   <input
                     type="text"
                     placeholder="Device Address"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                    className="mb-2 w-full bg-gray-200 rounded-md p-2"
                     value={deviceIP}
                     onChange={(e) => setDeviceIP(e.target.value)}
                   />
+                  <label className="px-1 text-sm font-medium text-gray-600 mb-1">
+                    Device Root Folder
+                  </label>
                   <input
                     type="text"
                     placeholder="Device Root Folder"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                    className="mb-2 w-full bg-gray-200 rounded-md p-2"
                     value={deviceRootFolder}
                     onChange={(e) => setDeviceRootFolder(e.target.value)}
                   />
+                  <label className="px-1 text-sm font-medium text-gray-600 mb-1">
+                    Camera IP
+                  </label>
                   <input
                     type="text"
                     placeholder="Camera IP"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                    className="mb-2 w-full bg-gray-200 rounded-md p-2"
                     value={cameraIP}
                     onChange={(e) => setCameraIP(e.target.value)}
                   />
+                  <label className="px-1 text-sm font-medium text-gray-600 mb-1">
+                    Camera Root Folder
+                  </label>
                   <input
                     type="text"
                     placeholder="Camera Root Folder"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                    className="mb-2 w-full bg-gray-200 rounded-md p-2"
                     value={cameraRootFolder}
                     onChange={(e) => setCameraRootFolder(e.target.value)}
                   />
+                  <label className="px-1 text-sm font-medium text-gray-600 mb-1">
+                    Camera Type
+                  </label>
                   <input
                     type="text"
                     placeholder="Camera Type"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                    className="mb-2 w-full bg-gray-200 rounded-md p-2"
                     value={cameraType}
                     onChange={(e) => setCameraType(e.target.value)}
                   />
-
+                  <label className="px-1 text-sm font-medium text-gray-600 mb-1">
+                    Location
+                  </label>
                   <CustomSelects
                     value={
                       locationsOption.find((opt) => opt.value === location) ||
@@ -551,7 +591,7 @@ export default function ManageDevice() {
                     background="bg-gray-200 border-none text-black"
                   />
 
-                  <div className="flex justify-between">
+                  <div className="flex justify-between mt-4">
                     <div className="flex items-center flex-row gap-2">
                       <input
                         type="checkbox"
@@ -584,7 +624,9 @@ export default function ManageDevice() {
                 confirmText="Delete"
                 onSubmit={handleDelete}
               >
-                <p>Apakah Anda yakin ingin menghapus data ini?</p>
+                <p className="px-1">
+                  Apakah Anda yakin ingin menghapus data ini?
+                </p>
               </CustomModal>
             </>
           )}

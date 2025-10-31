@@ -93,7 +93,7 @@ export default function ManageLocation() {
 
   const handlePrefillUpdate = () => {
     if (selectedIds.length !== 1) {
-      setWarning("Pilih tepat satu lokasi untuk diperbarui");
+      setWarning("Choose at least one location");
       return;
     }
     const selectedLoc = locations?.find(
@@ -106,7 +106,7 @@ export default function ManageLocation() {
 
   const handleUpdate = async () => {
     if (selectedIds.length !== 1) {
-      setWarning("Pilih tepat satu lokasi untuk diperbarui");
+      setWarning("Choose at least one location");
       return;
     }
     const selectedId = Number(selectedIds[0]);
@@ -131,7 +131,7 @@ export default function ManageLocation() {
 
   const handleDelete = async () => {
     if (selectedIds.length === 0) {
-      setWarning("Pilih minimal satu lokasi untuk dihapus");
+      setWarning("Choose at least one location");
       return;
     }
     try {
@@ -323,13 +323,18 @@ export default function ManageLocation() {
                   confirmText="Register"
                   onSubmit={handleRegister}
                 >
-                  <input
-                    type="text"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    className="bg-gray-200 w-full rounded-md p-2"
-                    placeholder="Location Name"
-                  />
+                  <div className="flex flex-col">
+                    <label className="px-1 text-sm font-medium text-gray-600 mb-1">
+                      Location
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Location Name"
+                      className="bg-gray-200 w-full rounded-md p-2"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                    />
+                  </div>
                 </CustomModal>
 
                 <CustomModal
@@ -338,13 +343,18 @@ export default function ManageLocation() {
                   confirmText="Update"
                   onSubmit={handleUpdate}
                 >
-                  <input
-                    type="text"
-                    placeholder="Update Location"
-                    className="mb-4 w-full bg-gray-200 rounded-md p-2"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                  />
+                  <div className="flex flex-col">
+                    <label className="px-1 text-sm font-medium text-gray-600 mb-1">
+                      Location
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Update Location"
+                      className="mb-4 w-full bg-gray-200 rounded-md p-2"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                    />
+                  </div>
                 </CustomModal>
 
                 <CustomModal

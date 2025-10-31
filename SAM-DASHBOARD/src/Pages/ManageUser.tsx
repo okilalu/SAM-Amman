@@ -366,6 +366,9 @@ export default function ManageUser() {
                   onSubmit={handleRegister}
                 >
                   <div className="flex flex-col">
+                    <label className="text-sm px-1 font-medium text-gray-600 mb-0.5">
+                      Username
+                    </label>
                     <label className="input validator w-full bg-gray-200 rounded-md">
                       <input
                         type="text"
@@ -395,6 +398,9 @@ export default function ManageUser() {
 
                     <div className="mb-3">
                       <div className="relative w-full">
+                        <label className="px-1 text-sm font-medium text-gray-600 mb-1">
+                          Password
+                        </label>
                         <input
                           type={show ? "text" : "password"}
                           placeholder="Enter Password (min 8 karakter)"
@@ -411,7 +417,7 @@ export default function ManageUser() {
                           <button
                             type="button"
                             onClick={handleShowPass}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-900 transition"
+                            className="absolute right-3 top-11 -translate-y-1/2 text-gray-600 hover:text-gray-900 transition"
                           >
                             {show ? <FaEye /> : <FaEyeSlash />}
                           </button>
@@ -424,18 +430,22 @@ export default function ManageUser() {
                         </span>
                       )}
                     </div>
-
-                    <CustomSelects
-                      value={
-                        optionCredentials.find(
-                          (opt) => opt.value === credential
-                        ) || null
-                      }
-                      onChange={(val) => setCredential(val)}
-                      options={optionCredentials}
-                      flex="flex-row"
-                      background="bg-gray-200 border-none text-black"
-                    />
+                    <div className="pt-3">
+                      <label className="px-1 text-sm font-medium text-gray-600 mb-1">
+                        Credential
+                      </label>
+                      <CustomSelects
+                        value={
+                          optionCredentials.find(
+                            (opt) => opt.value === credential
+                          ) || null
+                        }
+                        onChange={(val) => setCredential(val)}
+                        options={optionCredentials}
+                        flex="flex-row"
+                        background="bg-gray-200 border-none text-black"
+                      />
+                    </div>
                   </div>
                 </CustomModal>
 

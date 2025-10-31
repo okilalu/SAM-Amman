@@ -264,6 +264,9 @@ export default function ManageEmail() {
               onSubmit={handleRegister}
             >
               <div className="flex flex-col">
+                <label className="px-1 text-sm font-medium text-gray-600 mb-1">
+                  Email
+                </label>
                 <input
                   type="text"
                   placeholder="Masukkan nama email"
@@ -282,6 +285,9 @@ export default function ManageEmail() {
               onSubmit={handleUpdate}
             >
               <div className="flex flex-col">
+                <label className="px-1 text-sm font-medium text-gray-600 mb-1">
+                  Email
+                </label>
                 <input
                   type="text"
                   placeholder="Masukkan nama email"
@@ -299,7 +305,7 @@ export default function ManageEmail() {
               confirmText="Hapus"
               onSubmit={handleDelete}
             >
-              <div className="flex flex-col text-center">
+              <div className="flex flex-col px-1">
                 <p>
                   Apakah anda yakin ingin menghapus{" "}
                   <strong>{selectedIds.length}</strong> email?
