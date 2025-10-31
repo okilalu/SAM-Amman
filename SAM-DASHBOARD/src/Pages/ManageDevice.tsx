@@ -12,6 +12,7 @@ import { FaCheckCircle } from "react-icons/fa";
 import { IoWarningOutline } from "react-icons/io5";
 import { CustomButton } from "@/components/CustomButton";
 import { CustomMainLoading } from "@/components/CustomMainLoading";
+import type { Device } from "../../types/types";
 
 export default function ManageDevice() {
   const {
@@ -117,8 +118,7 @@ export default function ManageDevice() {
     }
 
     try {
-      setLoading(true);
-      await handleGenerateDevice({
+      const payload = {
         samId,
         deviceIP,
         deviceRootFolder,
@@ -126,7 +126,9 @@ export default function ManageDevice() {
         cameraRootFolder,
         cameraType,
         location,
-      });
+      };
+      setLoading(true);
+      await handleGenerateDevice(payload as Device);
 
       handleCloseModal("modal_register");
       await fetchAllDevices();

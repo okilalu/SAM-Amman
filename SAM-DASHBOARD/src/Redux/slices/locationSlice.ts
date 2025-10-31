@@ -13,7 +13,7 @@ import { uri } from "../../../utils/uri";
 
 export const createLocation = createAsyncThunk<
   LocationResponse,
-  { data: Partial<Location> }
+  { data: string }
 >("location/create", async ({ data }, { rejectWithValue }) => {
   console.log(data);
   try {
@@ -120,7 +120,7 @@ const locationSlice = createSlice({
       )
       .addCase(createLocation.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload ?? "Failed to create location";
+        state.error = (action.payload as string) ?? "Failed to create location";
       })
 
       // GET ALL

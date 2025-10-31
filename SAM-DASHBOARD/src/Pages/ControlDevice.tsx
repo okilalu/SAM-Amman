@@ -13,6 +13,7 @@ import { FaCheckCircle } from "react-icons/fa";
 import { IoWarningOutline } from "react-icons/io5";
 import { CustomButton } from "@/components/CustomButton";
 import { CustomMainLoading } from "@/components/CustomMainLoading";
+import type { Device, User } from "../../types/types";
 
 export default function ControlDevice() {
   const { devices, fetchAllDevices } = useDeviceData({});
@@ -38,8 +39,8 @@ export default function ControlDevice() {
   const [warning, setWarning] = useState<string | null>(null);
   const [isDeviceLoading, setIsDeviceLoading] = useState(true);
   const [isUserLoading, setIsUserLoading] = useState(true);
-  const [selectedUser, setSelectedUser] = useState<any>(null);
-  const [selectedDevices, setSelectedDevices] = useState<any[]>([]);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedDevices, setSelectedDevices] = useState<Device[]>([]);
 
   // Filter & sort
   const filteredUsers =
@@ -84,7 +85,7 @@ export default function ControlDevice() {
         ? prev.filter((x) => x !== deviceId)
         : [...prev, deviceId]
     );
-    setSelectedDevices((prev) => {
+    setSelectedDevices((prev: Device[]) => {
       const exists = prev.find((d) => d.deviceId === deviceId);
       if (exists) {
         return prev.filter((d) => d.deviceId !== deviceId);
@@ -291,7 +292,7 @@ export default function ControlDevice() {
                               setUserId((prev) =>
                                 prev === item.userId ? "" : item.userId!
                               );
-                              setSelectedUser((prev: any) =>
+                              setSelectedUser((prev: User | null) =>
                                 prev?.userId === item.userId ? null : item
                               );
                             }}

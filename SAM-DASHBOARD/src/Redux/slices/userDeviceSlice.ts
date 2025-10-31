@@ -2,7 +2,6 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import type { UserDeviceResponse, UserDeviceState } from "../../../types/types";
 import { uri } from "../../../utils/uri";
-import { getToken } from "../../../utils/auth";
 
 export const addPermission = createAsyncThunk<
   UserDeviceResponse,

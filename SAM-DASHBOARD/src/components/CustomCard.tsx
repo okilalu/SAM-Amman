@@ -25,7 +25,7 @@ interface CustomCardProps {
   icon?: IconType;
   type?: "storage" | "totalRecord" | "averageSpeed" | "overspeed";
   value?: SummaryData[];
-  valueData?: StorageData;
+  valueData?: StorageData | null;
 }
 
 export default function CustomCard({

@@ -53,7 +53,7 @@ export default function Logs() {
 
             {!loading && sortedLogs.length > 0 && (
               <div className="">
-                {sortedLogs.map((log: any, index: number) => (
+                {sortedLogs.map((log) => (
                   <div
                     key={log.id}
                     className=" p-1 border-gray-700 text-gray-700"

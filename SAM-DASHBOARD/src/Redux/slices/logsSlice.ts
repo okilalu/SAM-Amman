@@ -4,7 +4,7 @@ import {
   type PayloadAction,
 } from "@reduxjs/toolkit";
 import axios from "axios";
-import type { Log, LogState, LogResponse } from "../../../types/types";
+import type { LogState, LogResponse } from "../../../types/types";
 import { uri } from "../../../utils/uri";
 
 const initialState: LogState = {

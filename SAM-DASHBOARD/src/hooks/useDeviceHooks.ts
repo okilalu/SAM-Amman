@@ -6,7 +6,7 @@ import {
   storageInfo,
 } from "../Redux/slices/deviceSlice";
 import type { AppDispatch } from "../Redux/store";
-import type { Device } from "../../types/types";
+import type { Device, StorageData } from "../../types/types";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 
@@ -16,14 +16,11 @@ interface UseDeviceDataProps {
   value?: Partial<Device>;
   samId?: string;
 }
-export function useDeviceData({
-  deviceId,
-  closeModal,
-  value,
-}: UseDeviceDataProps) {
+export function useDeviceData({ closeModal }: UseDeviceDataProps) {
   const dispatch = useDispatch<AppDispatch>();
   const [devices, setDevices] = useState<Device[]>([]);
-  const [storage, setStorage] = useState();
+  // const [storage, setStorage] = useState();
+  const [storage, setStorage] = useState<StorageData | null>(null);
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -39,13 +36,13 @@ export function useDeviceData({
         generateDevice({ data: value as Device })
       ).unwrap();
 
-      setDevices((prev) => [...prev, res.data.device as Device]);
+      setDevices((prev) => [...prev, res.data.device as unknown as Device]);
       setSuccess("Device created successfully");
 
       await fetchAllDevices();
       closeModal?.();
       return res;
-    } catch (err: any) {
+    } catch (err) {
       console.log(err);
     } finally {
       setIsLoading(false);
@@ -60,8 +57,8 @@ export function useDeviceData({
       setDevices(res.data.device || []);
       setSuccess("Devices fetched successfully");
       return res;
-    } catch (err: any) {
-      setError(err?.message || "Gagal memuat perangkat");
+    } catch (err) {
+      setError("Gagal memuat perangkat");
       console.log(err);
     } finally {
       setIsLoading(false);
@@ -91,9 +88,8 @@ export function useDeviceData({
       await fetchAllDevices();
       closeModal?.();
       return res;
-    } catch (err: any) {
-      const msg = err?.message || "Gagal memperbarui perangkat";
-      setError(msg);
+    } catch (err) {
+      setError("Gagal memperbarui perangkat");
       console.log(err);
     } finally {
       setIsLoading(false);
@@ -112,7 +108,7 @@ export function useDeviceData({
       alert("Berhasil Menghapus data");
       await fetchAllDevices();
       closeModal?.();
-    } catch (err: any) {
+    } catch (err) {
       console.log(err);
     } finally {
       setIsLoading(false);
@@ -125,11 +121,11 @@ export function useDeviceData({
     setError("");
     try {
       const res = await dispatch(storageInfo()).unwrap();
-      setStorage(res.data);
+      setStorage(res.data as unknown as StorageData);
       setSuccess("Devices fetched successfully");
       return res;
-    } catch (err: any) {
-      setError(err?.message || "Gagal memuat perangkat");
+    } catch (err) {
+      setError("Gagal memuat perangkat");
       console.log(err);
     } finally {
       setIsLoading(false);

@@ -68,6 +68,7 @@ export const storageInfo = createAsyncThunk<DeviceResponse>(
   async (_, { rejectWithValue }) => {
     try {
       const response = await axios.get(`${uri}/api/v2/system/info`);
+
       return response.data;
     } catch (error: any) {
       return rejectWithValue(error.response?.data);
@@ -115,16 +116,18 @@ const deviceSlice = createSlice({
     });
     builder.addCase(updateDevice.fulfilled, (state, action) => {
       state.loading = false;
+
       const updated = Array.isArray(action.payload.data.device)
         ? action.payload.data.device[0]
         : action.payload.data.device;
 
-      if (updated) {
+      if (updated && updated.id) {
         state.devices = state.devices.map((d) =>
-          d.id === updateDevice.id ? updated : d
+          d.id === updated.id ? updated : d
         );
       }
     });
+
     builder.addCase(updateDevice.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload as string;

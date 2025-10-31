@@ -36,9 +36,9 @@ export function useLocationData({ closeModal }: UseLocationProps = {}) {
       await fetchAllLocations();
       closeModal?.();
       return res;
-    } catch (err: any) {
+    } catch (err) {
       console.error("❌ Create Location Error:", err);
-      setError(err?.message || "Gagal menambah lokasi");
+      setError("Gagal menambah lokasi");
     } finally {
       setLoading(false);
     }
@@ -65,9 +65,9 @@ export function useLocationData({ closeModal }: UseLocationProps = {}) {
         setError(res.message || "Gagal memperbarui lokasi");
       }
       return res;
-    } catch (err: any) {
+    } catch (err) {
       console.error("❌ Update Location Error:", err);
-      setError(err?.message || "Gagal memperbarui lokasi");
+      setError("Gagal memperbarui lokasi");
     } finally {
       setLoading(false);
     }
@@ -86,9 +86,9 @@ export function useLocationData({ closeModal }: UseLocationProps = {}) {
       setSuccess("Lokasi berhasil dihapus");
       await fetchAllLocations();
       closeModal?.();
-    } catch (err: any) {
+    } catch (err) {
       console.error("❌ Delete Location Error:", err);
-      setError(err?.message || "Gagal menghapus lokasi");
+      setError("Gagal menghapus lokasi");
     } finally {
       setLoading(false);
     }
@@ -112,8 +112,10 @@ export function useLocationData({ closeModal }: UseLocationProps = {}) {
       setSuccess(res?.message ?? "Fetched");
 
       return res;
-    } catch (err: any) {
-      setError(err?.message || "Gagal memuat daftar lokasi");
+    } catch (err) {
+      console.log(err);
+
+      setError("Gagal memuat daftar lokasi");
       return undefined;
     } finally {
       setLoading(false);

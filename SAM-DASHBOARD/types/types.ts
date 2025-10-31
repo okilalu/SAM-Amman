@@ -39,7 +39,7 @@ export interface MultiUserResponse {
 }
 
 // Device state
-export interface Device {
+export interface Device extends StorageData {
   id?: number;
   deviceId?: string;
   samId?: string;
@@ -54,12 +54,6 @@ export interface Device {
   location?: string;
   speedThreshold?: string;
   speed_limit?: number;
-  path: string;
-  total: string;
-  used: string;
-  free: string;
-  usedPercent: string;
-  availablePercent: string;
 }
 
 export interface DeviceState {
@@ -116,7 +110,7 @@ export interface DataResponse {
 export interface Raspi {
   samId: string;
   status?: string;
-  data?: any;
+  data?: Datas;
   speed_limit?: number;
 }
 
@@ -170,7 +164,9 @@ export interface EmailsResponse {
 
 // Logs State
 export interface Log {
-  acttivity: string;
+  activity: string;
+  id: string;
+  createdAt: string;
 }
 
 export interface LogResponse {
@@ -220,4 +216,20 @@ export interface UserDeviceResponse {
   data: UserDevice[];
   status: boolean;
   message: string;
+}
+
+export interface StorageData {
+  path: string;
+  total: string;
+  used: string;
+  free: string;
+  usedPercent: string;
+  availablePercent: string;
+}
+
+export interface SummaryData {
+  samId: string;
+  totalRecords: number;
+  averageSpeed: number;
+  overSpeed: number;
 }

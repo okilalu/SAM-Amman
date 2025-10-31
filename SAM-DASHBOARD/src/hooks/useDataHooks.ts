@@ -7,13 +7,13 @@ import {
   getSummaryData,
 } from "../Redux/slices/dataSlicer";
 import type { AppDispatch } from "../Redux/store";
-import type { Datas } from "../../types/types";
+import type { Datas, SummaryData } from "../../types/types";
 
 export function useData() {
   const dispatch = useDispatch<AppDispatch>();
   const [data, setData] = useState<Datas[]>([]);
-  const [summary, setSummary] = useState<Datas[]>([]);
-  const [chartData, setChartData] = useState<any[]>([]);
+  const [summary, setSummary] = useState<SummaryData[]>([]);
+  const [chartData, setChartData] = useState<Datas[]>([]);
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -112,7 +112,7 @@ export function useData() {
     try {
       const res = await dispatch(getSummaryData()).unwrap();
 
-      setSummary(res.data);
+      setSummary(res.data as unknown as SummaryData[]);
       setSuccess("Data loaded successfully");
     } catch (err) {
       console.error(err);
