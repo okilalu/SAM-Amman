@@ -7,13 +7,13 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     port: 5173,
-    proxy: {
-      "/api": {
-        target: "https://samviewer.com",
-        changeOrigin: true,
-        secure: false,
-      },
-    },
+    // proxy: {
+    //   "/api": {
+    //     target: "https://samviewer.com",
+    //     changeOrigin: true,
+    //     secure: false,
+    //   },
+    // },
   },
   resolve: {
     alias: {
