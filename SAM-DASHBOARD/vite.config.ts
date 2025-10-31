@@ -9,7 +9,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/api": {
-        target: "https://dt974l71-2090.asse.devtunnels.ms",
+        target: "https://samviewer.com",
         changeOrigin: true,
         secure: false,
       },
