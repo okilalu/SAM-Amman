@@ -1,7 +1,4 @@
 // export const uri = "http://localhost:2090";
-// export const uri = "https://samviewer.com";
-// src/utils/uri.ts
-export const uri = import.meta.env.VITE_API_URI;
-
+export const uri = "https://samviewer.com";
 // export const uri = "https://dt974l71-2090.asse.devtunnels.ms";
 // export const uri = "http://192.168.1.10:2090";
