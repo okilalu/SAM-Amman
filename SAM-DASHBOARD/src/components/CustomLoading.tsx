@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDeviceData } from "../hooks/useDeviceHooks";
 import { useUserData } from "../hooks/useUserHooks";
 

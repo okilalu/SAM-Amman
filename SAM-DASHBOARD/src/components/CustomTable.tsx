@@ -1,5 +1,4 @@
 import React from "react";
-import CustomLoading from "./CustomLoading";
 
 type CustomTableProps = {
   headers: string[];

@@ -1,4 +1,4 @@
-import React, { type ReactElement } from "react";
+import { type ReactElement } from "react";
 import { CustomButton } from "./CustomButton";
 
 interface CustomModalProps {
@@ -18,17 +18,14 @@ export default function ModalRegister({
   id,
   onSubmit,
   onClose,
-  onChange,
   showFooter = true,
   confirmText = "OK",
   cancelText = "Cancel",
   title,
   children,
-  width = "max-2-xl",
-  className,
 }: CustomModalProps) {
   const handleClose = () => {
-    const modal = document.getElementById(id) as HTMLDialogElement;
+    const modal = document.getElementById(String(id)) as HTMLDialogElement;
     if (modal) modal.close();
     if (onClose) onClose();
   };

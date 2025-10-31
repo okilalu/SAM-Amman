@@ -6,6 +6,9 @@ import { CustomSelects } from "@/components/CustomSelects";
 import { CustomPagination } from "@/components/CustomPagination";
 import { useUserDeviceData } from "@/hooks/useUserDeviceHooks";
 import { CustomMainLoading } from "@/components/CustomMainLoading";
+import { CustomButton } from "@/components/CustomButton";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 export default function Portable() {
   const { data, handleFilterData, handleGetAllData, isLoading } = useData();
@@ -27,6 +30,7 @@ export default function Portable() {
   const [selectedDevice, setSelectedDevice] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  // const [device, setDevice] = useState();
 
   useEffect(() => {
     fetchAllAccessible();
@@ -107,6 +111,40 @@ export default function Portable() {
   );
   const handlePageChange = (page: number) => setCurrentPage(page);
 
+  const handleExportExcel = () => {
+    if (!data || data.length === 0) {
+      alert("Tidak ada data untuk diexport.");
+      return;
+    }
+
+    const exportData = data.map((item, index) => ({
+      No: index + 1,
+      Portable_Name: item.samId,
+      Log_Time: new Date(item.createdAt as string).toLocaleString(),
+      Over_Speed: item.category === "over speed" ? "TRUE" : "FALSE",
+      Speed: item.speed,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    const file = new Blob([excelBuffer], {
+      type: "application/octet-stream",
+    });
+    console.log(excelBuffer);
+
+    const filename = `data_viewer_${selectedDevice}_${
+      new Date().toISOString().split("T")[0]
+    }.xlsx`;
+    saveAs(file, filename);
+  };
+
   return (
     <div className="flex gap-3">
       <div className="flex-1 text-sm text-black">
@@ -179,19 +217,28 @@ export default function Portable() {
             </div>
           </div>
 
-          <div className="flex gap-5 justify-end">
-            <button
-              onClick={handleClear}
-              className="btn bg-transparent border border-[#63b1bb] shadow-none text-[#63b1bb] px-10"
-            >
-              Clear
-            </button>
-            <button
-              onClick={handleSearch}
-              className="btn bg-[#63b1bb] shadow-none border-none px-10 text-white"
-            >
-              {isLoading ? "Searching..." : "Search"}
-            </button>
+          <div className="flex gap-5 justify-between">
+            <div className="flex items-start">
+              <CustomButton
+                text="Create Excel"
+                className="btn btn-success px-5"
+                onClick={handleExportExcel}
+              />
+            </div>
+            <div className="flex gap-5">
+              <button
+                onClick={handleClear}
+                className="btn bg-transparent border border-[#63b1bb] shadow-none text-[#63b1bb] px-10"
+              >
+                Clear
+              </button>
+              <button
+                onClick={handleSearch}
+                className="btn bg-[#63b1bb] shadow-none border-none px-10 text-white"
+              >
+                {isLoading ? "Searching..." : "Search"}
+              </button>
+            </div>
           </div>
         </div>
 

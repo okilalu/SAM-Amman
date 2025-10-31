@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import type { IconType } from "react-icons";
 import { useData } from "@/hooks/useDataHooks";
 import { useDeviceData } from "@/hooks/useDeviceHooks";
