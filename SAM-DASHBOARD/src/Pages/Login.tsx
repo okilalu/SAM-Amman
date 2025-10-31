@@ -1,5 +1,5 @@
 import { MdLockOutline } from "react-icons/md";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useUserData } from "../hooks/useUserHooks";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useState } from "react";
@@ -168,21 +168,6 @@ export default function Login() {
             Login
           </button>
         </form>
-
-        {/* Divider */}
-        <div className="flex items-center my-6">
-          <div className="flex-1 h-px bg-gray-300" />
-          <span className="px-3 text-gray-400 text-sm">OR</span>
-          <div className="flex-1 h-px bg-gray-300" />
-        </div>
-
-        {/* Redirect ke Register */}
-        <p className="text-center text-gray-600 text-sm">
-          Don’t have an account?{" "}
-          <Link to="/register" className="text-blue-500 font-semibold">
-            Sign Up
-          </Link>
-        </p>
       </div>
     </div>
   );
