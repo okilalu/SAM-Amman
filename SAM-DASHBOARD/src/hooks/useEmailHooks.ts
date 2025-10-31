@@ -34,7 +34,8 @@ export function useEmailData({ closeModal }: UseEmailProps = {}) {
       } else {
         setEmails([]);
       }
-      setSuccess(res?.message ?? "Fetched");
+      // setSuccess(res?.message ?? "Fetched");
+      setSuccess("Email fetched successfully");
 
       return res;
     } catch (err: any) {
@@ -136,5 +137,6 @@ export function useEmailData({ closeModal }: UseEmailProps = {}) {
     setError,
     warning,
     setWarning,
+    setSuccess,
   };
 }

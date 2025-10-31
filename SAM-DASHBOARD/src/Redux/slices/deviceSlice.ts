@@ -62,6 +62,19 @@ export const getAllDevice = createAsyncThunk<DeviceResponse>(
   }
 );
 
+// GetAll Device
+export const storageInfo = createAsyncThunk<DeviceResponse>(
+  "storage/Info",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${uri}/api/v2/system/info`);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data);
+    }
+  }
+);
+
 const initialState: DeviceState = {
   devices: [],
   loading: false,
@@ -143,6 +156,20 @@ const deviceSlice = createSlice({
       state.devices = action.payload.data.device || [];
     });
     builder.addCase(getAllDevice.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload as string;
+    });
+
+    // System Info
+    builder.addCase(storageInfo.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(storageInfo.fulfilled, (state, action) => {
+      state.loading = false;
+      state.devices = action.payload.data.device || [];
+    });
+    builder.addCase(storageInfo.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload as string;
     });

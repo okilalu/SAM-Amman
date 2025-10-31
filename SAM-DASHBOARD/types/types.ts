@@ -54,6 +54,12 @@ export interface Device {
   location?: string;
   speedThreshold?: string;
   speed_limit?: number;
+  path: string;
+  total: string;
+  used: string;
+  free: string;
+  usedPercent: string;
+  availablePercent: string;
 }
 
 export interface DeviceState {
@@ -87,6 +93,9 @@ export interface Datas {
   createdAt?: string;
   filterValue?: string;
   filterType?: "day" | "month" | "year";
+  totalRecords?: number;
+  averageSpeed?: number;
+  overSpeed?: number;
 }
 
 export interface DataState {

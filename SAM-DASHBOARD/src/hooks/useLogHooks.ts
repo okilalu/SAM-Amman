@@ -29,7 +29,8 @@ export const useLogs = () => {
       } else {
         setLogs([]);
       }
-      setSuccess(res?.message ?? "Fetched");
+      // setSuccess(res?.message ?? "Fetched");
+      setSuccess("Logs fetched Successfuly");
 
       return res;
     } catch (err: any) {

@@ -1,12 +1,18 @@
 import { useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
-import { filterData, getAll, getAllFilter } from "../Redux/slices/dataSlicer";
+import {
+  filterData,
+  getAll,
+  getAllFilter,
+  getSummaryData,
+} from "../Redux/slices/dataSlicer";
 import type { AppDispatch } from "../Redux/store";
 import type { Datas } from "../../types/types";
 
 export function useData() {
   const dispatch = useDispatch<AppDispatch>();
   const [data, setData] = useState<Datas[]>([]);
+  const [summary, setSummary] = useState<Datas[]>([]);
   const [chartData, setChartData] = useState<any[]>([]);
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
@@ -98,6 +104,25 @@ export function useData() {
     [dispatch]
   );
 
+  const handleGetSummaryData = async () => {
+    setIsLoading(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const res = await dispatch(getSummaryData()).unwrap();
+
+      setSummary(res.data);
+      setSuccess("Data loaded successfully");
+    } catch (err) {
+      console.error(err);
+      const msg = "Gagal memuat data";
+      setError(msg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     isLoading,
     error,
@@ -107,5 +132,7 @@ export function useData() {
     handleFilterData,
     handleGetAllData,
     handleGetAllFilter,
+    handleGetSummaryData,
+    summary,
   };
 }

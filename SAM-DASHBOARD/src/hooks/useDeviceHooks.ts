@@ -3,6 +3,7 @@ import {
   updateDevice,
   deleteDevice,
   getAllDevice,
+  storageInfo,
 } from "../Redux/slices/deviceSlice";
 import type { AppDispatch } from "../Redux/store";
 import type { Device } from "../../types/types";
@@ -22,9 +23,11 @@ export function useDeviceData({
 }: UseDeviceDataProps) {
   const dispatch = useDispatch<AppDispatch>();
   const [devices, setDevices] = useState<Device[]>([]);
+  const [storage, setStorage] = useState();
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [warning, setWarning] = useState<string | null>(null);
 
   const handleGenerateDevice = async (value: Device) => {
     setIsLoading(true);
@@ -73,7 +76,7 @@ export function useDeviceData({
     console.log(deviceId);
 
     if (!deviceId) {
-      alert("Device ID tidak ditemukan");
+      setWarning("Can't find device");
       return;
     }
 
@@ -83,7 +86,6 @@ export function useDeviceData({
       const res = await dispatch(
         updateDevice({ deviceId, data: data || {} })
       ).unwrap();
-      alert("Berhasil memperbarui perangkat");
       setSuccess("Device updated successfully");
 
       await fetchAllDevices();
@@ -117,15 +119,35 @@ export function useDeviceData({
     }
   };
 
+  // Get all devices
+  const getSystemInfo = async () => {
+    setIsLoading(true);
+    setError("");
+    try {
+      const res = await dispatch(storageInfo()).unwrap();
+      setStorage(res.data);
+      setSuccess("Devices fetched successfully");
+      return res;
+    } catch (err: any) {
+      setError(err?.message || "Gagal memuat perangkat");
+      console.log(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     devices,
     isLoading,
     error,
     success,
+    warning,
     setError,
+    storage,
     handleGenerateDevice,
     fetchAllDevices,
     handleUpdateDevice,
     handleDeleteDevice,
+    getSystemInfo,
   };
 }
