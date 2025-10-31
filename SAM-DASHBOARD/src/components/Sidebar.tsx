@@ -139,9 +139,9 @@ export default function Sidebar() {
 
   return (
     <div className="w-full h-screen flex">
-      <aside className="fixed left-0 top-0 h-screen w-[20%] bg-gray-300 text-black flex flex-col justify-between shadow-lg">
+      <aside className="fixed left-0 top-0 h-screen w-[20%] bg-gray-100 border-r-[1px] border-r-[#d7dae0] text-black flex flex-col justify-between shadow-lg">
         <div>
-          <div className="px-6 h-16 flex items-center justify-center">
+          <div className="px-6 h-16 flex items-center justify-center border-b-1 border-b-[#d7dae0] ">
             <h1 className="text-3xl font-bold tracking-wider">AMMAN</h1>
           </div>
 
@@ -224,7 +224,7 @@ export default function Sidebar() {
           id="modal_logout"
           confirmText="Logout"
           onSubmit={Logout}
-          className="btn bg-red-600 text-white hover:bg-red-700"
+          className="btn bg-red-600 text-white hover:bg-red-700 border-t-[1px] border-t-[#d7dae0]"
         >
           <p className="text-black px-3">Apakah anda yakin ingin logout?</p>
         </CustomModal>
