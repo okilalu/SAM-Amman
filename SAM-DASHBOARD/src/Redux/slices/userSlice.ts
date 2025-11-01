@@ -1,25 +1,25 @@
-// import { getToken, removeToken, saveToken } from "./../../../utils/auth";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 import { uri } from "../../../utils/uri";
+import { saveToken, getToken, removeToken } from "../../../utils/auth";
 import type {
-  MultiUserResponse,
+  UserState,
   User,
   UserResponse,
-  UserState,
+  MultiUserResponse,
 } from "../../../types/types";
 
-// Register
+// ====================== THUNKS ======================
+
+// Register User
 export const createUser = createAsyncThunk<UserResponse, User>(
   "user/create",
   async (data, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${uri}/api/v1/register/user`, data);
-      return response.data;
-    } catch (error) {
-      console.log(error);
-      return rejectWithValue("Registration failed");
-      // return rejectWithValue(error.response?.data || "Registration failed");
+      const res = await axios.post(`${uri}/api/v1/register/user`, data);
+      return res.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || "Registration failed");
     }
   }
 );
@@ -29,15 +29,19 @@ export const login = createAsyncThunk<UserResponse, User>(
   "user/login",
   async (data, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${uri}/api/v1/login/user`, data, {
-        withCredentials: true,
+      const res = await axios.post(`${uri}/api/v1/login/user`, data, {
+        withCredentials: true, // cookie cross-origin
       });
 
-      return response.data;
-    } catch (error) {
+      // Simpan token fallback jika dikirim backend
+      if (res.data.data?.token) {
+        saveToken({ token: res.data.data.token, user: res.data.data.user });
+      }
+
+      return res.data;
+    } catch (error: any) {
       console.log(error);
-      return rejectWithValue("Login Failed");
-      // return rejectWithValue(error.response?.data || "Login Failed");
+      return rejectWithValue(error.response?.data || "Login Failed");
     }
   }
 );
@@ -47,17 +51,20 @@ export const currentUser = createAsyncThunk<UserResponse>(
   "user/current",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${uri}/api/v1/current/user`, {
+      const auth = getToken();
+      const token = auth?.token;
+
+      const res = await axios.get(`${uri}/api/v1/current/user`, {
         withCredentials: true,
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
 
-      return response.data;
-    } catch (error) {
+      return res.data;
+    } catch (error: any) {
       console.log(error);
-      return rejectWithValue("Failed to fetch current user");
-      // return rejectWithValue(
-      //   error.response?.data || "Failed to fetch current user"
-      // );
+      return rejectWithValue(
+        error.response?.data || "Failed to fetch current user"
+      );
     }
   }
 );
@@ -67,35 +74,29 @@ export const logout = createAsyncThunk<void>(
   "user/logout",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.post(
-        `${uri}/api/v1/logout`,
-        {},
-        {
-          withCredentials: true,
-        }
-      );
-      return response.data;
-    } catch (error) {
-      console.log(error);
-      return rejectWithValue("Failed to log out");
+      await axios.post(`${uri}/api/v1/logout`, {}, { withCredentials: true });
+      removeToken(); // hapus token fallback
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || "Failed to logout");
     }
   }
 );
 
-// Get All User
+// Get All Users
 export const getAllUser = createAsyncThunk<MultiUserResponse>(
   "user/getAll",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${uri}/api/v1/getAll/user`, {
+      const auth = getToken();
+      const token = auth?.token;
+
+      const res = await axios.get(`${uri}/api/v1/getAll/user`, {
         withCredentials: true,
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
-      console.log(response);
-      return response.data;
-    } catch (error) {
-      console.log(error);
-      return rejectWithValue("getAll user Failed");
-      // return rejectWithValue(error.response?.data ?? error.message);
+      return res.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || error.message);
     }
   }
 );
@@ -106,36 +107,37 @@ export const updateUser = createAsyncThunk<
   { userId: string; data: Partial<User> }
 >("user/update", async ({ userId, data }, { rejectWithValue }) => {
   try {
-    const response = await axios.put(
-      `${uri}/api/v1/update/user/${userId}`,
-      data,
-      {
-        withCredentials: true,
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.log(error);
-    return rejectWithValue("Updated Failed");
-    // return rejectWithValue(error.response?.data ?? error.message);
+    const auth = getToken();
+    const token = auth?.token;
+
+    const res = await axios.put(`${uri}/api/v1/update/user/${userId}`, data, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+    return res.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data || error.message);
   }
 });
+
 // Delete User
 export const deleteUser = createAsyncThunk(
-  "history/deleteHistory",
-  async ({ data }: { data: string }, thunkAPI) => {
+  "user/delete",
+  async ({ userId }: { userId: string }, { rejectWithValue }) => {
     try {
-      const response = await axios.delete(`${uri}/api/v1/delete/user/${data}`, {
-        withCredentials: true,
+      const auth = getToken();
+      const token = auth?.token;
+
+      const res = await axios.delete(`${uri}/api/v1/delete/user/${userId}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
-      return response.data;
-    } catch (err) {
-      console.log(err);
-      return thunkAPI.rejectWithValue("Deleted User Failed");
-      // return thunkAPI.rejectWithValue(err.response?.data || err.message);
+      return res.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data || error.message);
     }
   }
 );
+
+// ====================== SLICE ======================
 
 const initialState: UserState = {
   user: null,
@@ -154,7 +156,7 @@ const userSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    // Create User
+    // --- Create User ---
     builder.addCase(createUser.pending, (state) => {
       state.loading = true;
       state.error = null;
@@ -168,7 +170,7 @@ const userSlice = createSlice({
       state.error = action.payload as string;
     });
 
-    // Login
+    // --- Login ---
     builder.addCase(login.pending, (state) => {
       state.loading = true;
       state.error = null;
@@ -183,9 +185,10 @@ const userSlice = createSlice({
       state.error = action.payload as string;
     });
 
-    // Current User
+    // --- Current User ---
     builder.addCase(currentUser.pending, (state) => {
       state.loading = true;
+      state.error = null;
     });
     builder.addCase(currentUser.fulfilled, (state, action) => {
       state.loading = false;
@@ -196,9 +199,16 @@ const userSlice = createSlice({
       state.error = action.payload as string;
     });
 
-    // Get All User
+    // --- Logout ---
+    builder.addCase(logout.fulfilled, (state) => {
+      state.user = null;
+      state.token = null;
+    });
+
+    // --- Get All Users ---
     builder.addCase(getAllUser.pending, (state) => {
       state.loading = true;
+      state.error = null;
     });
     builder.addCase(getAllUser.fulfilled, (state, action) => {
       state.loading = false;
@@ -209,9 +219,10 @@ const userSlice = createSlice({
       state.error = action.payload as string;
     });
 
-    // Update User
+    // --- Update User ---
     builder.addCase(updateUser.pending, (state) => {
       state.loading = true;
+      state.error = null;
     });
     builder.addCase(updateUser.fulfilled, (state, action) => {
       state.loading = false;
@@ -226,26 +237,19 @@ const userSlice = createSlice({
       state.error = action.payload as string;
     });
 
-    // Delete User
+    // --- Delete User ---
     builder.addCase(deleteUser.pending, (state) => {
       state.loading = true;
+      state.error = null;
     });
     builder.addCase(deleteUser.fulfilled, (state, action) => {
       state.loading = false;
-      const deletedIds = action.meta.arg.data;
-      state.users = state.users!.filter(
-        (item) => item.id !== undefined && !deletedIds.includes(String(item.id))
-      );
+      const deletedId = action.meta.arg.userId;
+      state.users = state.users!.filter((u) => String(u.id) !== deletedId);
     });
     builder.addCase(deleteUser.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload as string;
-    });
-
-    // Logout User
-    builder.addCase(logout.fulfilled, (state) => {
-      state.user = null;
-      state.token = null;
     });
   },
 });

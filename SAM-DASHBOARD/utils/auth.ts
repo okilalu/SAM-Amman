@@ -8,7 +8,7 @@ export const saveToken = (data: { token: string; user: any }) => {
 
 export const removeToken = () => {
   try {
-    localStorage.removeItem("token");
+    localStorage.removeItem("auth");
   } catch (error) {
     console.error("Error removing token", error);
   }

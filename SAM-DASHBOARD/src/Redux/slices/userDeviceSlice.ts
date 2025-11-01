@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import type { UserDeviceResponse, UserDeviceState } from "../../../types/types";
 import { uri } from "../../../utils/uri";
+import { getToken } from "../../../utils/auth";
 
 export const addPermission = createAsyncThunk<
   UserDeviceResponse,
@@ -77,9 +78,15 @@ export const getAccessibleDevice = createAsyncThunk<UserDeviceResponse, void>(
   "user-device/accessible",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(
-        `${uri}/api/v9/user-device/get/accessible/device`,
-        { withCredentials: true }
+      const auth = getToken();
+      const token = auth?.token;
+
+      const response = await axios.get(`
+        ${uri}/api/v9/user-device/get/accessible/device,`
+        {
+          withCredentials: true,
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        }
       );
       return response.data as UserDeviceResponse;
     } catch (error: any) {
