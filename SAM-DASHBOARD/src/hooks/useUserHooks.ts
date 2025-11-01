@@ -72,18 +72,18 @@ export function useUserData({ closeModal }: UserDataProps) {
     }
   };
 
-  const deleteUsers = async ({ id }: { id: string }) => {
+  const deleteUsers = async ({ userId }: { userId: string }) => {
     setIsLoading(true);
     setError(null);
     setSuccess(null);
 
-    if (!id) {
+    if (!userId) {
       setWarning("User not found");
       return;
     }
 
     try {
-      await dispatch(deleteUser({ data: id })).unwrap();
+      await dispatch(deleteUser({ userId: userId })).unwrap();
       setSuccess("Successfuly deleted user");
       await validateAllUsers();
       closeModal?.();
