@@ -115,7 +115,7 @@ export default function CustomCard({
             ))}
           </div>
         ) : (
-          <p className="text-gray-400 text-sm italic">Loading data...</p>
+          <p className="text-gray-400 text-sm italic">No data show</p>
         )
       ) : null}
     </div>
