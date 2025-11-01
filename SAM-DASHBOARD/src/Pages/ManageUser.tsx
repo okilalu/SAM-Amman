@@ -170,7 +170,7 @@ export default function ManageUser() {
     }
     try {
       setLoading(true);
-      await deleteUsers({ id: String(selectedIds) });
+      await deleteUsers({ userId: String(selectedIds) });
 
       setSuccess("Successfuly deleted user");
       handleCloseModal("modal_delete");
