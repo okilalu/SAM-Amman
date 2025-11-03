@@ -32,6 +32,8 @@ import {
   PiAtFill,
   PiDoorOpenFill,
   PiDoor,
+  PiList,
+  PiX,
 } from "react-icons/pi";
 import CustomModal from "./CustomModal";
 import { CustomMainLoading } from "./CustomMainLoading";
@@ -43,6 +45,7 @@ export default function Sidebar() {
   const { handleLogout, validateUser, user, isLoggedIn } = useUserData({});
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isMenuLoading, setIsMenuLoading] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -139,10 +142,25 @@ export default function Sidebar() {
 
   return (
     <div className="w-full h-screen flex">
-      <aside className="fixed left-0 top-0 h-screen w-[20%] bg-gray-100 border-r-[1px] border-r-[#d7dae0] text-black flex flex-col justify-between shadow-lg">
+      <aside
+        className={`fixed top-0 left-0 h-screen bg-gray-100 border-r border-[#d7dae0] text-black flex flex-col justify-between shadow-lg z-50 transition-transform duration-300
+          w-[70%] sm:w-[50%] md:w-[40%] lg:w-[20%]
+          ${
+            isSidebarOpen
+              ? "translate-x-0"
+              : "-translate-x-full lg:translate-x-0"
+          }
+        `}
+      >
         <div>
-          <div className="px-6 h-16 flex items-center justify-center border-b-1 border-b-[#d7dae0] ">
+          <div className="px-6  h-16 flex items-center lg:justify-center sm:justify-between border-b-1 border-b-[#d7dae0] ">
             <h1 className="text-3xl font-bold tracking-wider">AMMAN</h1>
+            <button
+              onClick={() => setIsSidebarOpen(false)}
+              className="lg:hidden text-2xl text-gray-700 hover:text-[#63b0ba] transition-all"
+            >
+              <PiX />
+            </button>
           </div>
 
           <nav className="mt-6">
@@ -157,6 +175,7 @@ export default function Sidebar() {
                       setIsMenuLoading(true);
                       setActiveMenu(item.name);
                       setTimeout(() => setIsMenuLoading(false), 500);
+                      setIsSidebarOpen(false);
                     }}
                     className={`px-6 py-3 flex items-center gap-3 cursor-pointer rounded-md transition-all duration-200 ${
                       isActive
@@ -200,8 +219,21 @@ export default function Sidebar() {
         </div>
       </aside>
 
-      <div className="ml-[20%] w-[80%] h-screen flex flex-col overflow-hidden">
-        <div className="sticky top-0 z-40 shadow-md">
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden"
+          onClick={() => setIsSidebarOpen}
+        />
+      )}
+
+      <div className="flex-1 lg:ml-[20%] w-[80%] h-screen flex flex-col overflow-hidden">
+        <div className="sticky top-0 z-40 shadow-md bg-gray-100 flex">
+          <button
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className=" lg:hidden text-2xl text-gray-700"
+          >
+            <PiList />
+          </button>
           <CustomBreadcrumbs
             isLoggedIn={isLoggedIn}
             className="rounded-none text-black h-16 pl-5"
