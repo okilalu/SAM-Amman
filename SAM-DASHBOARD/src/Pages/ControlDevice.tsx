@@ -314,13 +314,14 @@ export default function ControlDevice() {
                   )}
                 </CustomTable>
               </div>
-
-              <CustomPagination
-                currentPage={currentPage}
-                itemsPerPage={itemsPerPage}
-                totalItems={allUsers?.length || 0}
-                onPageChange={handlePageChange}
-              />
+              <div className="pt-5 flex gap-3 justify-center md:justify-center lg:justify-center">
+                <CustomPagination
+                  currentPage={currentPage}
+                  itemsPerPage={itemsPerPage}
+                  totalItems={allUsers?.length || 0}
+                  onPageChange={handlePageChange}
+                />
+              </div>
             </>
           )}
         </div>
@@ -335,7 +336,7 @@ export default function ControlDevice() {
             />
           ) : (
             <>
-              <div className="min-h-[250px]">
+              <div className="min-h-[250px] pt-3">
                 <CustomTable
                   headers={["Select", "PortableDeviceId", "LocationName"]}
                 >
@@ -370,7 +371,7 @@ export default function ControlDevice() {
                 </CustomTable>
               </div>
 
-              <div className="pt-5 flex gap-3 justify-end">
+              <div className="pt-5 flex gap-3 justify-center md:justify-end lg:justify-end">
                 <CustomButton
                   text="Add Access"
                   onClick={() => handleOpenModal("modal_register")}

@@ -173,9 +173,9 @@ export default function ManageEmail() {
           icon={<IoWarningOutline />}
         />
       )}
-      <div className="flex gap-3">
+      <div className="flex flex-col gap-3 lg:flex-row">
         <div className="flex-1 text-sm text-black">
-          <div className="flex flex-col gap-5 flex-1">
+          <div className="flex flex-col gap-5 flex-1 ">
             <CustomInputs
               label="Filter email"
               placeholder="Cari email"
@@ -201,7 +201,7 @@ export default function ManageEmail() {
               menuLines={itemsPerPage}
             />
           ) : (
-            <div className="pt-5 min-h-[270px]">
+            <div className="pt-5 min-h-[270px] overflow-x-auto">
               <CustomTable headers={["Select", "ID", "Email Name"]}>
                 {paginatedEmails.length > 0 ? (
                   paginatedEmails.map((item) => (
@@ -228,19 +228,19 @@ export default function ManageEmail() {
               </CustomTable>
             </div>
           )}
+          <div className="pt-5 flex flex-col ">
+            <CustomPagination
+              currentPage={currentPage}
+              itemsPerPage={itemsPerPage}
+              totalItems={emails ? emails!.length : 0}
+              onPageChange={handlePageChange}
+            />
+          </div>
 
-          <CustomPagination
-            currentPage={currentPage}
-            itemsPerPage={itemsPerPage}
-            totalItems={emails ? emails!.length : 0}
-            onPageChange={handlePageChange}
-          />
-
-          <div className="pt-5 flex gap-3 justify-end">
+          <div className="pt-5 flex gap-3 justify-center md:justify-end lg:justify-end">
             <CustomButton
               text="Add Email"
               onClick={handleOpenRegister}
-              // onClick={() => handleOpenModal("modal_register")}
               className="btn-success"
             />
             <CustomButton

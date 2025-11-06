@@ -6,7 +6,6 @@ import { CustomSelects } from "@/components/CustomSelects";
 import { CustomPagination } from "@/components/CustomPagination";
 import { useUserDeviceData } from "@/hooks/useUserDeviceHooks";
 import { CustomMainLoading } from "@/components/CustomMainLoading";
-import { CustomButton } from "@/components/CustomButton";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 
@@ -146,10 +145,12 @@ export default function Portable() {
   };
 
   return (
-    <div className="flex gap-3">
-      <div className="flex-1 text-sm text-black">
-        <div className="bg-white shadow rounded-xl p-6 mb-8">
-          <div className="flex items-center gap-5 justify-between p-3">
+    <div className="flex flex-col gap-3 w-full text-black">
+      <div className="flex-1 text-sm">
+        {/* Filter Section */}
+        <div className="bg-white shadow rounded-xl p-4 sm:p-6 mb-8 w-full">
+          <div className="flex flex-col lg:flex-row gap-6 justify-between">
+            {/* Left Column */}
             <div className="flex flex-col gap-5 flex-1">
               <CustomInputs
                 label="Start date"
@@ -165,10 +166,10 @@ export default function Portable() {
                 onChange={(val) => setSpeedFrom(Number(val))}
                 type="number"
               />
-              <div className="flex border border-[#63b1bb] rounded-xl overflow-hidden cursor-pointer self-end">
+              <div className="flex border border-[#63b1bb] rounded-xl overflow-hidden cursor-pointer self-center sm:self-center">
                 <button
                   onClick={() => handleChangeStatus("all")}
-                  className={`px-6 py-2 cursor-pointer font-semibold ${
+                  className={`px-5 sm:px-6 py-2 font-semibold ${
                     status === "all"
                       ? "bg-[#63b1bb] text-white"
                       : "hover:bg-[#63b1bb] hover:text-white"
@@ -178,7 +179,7 @@ export default function Portable() {
                 </button>
                 <button
                   onClick={() => handleChangeStatus("over speed")}
-                  className={`px-6 py-2 cursor-pointer font-semibold ${
+                  className={`px-5 sm:px-6 py-2 font-semibold ${
                     status === "over speed"
                       ? "bg-[#63b1bb] text-white"
                       : "hover:bg-[#63b1bb] hover:text-white"
@@ -189,6 +190,7 @@ export default function Portable() {
               </div>
             </div>
 
+            {/* Right Column */}
             <div className="flex flex-col gap-5 flex-1">
               <CustomInputs
                 label="End date"
@@ -217,15 +219,17 @@ export default function Portable() {
             </div>
           </div>
 
-          <div className="flex gap-5 justify-between">
-            <div className="flex items-start">
-              <CustomButton
-                text="Create Excel"
-                className="btn btn-success px-5"
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 justify-between mt-6">
+            <div className="flex flex-col justify-center sm:justify-start">
+              <button
                 onClick={handleExportExcel}
-              />
+                className="btn bg-[#00d491] shadow-none border-none px-10 text-white"
+              >
+                Create Excel
+              </button>
             </div>
-            <div className="flex gap-5">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-5 justify-end">
               <button
                 onClick={handleClear}
                 className="btn bg-transparent border border-[#63b1bb] shadow-none text-[#63b1bb] px-10"
@@ -242,13 +246,14 @@ export default function Portable() {
           </div>
         </div>
 
-        <div className="bg-white shadow rounded-xl p-6">
+        {/* Table Section */}
+        <div className="bg-white shadow rounded-xl p-4 sm:p-6 w-full overflow-x-auto">
           {isLoading && paginatedDatas.length < 0 ? (
             <CustomMainLoading variant="table" menuLines={itemsPerPage} />
           ) : paginatedDatas.length > 0 ? (
-            <table className="table w-full text-sm shadow rounded-sm">
-              <thead className="bg-gray-200 text-black text-center">
-                <tr className="bg-gray-100">
+            <table className="table w-full text-sm text-center border-collapse">
+              <thead className="bg-gray-200 text-black">
+                <tr>
                   <th className="p-3">ID</th>
                   <th className="p-3">Date</th>
                   <th className="p-3">Speed</th>
@@ -258,7 +263,7 @@ export default function Portable() {
               </thead>
               <tbody>
                 {paginatedDatas.map((item, idx) => (
-                  <tr key={idx} className="text-center">
+                  <tr key={idx} className="hover:bg-gray-50">
                     <td className="p-3">{item.id}</td>
                     <td className="p-3">{item.createdAt}</td>
                     <td className="p-3">{item.speed} km/h</td>
@@ -276,7 +281,7 @@ export default function Portable() {
         </div>
 
         {/* Pagination */}
-        <div className="mt-3">
+        <div className="mt-4 sm:mt-6">
           <CustomPagination
             currentPage={currentPage}
             itemsPerPage={itemsPerPage}

@@ -51,7 +51,7 @@ export default function CustomCard({
 
   return (
     <div
-      className={`bg-gray-100 border border-gray-400 rounded-xl shadow p-6 hover:shadow-lg transition ${className}`}
+      className={`bg-gray-00 border border-gray-400 rounded-xl shadow p-6 hover:shadow-lg transition ${className}`}
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-3">

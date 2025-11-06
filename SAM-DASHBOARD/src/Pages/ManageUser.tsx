@@ -263,27 +263,33 @@ export default function ManageUser() {
           icon={<IoWarningOutline />}
         />
       )}
-      <div className="flex gap-3">
-        <div className="flex-1 text-sm text-black">
+      <div className="flex flex-col lg:flex-row gap-3 w-full">
+        <div className="flex-1 text-sm text-black w-full">
+          {/* Filter & Sort */}
           <div className="flex flex-col gap-5 flex-1">
-            <CustomInputs
-              label="Filter users"
-              placeholder="Cari users"
-              onChange={(val) => setFilter(val)}
-              helperText="x"
-              helper={() => setFilter("")}
-              value={filter}
-            />
-            <CustomSelects
-              value={option.find((opt) => opt.value === selectOption) || null}
-              onChange={handleSelectOption}
-              options={option}
-              label="Sort"
-              flex="flex-row"
-              labelClass="items-center gap-3"
-            />
+            <div className="flex-1 min-w-[200px]">
+              <CustomInputs
+                label="Filter users"
+                placeholder="Cari users"
+                onChange={(val) => setFilter(val)}
+                helperText="x"
+                helper={() => setFilter("")}
+                value={filter}
+              />
+            </div>
+            <div className="flex-1 min-w-[200px]">
+              <CustomSelects
+                value={option.find((opt) => opt.value === selectOption) || null}
+                onChange={handleSelectOption}
+                options={option}
+                label="Sort"
+                flex="flex-row"
+                labelClass="items-center gap-3"
+              />
+            </div>
           </div>
 
+          {/* Loading */}
           {loading ? (
             <CustomMainLoading
               variant="table"
@@ -292,57 +298,72 @@ export default function ManageUser() {
             />
           ) : (
             <>
-              <div className="pt-5 min-h-[270px] ">
-                <CustomTable
-                  headers={[
-                    "Select",
-                    "UserId",
-                    "Username",
-                    "Password",
-                    "Privilage",
-                  ]}
-                >
-                  {paginatedUsers.length > 0 ? (
-                    paginatedUsers.map((item, idx) => (
-                      <tr key={idx} className="hover:bg-gray-50 text-center">
-                        <td>
-                          <input
-                            type="checkbox"
-                            className="checkbox checkbox-error"
-                            checked={selectedIds.includes(item.userId!)}
-                            onChange={() => handleSelectUser(item.userId!)}
-                          />
-                        </td>
-                        <td>{idx + 1}</td>
-                        <td>{item.username}</td>
-                        <td>{item.password}</td>
-                        <td>{item.credential}</td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td
-                        colSpan={5}
-                        className="text-center text-gray-500 py-4"
-                      >
-                        Tidak ada data ditemukan
-                      </td>
-                    </tr>
-                  )}
-                </CustomTable>
+              {/* Table Wrapper */}
+              <div className="pt-5 min-h-[270px] overflow-x-auto">
+                <div className="inline-block min-w-full align-middle">
+                  <div className="overflow-hidden border border-gray-200 rounded-lg">
+                    <CustomTable
+                      headers={[
+                        "Select",
+                        "UserId",
+                        "Username",
+                        "Password",
+                        "Privilage",
+                      ]}
+                    >
+                      {paginatedUsers.length > 0 ? (
+                        paginatedUsers.map((item, idx) => (
+                          <tr
+                            key={idx}
+                            className="hover:bg-gray-50 text-center"
+                          >
+                            <td>
+                              <input
+                                type="checkbox"
+                                className="checkbox checkbox-error"
+                                checked={selectedIds.includes(item.userId!)}
+                                onChange={() => handleSelectUser(item.userId!)}
+                              />
+                            </td>
+                            <td>{idx + 1}</td>
+                            <td className="break-words max-w-[120px]">
+                              {item.username}
+                            </td>
+                            <td className="truncate max-w-[120px]">
+                              {item.password}
+                            </td>
+                            <td>{item.credential}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan={5}
+                            className="text-center text-gray-500 py-4"
+                          >
+                            Tidak ada data ditemukan
+                          </td>
+                        </tr>
+                      )}
+                    </CustomTable>
+                  </div>
+                </div>
               </div>
 
-              <CustomPagination
-                currentPage={currentPage}
-                itemsPerPage={itemsPerPage}
-                totalItems={allUsers ? allUsers!.length : 0}
-                onPageChange={handlePageCHange}
-              />
+              {/* Pagination */}
+              <div className="mt-5">
+                <CustomPagination
+                  currentPage={currentPage}
+                  itemsPerPage={itemsPerPage}
+                  totalItems={allUsers ? allUsers!.length : 0}
+                  onPageChange={handlePageCHange}
+                />
+              </div>
 
-              <div className="pt-5 flex gap-3 justify-end">
+              {/* Action Buttons */}
+              <div className="pt-5 flex gap-3 justify-center md:justify-end lg:justify-end">
                 <CustomButton
                   text="Add User"
-                  // onClick={() => handleOpenModal("modal_register")}
                   onClick={handleOpenRegister}
                   className="btn-success"
                 />
@@ -358,6 +379,7 @@ export default function ManageUser() {
                 />
               </div>
 
+              {/* Modal Register */}
               <div className="pt-5">
                 <CustomModal
                   title="Register User"
@@ -365,7 +387,7 @@ export default function ManageUser() {
                   confirmText="Register"
                   onSubmit={handleRegister}
                 >
-                  <div className="flex flex-col">
+                  <div className="flex flex-col gap-3">
                     <label className="text-sm px-1 font-medium text-gray-600 mb-0.5">
                       Username
                     </label>
@@ -378,7 +400,7 @@ export default function ManageUser() {
                         title="Only letters, numbers or dash"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        className={`transition-all duration-300 ${
+                        className={`transition-all duration-300 w-full ${
                           username && !isValid
                             ? "border-red-400 focus:ring-red-300"
                             : "border-gray-300"
@@ -396,6 +418,7 @@ export default function ManageUser() {
                       dashes.
                     </p>
 
+                    {/* Password */}
                     <div className="mb-3">
                       <div className="relative w-full">
                         <label className="px-1 text-sm font-medium text-gray-600 mb-1">
@@ -417,7 +440,7 @@ export default function ManageUser() {
                           <button
                             type="button"
                             onClick={handleShowPass}
-                            className="absolute right-3 top-11 -translate-y-1/2 text-gray-600 hover:text-gray-900 transition"
+                            className="absolute right-3 top-1/2 translate-y-[-50%] text-gray-600 hover:text-gray-900 transition"
                           >
                             {show ? <FaEye /> : <FaEyeSlash />}
                           </button>
@@ -430,6 +453,8 @@ export default function ManageUser() {
                         </span>
                       )}
                     </div>
+
+                    {/* Credential */}
                     <div className="pt-3">
                       <label className="px-1 text-sm font-medium text-gray-600 mb-1">
                         Credential
@@ -449,14 +474,14 @@ export default function ManageUser() {
                   </div>
                 </CustomModal>
 
-                {/* UPDATE MODAL */}
+                {/* Update Modal */}
                 <CustomModal
                   title="Update User"
                   id="modal_update"
                   confirmText="Update"
                   onSubmit={handleUpdate}
                 >
-                  <div className="flex flex-col">
+                  <div className="flex flex-col gap-3">
                     <label className="input validator w-full bg-gray-200 rounded-md p-2">
                       <input
                         type="text"
@@ -467,8 +492,7 @@ export default function ManageUser() {
                         title="Only letters, numbers or dash"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        // className="mb-4 w-full bg-gray-200 rounded-md p-2"
-                        className={`transition-all duration-300 ${
+                        className={`transition-all duration-300 w-full ${
                           username && !isValid
                             ? "border-red-400 focus:ring-red-300"
                             : "border-gray-300"
@@ -485,12 +509,6 @@ export default function ManageUser() {
                       Must be 8 characters and contain only letters, numbers, or
                       dashes.
                     </p>
-                    {/* {username.length < 8 && (
-                      <p className="validator-hint mb-2">
-                        Must be 8 to 30 characters containing only letters,
-                        numbers, or dash
-                      </p>
-                    )} */}
                     <CustomSelects
                       value={
                         optionCredentials.find(
@@ -505,7 +523,7 @@ export default function ManageUser() {
                   </div>
                 </CustomModal>
 
-                {/* DELETE MODAL */}
+                {/* Delete Modal */}
                 <CustomModal
                   title="Delete User"
                   id="modal_delete"

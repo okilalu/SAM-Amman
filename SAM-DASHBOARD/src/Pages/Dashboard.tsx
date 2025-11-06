@@ -20,9 +20,9 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <div className="flex gap-3">
-      <div className="flex-1 text-sm text-black">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+    <div className="flex flex-col w-full h-full text-black">
+      <div className="flex-1 text-sm px-3 sm:px-5 md:px-8 py-3 md:py-3 text-black">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-10 transition-all duration-300">
           <CustomCard
             className="bg-green-50 border-green-400"
             title="Storage"
@@ -57,7 +57,7 @@ export default function Dashboard() {
           />
         </div>
 
-        <div className="mb-10">
+        <div className="w-full bg-white rounded-xl shadow-sm p-3 sm:p-5 md:p-6 transition-all duration-300">
           <CustomGrafik />
         </div>
       </div>

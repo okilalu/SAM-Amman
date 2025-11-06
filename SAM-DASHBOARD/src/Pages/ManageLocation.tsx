@@ -197,9 +197,9 @@ export default function ManageLocation() {
         />
       )}
 
-      <div className="flex gap-3">
+      <div className="flex gap-3 flex-col">
         <div className="flex-1 text-sm text-black">
-          <div className="flex items-center gap-5 justify-between p-3">
+          <div className="flex flex-col sm:flex-row flex-wrap gap-5 justify-between p-3 w-full">
             <div className="flex flex-col gap-5 flex-1">
               <CustomInputs
                 label="Filter"
@@ -296,7 +296,7 @@ export default function ManageLocation() {
                 onPageChange={handlePageChange}
               />
 
-              <div className="pt-5 flex gap-3 justify-end">
+              <div className="pt-5 flex gap-3 justify-center md:justify-end lg:justify-end">
                 <CustomButton
                   text="Add Location"
                   onClick={handleOpenRegister}

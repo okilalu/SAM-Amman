@@ -153,8 +153,10 @@ export default function Sidebar() {
         `}
       >
         <div>
-          <div className="px-6  h-16 flex items-center lg:justify-center sm:justify-between border-b-1 border-b-[#d7dae0] ">
-            <h1 className="text-3xl font-bold tracking-wider">AMMAN</h1>
+          <div className="px-6 h-16 flex items-center justify-between lg:justify-center border-b border-b-[#d7dae0]">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-wider text-gray-800">
+              AMMAN
+            </h1>
             <button
               onClick={() => setIsSidebarOpen(false)}
               className="lg:hidden text-2xl text-gray-700 hover:text-[#63b0ba] transition-all"
@@ -227,7 +229,7 @@ export default function Sidebar() {
       )}
 
       <div className="flex-1 lg:ml-[20%] w-[80%] h-screen flex flex-col overflow-hidden">
-        <div className="sticky top-0 z-40 shadow-md bg-gray-100 flex">
+        <div className="sticky top-0 z-40 shadow-md bg-gray-100 flex items-center px-4 h-16">
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className=" lg:hidden text-2xl text-gray-700"

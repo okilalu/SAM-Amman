@@ -47,7 +47,10 @@ export const CustomBreadcrumbs: React.FC<CustomBreadcrumbsProps> = ({
           />
         </div>
       ) : (
-        <div>
+        <div
+          className="flex items-center justify-end w-9 h-9 rounded-full hover:bg-[#e3f3f5] transition-all"
+          title="Profile"
+        >
           <PiUser size={20} color="#63b0ba" />
         </div>
       )}

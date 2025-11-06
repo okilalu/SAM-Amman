@@ -288,10 +288,11 @@ export default function ManageDevice() {
           icon={<IoWarningOutline />}
         />
       )}
-      <div className="flex gap-3">
+      <div className="flex flex-col gap-3">
         <div className="flex-1 text-sm text-black">
-          <div className="flex items-center gap-5 justify-between p-3">
-            <div className="flex flex-col gap-5 flex-1">
+          <div className="flex flex-col sm:flex-row flex-wrap gap-5 justify-between p-3 w-full">
+            {/* Kiri */}
+            <div className="flex flex-col gap-5 flex-1 min-w-[250px]">
               <CustomInputs
                 label="Filter"
                 placeholder="Cari Portable Device..."
@@ -310,7 +311,9 @@ export default function ManageDevice() {
                 labelClass="items-center gap-3"
               />
             </div>
-            <div className="flex flex-col gap-5 flex-1">
+
+            {/* Kanan */}
+            <div className="flex flex-col gap-5 flex-1 min-w-[250px]">
               <CustomInputs
                 label="Sort"
                 placeholder="Masukkan device portable"
@@ -338,7 +341,7 @@ export default function ManageDevice() {
             />
           ) : (
             <>
-              <div className="pt-5 min-h-[270px] ">
+              <div className="pt-5 min-h-[270px]">
                 <CustomTable
                   headers={[
                     "Select",
@@ -378,18 +381,19 @@ export default function ManageDevice() {
                 </CustomTable>
               </div>
 
-              <CustomPagination
-                currentPage={currentPage}
-                itemsPerPage={itemsPerPage}
-                totalItems={devices ? devices!.length : 0}
-                onPageChange={handlePageChange}
-              />
+              <div className=" ">
+                <CustomPagination
+                  currentPage={currentPage}
+                  itemsPerPage={itemsPerPage}
+                  totalItems={devices ? devices!.length : 0}
+                  onPageChange={handlePageChange}
+                />
+              </div>
 
-              <div className="pt-5 flex gap-3 justify-end">
+              <div className="pt-5 flex gap-3 justify-center md:justify-end lg:justify-end">
                 <CustomButton
                   text="Add Device"
                   onClick={handleOpenRegister}
-                  // onClick={() => handleOpenModal("modal_register")}
                   className="btn-success"
                 />
                 <CustomButton
