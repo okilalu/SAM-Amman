@@ -87,7 +87,7 @@ export interface Datas {
   endDate?: string;
   createdAt?: string;
   filterValue?: string;
-  filterType?: "day" | "month" | "year";
+  filterType?: "day" | "week" | "month" | "year";
   totalRecords?: number;
   averageSpeed?: number;
   overSpeed?: number;
