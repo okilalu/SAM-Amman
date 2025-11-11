@@ -38,6 +38,7 @@ export default function Portable() {
     () => data.filter((item) => item.category === "over speed"),
     [data]
   );
+  console.log(videoList);
 
   const getVideoUrl = useCallback((path: string) => {
     if (!path) return "";
