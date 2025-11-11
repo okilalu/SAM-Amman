@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useData } from "../hooks/useDataHooks";
 import type { Datas, SelectOption } from "../../types/types";
 import { CustomInputs } from "@/components/CustomInputs";
@@ -29,7 +29,21 @@ export default function Portable() {
   const [selectedDevice, setSelectedDevice] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  // const [device, setDevice] = useState();
+
+  const [selectedItem, setSelectedItem] = useState<Datas | null>(null);
+  const [videoList, setVideoList] = useState<string[]>([]);
+  const [activeVideo, setActiveVideo] = useState<string | null>(null);
+
+  const suggestionVideos = useMemo(
+    () => data.filter((item) => item.category === "over speed"),
+    [data]
+  );
+
+  const getVideoUrl = useCallback((path: string) => {
+    if (!path) return "";
+    if (/^https?:\/\//.test(path)) return path;
+    return `http://localhost:2090${path}`;
+  }, []);
 
   useEffect(() => {
     fetchAllAccessible();
@@ -40,6 +54,35 @@ export default function Portable() {
       setSelectedDevice(accessible[0].samId || null);
     }
   }, [accessible, selectedDevice]);
+
+  useEffect(() => {
+    if (!selectedItem) {
+      setVideoList([]);
+      setActiveVideo(null);
+      return;
+    }
+
+    const videosFromGCS = Array.isArray(selectedItem.video)
+      ? selectedItem.video
+      : typeof selectedItem.video === "string"
+      ? [selectedItem.video]
+      : [];
+
+    const videosFromLocal = Array.isArray(selectedItem.localVideo)
+      ? selectedItem.localVideo
+      : typeof selectedItem.localVideo === "string"
+      ? [selectedItem.localVideo]
+      : [];
+
+    const combinedVideos = [...videosFromGCS, ...videosFromLocal].map(
+      getVideoUrl
+    );
+
+    setVideoList(combinedVideos);
+    setActiveVideo((prev) =>
+      combinedVideos.includes(prev!) ? prev : combinedVideos[0] || null
+    );
+  }, [selectedItem, getVideoUrl]);
 
   const handleSearch = useCallback(() => {
     if (!selectedDevice) return;
@@ -288,6 +331,97 @@ export default function Portable() {
             totalItems={data.length}
             onPageChange={handlePageChange}
           />
+        </div>
+
+        {/* Suggestion Video */}
+        <div className="bg-white shadow rounded-xl p-4 sm:p-6 w-full mt-8">
+          <h2 className="text-lg font-semibold mb-4">
+            Suggestion Videos (Overspeed)
+          </h2>
+
+          {suggestionVideos.length > 0 ? (
+            <div
+              className="flex flex-col divide-y divide-gray-200 overflow-y-auto"
+              style={{ maxHeight: "170px" }}
+            >
+              {suggestionVideos.map((item, idx) => (
+                <div
+                  key={idx}
+                  onClick={() => setSelectedItem(item)}
+                  className={`py-3 px-2 cursor-pointer hover:bg-gray-50
+            ${selectedItem?.id === item.id ? "bg-[#e6f5f6]" : ""}
+          `}
+                >
+                  <div className="flex flex-col">
+                    <span className="font-semibold">SAM: {item.samId}</span>
+                    <span className="text-sm text-gray-600">
+                      {new Date(item.createdAt as string).toLocaleDateString()}
+                    </span>
+                    <span className="text-sm font-medium">
+                      Speed: {item.speed} km/h
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-4 text-center text-gray-500 border border-dashed rounded-lg">
+              No overspeed data
+            </div>
+          )}
+        </div>
+
+        {/* Preview Video */}
+        <div className="bg-white shadow rounded-xl p-4 sm:p-6 w-full mt-8">
+          <h2 className="text-lg font-semibold mb-4">Preview Video</h2>
+
+          {activeVideo ? (
+            <div className="flex flex-col gap-4">
+              <video
+                src={activeVideo}
+                className="w-full max-h-[400px] rounded-lg"
+                controls
+              />
+
+              {selectedItem && (
+                <div className="mt-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <p className="text-base font-semibold text-gray-800 mb-3">
+                    Portable Name:
+                    <span className="font-bold ml-3">{selectedItem.samId}</span>
+                  </p>
+
+                  <div className="flex flex-col gap-3 text-sm text-gray-700">
+                    <div>
+                      <p className="font-medium">Occurrence Date</p>
+                      <p className="text-gray-800">
+                        {new Date(
+                          selectedItem.createdAt as string
+                        ).toLocaleDateString()}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="font-medium">Occurrence Time</p>
+                      <p className="text-gray-800">
+                        {new Date(
+                          selectedItem.createdAt as string
+                        ).toLocaleTimeString()}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="font-medium">Speed</p>
+                      <p className="font-semibold">{selectedItem.speed} km/h</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="p-5 text-center text-gray-500 border border-dashed rounded-lg">
+              No video selected
+            </div>
+          )}
         </div>
       </div>
     </div>

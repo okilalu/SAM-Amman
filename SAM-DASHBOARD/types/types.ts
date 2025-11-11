@@ -76,6 +76,7 @@ export interface Datas {
   id?: number;
   speed?: number;
   video?: string;
+  localVideo?: string;
   deviceId?: string;
   samId?: string;
   category?: string;
