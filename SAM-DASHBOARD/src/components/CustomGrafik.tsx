@@ -18,7 +18,10 @@ export default function CustomGrafik() {
   const { chartData, handleGetAllFilter, isLoading } = useData();
   const { accessible, fetchAllAccessible } = useUserDeviceData({});
   const [samId, setSamId] = useState<string>("");
-  const [filterType, setFilterType] = useState<"day" | "month" | "year">("day");
+  // const [filterType, setFilterType] = useState<"day" | "month" | "year">("day");
+  const [filterType, setFilterType] = useState<
+    "day" | "week" | "month" | "year"
+  >("day");
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [selectedDevice, setSelectedDevice] = useState<string | null>(null);
 
@@ -35,16 +38,39 @@ export default function CustomGrafik() {
     }
   }, [accessible]);
 
-  const formattedMonthYear = selectedDate
-    ? new Date(selectedDate).toLocaleDateString("id-ID", {
-        month: "long",
-        year: "numeric",
-      })
-    : "";
+  const getISOWeek = (date: Date) => {
+    const target = new Date(date.valueOf());
+    const dayNr = (date.getDay() + 6) % 7;
+    target.setDate(target.getDate() - dayNr + 3);
+    const firstThursday = new Date(target.getFullYear(), 0, 4);
+    const firstDayNr = (firstThursday.getDay() + 6) % 7;
+    firstThursday.setDate(firstThursday.getDate() - firstDayNr + 3);
+
+    const weekNumber =
+      1 + Math.round((target.getTime() - firstThursday.getTime()) / 604800000);
+
+    return {
+      year: target.getFullYear(),
+      week: weekNumber,
+    };
+  };
+
+  const formattedMonthYear =
+    filterType === "week" && selectedDate
+      ? (() => {
+          const { year, week } = getISOWeek(new Date(selectedDate));
+          return `Minggu ke-${week}, ${year}`;
+        })()
+      : selectedDate
+      ? new Date(selectedDate).toLocaleDateString("id-ID", {
+          month: "long",
+          year: "numeric",
+        })
+      : "";
 
   const fetchChartData = (
     samIdParam: string,
-    filterTypeParam: "day" | "month" | "year",
+    filterTypeParam: "day" | "week" | "month" | "year",
     dateParam?: string
   ) => {
     if (!samIdParam) return;
@@ -60,6 +86,9 @@ export default function CustomGrafik() {
       ).padStart(2, "0")}`;
     } else if (filterTypeParam === "year" && dateParam) {
       filterValue = `${new Date(dateParam).getFullYear()}`;
+    } else if (filterTypeParam === "week" && dateParam) {
+      const { year, week } = getISOWeek(new Date(dateParam));
+      filterValue = `${year}-W${String(week).padStart(2, "0")}`; // format contoh: 2025-W07
     }
 
     handleGetAllFilter({
@@ -76,7 +105,7 @@ export default function CustomGrafik() {
     fetchChartData(samId, filterType, dateValue);
   };
 
-  const handleFilterChange = (type: "day" | "month" | "year") => {
+  const handleFilterChange = (type: "day" | "week" | "month" | "year") => {
     setFilterType(type);
     if (!samId) return;
     fetchChartData(samId, type, selectedDate);
@@ -107,7 +136,7 @@ export default function CustomGrafik() {
     const mapped = Array.isArray(chartData)
       ? chartData.map((d: any) => ({
           name: d?.createdAt || "",
-          uv: d?.speed || 0,
+          speed: d?.speed || 0,
         }))
       : [];
     return downSampleData(mapped, 500);
@@ -140,24 +169,63 @@ export default function CustomGrafik() {
             </div>
           </div>
 
-          <div className="flex justify-between items-center mb-6">
-            <div className="bg-[#bde1e4] px-3 py-2 rounded-md">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 mb-6 w-full">
+            {/* 🔹 DATE PICKER */}
+            <div
+              className="
+    w-full 
+    sm:w-auto 
+    bg-[#bde1e4] 
+    px-4 py-2 
+    rounded-md 
+    flex justify-center sm:justify-start
+  "
+            >
               <input
                 type="date"
-                className="text-md text-gray-700"
+                className="
+        text-md text-gray-700 
+        bg-transparent 
+        focus:outline-none 
+        cursor-pointer 
+        w-full sm:w-auto
+      "
                 value={selectedDate}
                 onChange={handleDateChange}
               />
             </div>
 
-            <div className="flex bg-[#bde1e4] rounded-xl overflow-hidden text-sm font-medium border border-[#63b1bb] text-black">
-              {["day", "month", "year"].map((t) => (
+            {/* 🔹 FILTER BUTTONS */}
+            <div
+              className="
+    flex 
+    w-full 
+    sm:w-auto 
+    justify-center 
+    sm:justify-end 
+    bg-[#bde1e4] 
+    rounded-lg 
+    overflow-hidden 
+    text-sm font-medium 
+    border border-[#63b1bb]
+  "
+            >
+              {["day", "week", "month", "year"].map((t) => (
                 <button
                   key={t}
                   onClick={() => handleFilterChange(t as any)}
-                  className={`px-3 py-2 cursor-pointer ${
-                    filterType === t ? "bg-[#63b1bb] font-semibold" : ""
-                  } ${t !== "day" ? "border-l border-[#63b1bb]" : ""}`}
+                  className={`
+          flex-1 sm:flex-none 
+          px-4 py-2 
+          cursor-pointer 
+          transition-all duration-200
+          ${
+            filterType === t
+              ? "bg-[#63b1bb] font-semibold text-white"
+              : "hover:bg-[#a8d3d7]"
+          }
+          ${t !== "day" ? "border-l border-[#63b1bb]" : ""}
+        `}
                 >
                   {t.toUpperCase()}
                 </button>
@@ -173,13 +241,21 @@ export default function CustomGrafik() {
                   <XAxis
                     dataKey="name"
                     interval="preserveStartEnd"
-                    tickFormatter={(val) =>
-                      new Date(val).toLocaleDateString("id-ID", {
+                    tickFormatter={(val) => {
+                      if (filterType === "week") {
+                        return new Date(val).toLocaleDateString("id-ID", {
+                          weekday: "short",
+                          day: "2-digit",
+                          month: "short",
+                        });
+                      }
+
+                      return new Date(val).toLocaleDateString("id-ID", {
                         day: filterType === "year" ? undefined : "2-digit",
                         month: filterType !== "day" ? "short" : undefined,
                         year: "numeric",
-                      })
-                    }
+                      });
+                    }}
                   />
                   <YAxis />
                   <Tooltip
@@ -195,7 +271,7 @@ export default function CustomGrafik() {
                   />
                   <Line
                     type="monotone"
-                    dataKey="uv"
+                    dataKey="speed"
                     stroke="#ef4444"
                     strokeWidth={2}
                     dot={false}

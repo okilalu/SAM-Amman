@@ -143,16 +143,14 @@ export default function Sidebar() {
   return (
     <div className="w-full h-screen flex">
       <aside
-        className={`fixed top-0 left-0 h-screen bg-gray-100 border-r border-[#d7dae0] text-black flex flex-col justify-between shadow-lg z-50 transition-transform duration-300
-          w-[70%] sm:w-[50%] md:w-[40%] lg:w-[20%]
-          ${
-            isSidebarOpen
-              ? "translate-x-0"
-              : "-translate-x-full lg:translate-x-0"
-          }
-        `}
+        className={`fixed top-0 left-0 h-screen bg-gray-100 border-r border-[#d7dae0] text-black
+    flex flex-col justify-between shadow-lg z-50 transition-transform duration-300
+    w-[70%] sm:w-[50%] md:w-[40%] lg:w-[20%]
+    ${isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+  `}
       >
-        <div>
+        {/* HEADER + MENU */}
+        <div className="flex-1 overflow-y-auto">
           <div className="px-6 h-16 flex items-center justify-between lg:justify-center border-b border-b-[#d7dae0]">
             <h1 className="text-2xl sm:text-3xl font-bold tracking-wider text-gray-800">
               AMMAN
@@ -165,7 +163,7 @@ export default function Sidebar() {
             </button>
           </div>
 
-          <nav className="mt-6">
+          <nav className="mt-4">
             <ul className="duration-300 ease-in-out">
               {menuItems.map((item) => {
                 const isActive = activeMenu === item.name;
@@ -179,11 +177,11 @@ export default function Sidebar() {
                       setTimeout(() => setIsMenuLoading(false), 500);
                       setIsSidebarOpen(false);
                     }}
-                    className={`px-6 py-3 flex items-center gap-3 cursor-pointer rounded-md transition-all duration-200 ${
-                      isActive
-                        ? "text-[#63b0ba]"
-                        : "text-black hover:text-gray-700"
-                    }`}
+                    className={`px-6 py-3 flex items-center gap-3 cursor-pointer rounded-md transition-all duration-200
+                ${
+                  isActive ? "text-[#63b0ba]" : "text-black hover:text-gray-700"
+                }
+              `}
                   >
                     <Icon
                       className={`text-xl transition-all duration-200 ${
@@ -199,7 +197,8 @@ export default function Sidebar() {
           </nav>
         </div>
 
-        <div className="px-6 py-5 flex flex-col gap-3">
+        {/* LOGOUT FIXED DI BAWAH */}
+        <div className="px-6 py-5 shrink-0">
           {isLoggedIn && (
             <button
               onClick={() => handleOpenModal("modal_logout")}
@@ -208,11 +207,11 @@ export default function Sidebar() {
               <div className="relative w-5 h-5">
                 <PiDoor
                   size={20}
-                  className="absolute top-0 left-0 transition-opacity duration-300 ease-in-out opacity-100 group-hover:opacity-0"
+                  className="absolute top-0 left-0 transition-opacity duration-300 opacity-100 group-hover:opacity-0"
                 />
                 <PiDoorOpenFill
                   size={20}
-                  className="absolute top-0 left-0 transition-opacity duration-300 ease-in-out opacity-0 group-hover:opacity-100"
+                  className="absolute top-0 left-0 transition-opacity duration-300 opacity-0 group-hover:opacity-100"
                 />
               </div>
               <p className="capitalize">log out</p>

@@ -73,7 +73,7 @@ export default function ManageUser() {
     handleOpenModal("modal_register");
   };
 
-  const isValid = username.length >= 8;
+  const isValid = username.length >= 4;
 
   // 🔸 Checkbox handler
   const handleSelectUser = (id: string) => {
@@ -94,8 +94,8 @@ export default function ManageUser() {
       return;
     }
 
-    if (username.length < 8) {
-      setWarning("Username Harus memiliki minimal 8 karakter");
+    if (username.length < 4) {
+      setWarning("Username Harus memiliki minimal 4 karakter");
       return;
     }
     if (password.length < 8) {
@@ -137,8 +137,8 @@ export default function ManageUser() {
       return;
     }
 
-    if (username.length < 8) {
-      setWarning("Username Harus memiliki minimal 8 karakter");
+    if (username.length < 4) {
+      setWarning("Username Harus memiliki minimal 4 karakter");
       return;
     }
 
@@ -387,11 +387,13 @@ export default function ManageUser() {
                   confirmText="Register"
                   onSubmit={handleRegister}
                 >
-                  <div className="flex flex-col gap-3">
-                    <label className="text-sm px-1 font-medium text-gray-600 mb-0.5">
-                      Username
-                    </label>
-                    <label className="input validator w-full bg-gray-200 rounded-md">
+                  <div className="flex flex-col gap-4 px-1 py-2 sm:px-3">
+                    {/* Username */}
+                    <div className="flex flex-col gap-1">
+                      <label className="text-sm font-medium text-gray-700">
+                        Username
+                      </label>
+
                       <input
                         type="text"
                         placeholder="Enter Username"
@@ -400,65 +402,71 @@ export default function ManageUser() {
                         title="Only letters, numbers or dash"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        className={`transition-all duration-300 w-full ${
-                          username && !isValid
-                            ? "border-red-400 focus:ring-red-300"
-                            : "border-gray-300"
-                        }`}
+                        className={`w-full px-3 py-2 text-sm rounded-md border transition-all duration-300
+      ${
+        username.length > 0 && !isValid
+          ? "border-red-400 bg-red-50"
+          : "border-gray-300 bg-gray-200"
+      }
+    `}
                       />
-                    </label>
-                    <p
-                      className={`text-xs px-1 py-1 transition-all duration-300 ${
-                        username && !isValid
-                          ? "text-red-600 opacity-100 translate-y-0"
-                          : "opacity-0 -translate-y-2"
-                      }`}
-                    >
-                      Must be 8 characters and contain only letters, numbers, or
-                      dashes.
-                    </p>
+                      {username.length > 0 && !isValid && (
+                        <span className="text-xs text-red-500 ml-1">
+                          Username harus memiliki minimal 8 karakter dan hanya
+                          boleh berisi huruf, angka, atau dash.
+                        </span>
+                      )}
+                    </div>
 
                     {/* Password */}
-                    <div className="mb-3">
-                      <div className="relative w-full">
-                        <label className="px-1 text-sm font-medium text-gray-600 mb-1">
-                          Password
-                        </label>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-sm font-medium text-gray-700">
+                        Password
+                      </label>
+
+                      <div className="relative">
                         <input
                           type={show ? "text" : "password"}
                           placeholder="Enter Password (min 8 karakter)"
-                          className={`w-full rounded-md px-3 py-3 pr-10 border transition-all duration-300 ${
-                            password.length > 0 && password.length < 8
-                              ? "bg-red-100"
-                              : "bg-gray-200"
-                          }`}
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
+                          className={`w-full px-3 py-2 pr-10 text-sm rounded-md border transition-all duration-300
+            ${
+              password.length > 0 && password.length < 8
+                ? "border-red-400 bg-red-50"
+                : "border-gray-300 bg-gray-200"
+            }
+          `}
                         />
 
                         {password.length > 0 && (
                           <button
                             type="button"
                             onClick={handleShowPass}
-                            className="absolute right-3 top-1/2 translate-y-[-50%] text-gray-600 hover:text-gray-900 transition"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-900 transition"
                           >
-                            {show ? <FaEye /> : <FaEyeSlash />}
+                            {show ? (
+                              <FaEye size={16} />
+                            ) : (
+                              <FaEyeSlash size={16} />
+                            )}
                           </button>
                         )}
                       </div>
 
                       {password.length > 0 && password.length < 8 && (
-                        <span className="text-red-500 text-xs -mt-4 px-1">
+                        <span className="text-xs text-red-500 ml-1">
                           Password harus memiliki minimal 8 karakter
                         </span>
                       )}
                     </div>
 
                     {/* Credential */}
-                    <div className="pt-3">
-                      <label className="px-1 text-sm font-medium text-gray-600 mb-1">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-sm font-medium text-gray-700">
                         Credential
                       </label>
+
                       <CustomSelects
                         value={
                           optionCredentials.find(
@@ -468,7 +476,7 @@ export default function ManageUser() {
                         onChange={(val) => setCredential(val)}
                         options={optionCredentials}
                         flex="flex-row"
-                        background="bg-gray-200 border-none text-black"
+                        background="bg-gray-200 border-none text-black w-full rounded-md"
                       />
                     </div>
                   </div>
@@ -481,45 +489,57 @@ export default function ManageUser() {
                   confirmText="Update"
                   onSubmit={handleUpdate}
                 >
-                  <div className="flex flex-col gap-3">
-                    <label className="input validator w-full bg-gray-200 rounded-md p-2">
+                  <div className="flex flex-col gap-4 px-1 py-2 sm:px-2">
+                    {/* Username */}
+                    <div className="flex flex-col gap-1">
+                      <label className="text-sm font-medium text-gray-700">
+                        Username
+                      </label>
+
                       <input
                         type="text"
                         placeholder="Enter Username"
                         required
                         minLength={8}
-                        maxLength={30}
                         title="Only letters, numbers or dash"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        className={`transition-all duration-300 w-full ${
-                          username && !isValid
-                            ? "border-red-400 focus:ring-red-300"
-                            : "border-gray-300"
-                        }`}
+                        className={`w-full px-3 py-2 text-sm rounded-md border transition-all duration-300
+      ${
+        username.length > 0 && !isValid
+          ? "border-red-400 bg-red-50"
+          : "border-gray-300 bg-gray-200"
+      }
+    `}
                       />
-                    </label>
-                    <p
-                      className={`text-xs px-1 py-1 transition-all duration-300 ${
-                        username && !isValid
-                          ? "text-red-600 opacity-100 translate-y-0"
-                          : "opacity-0 -translate-y-2"
-                      }`}
-                    >
-                      Must be 8 characters and contain only letters, numbers, or
-                      dashes.
-                    </p>
-                    <CustomSelects
-                      value={
-                        optionCredentials.find(
-                          (opt) => opt.value === credential
-                        ) || null
-                      }
-                      onChange={(val) => setCredential(val)}
-                      options={optionCredentials}
-                      flex="flex-row"
-                      background="bg-gray-200 border-none text-black"
-                    />
+
+                      {/* ALERT ERROR mirip dengan password */}
+                      {username.length > 0 && !isValid && (
+                        <span className="text-xs text-red-500 ml-1">
+                          Username harus memiliki minimal 8 karakter dan hanya
+                          boleh berisi huruf, angka, atau dash.
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Credential */}
+                    <div className="flex flex-col gap-1">
+                      <label className="px-1 text-sm font-medium text-gray-700">
+                        Credential
+                      </label>
+
+                      <CustomSelects
+                        value={
+                          optionCredentials.find(
+                            (opt) => opt.value === credential
+                          ) || null
+                        }
+                        onChange={(val) => setCredential(val)}
+                        options={optionCredentials}
+                        flex="flex-row"
+                        background="bg-gray-200 border-none text-black w-full rounded-md"
+                      />
+                    </div>
                   </div>
                 </CustomModal>
 
