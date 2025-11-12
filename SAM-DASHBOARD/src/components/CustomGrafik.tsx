@@ -24,6 +24,11 @@ export default function CustomGrafik() {
   >("day");
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [selectedDevice, setSelectedDevice] = useState<string | null>(null);
+  const [filterSpeedType, setFilterSpeedType] = useState<"all" | "overspeed">(
+    "all"
+  );
+
+  // const SPEED_LIMIT = 40;
 
   useEffect(() => {
     fetchAllAccessible();
@@ -119,6 +124,10 @@ export default function CustomGrafik() {
     }
   };
 
+  const handleSpeedFilterChange = (type: "all" | "overspeed") => {
+    setFilterSpeedType(type);
+  };
+
   const option: SelectOption[] = Array.isArray(accessible)
     ? accessible.map((item) => ({
         label: item.samId || "",
@@ -141,6 +150,29 @@ export default function CustomGrafik() {
       : [];
     return downSampleData(mapped, 500);
   }, [chartData]);
+
+  // const filteredData = useMemo(() => {
+  //   if (!dataValue) return [];
+  //   return filterSpeedType === "overspeed"
+  //     ? dataValue.filter((d) => Number(d?.speed) >= SPEED_LIMIT)
+  //     : dataValue;
+  // }, [dataValue, filterSpeedType]);
+
+  const filteredData = useMemo(() => {
+    if (!dataValue || dataValue.length === 0) return [];
+
+    if (filterSpeedType === "overspeed") {
+      const speeds = dataValue
+        .map((d) => Number(d.speed))
+        .sort((a, b) => a - b);
+      const percentileIndex = Math.floor(0.8 * speeds.length);
+      const threshold = speeds[percentileIndex]; // ambang batas 80%
+
+      return dataValue.filter((d) => Number(d.speed) >= threshold);
+    }
+
+    return dataValue;
+  }, [dataValue, filterSpeedType]);
 
   return (
     <div className="bg-white rounded-xl shadow p-6">
@@ -195,6 +227,27 @@ export default function CustomGrafik() {
               />
             </div>
 
+            {/* Filter All & Overspeed */}
+            <div className="flex justify-center sm:justify-end">
+              <div className="flex bg-[#bde1e4] rounded-lg overflow-hidden text-sm font-medium border border-[#63b1bb]">
+                {["all", "overspeed"].map((t) => (
+                  <button
+                    key={t}
+                    onClick={() =>
+                      handleSpeedFilterChange(t as "all" | "overspeed")
+                    }
+                    className={`px-4 py-2 transition-all duration-200 ${
+                      filterSpeedType === t
+                        ? "bg-[#63b1bb] font-semibold text-white"
+                        : "hover:bg-[#a8d3d7]"
+                    } ${t !== "all" ? "border-l border-[#63b1bb]" : ""}`}
+                  >
+                    {t === "all" ? "ALL" : "OVERSPEED"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* 🔹 FILTER BUTTONS */}
             <div
               className="
@@ -234,28 +287,20 @@ export default function CustomGrafik() {
           </div>
 
           <div className="h-80">
-            {dataValue && dataValue.length > 0 ? (
+            {filteredData && filteredData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={dataValue}>
+                <LineChart data={filteredData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis
                     dataKey="name"
                     interval="preserveStartEnd"
-                    tickFormatter={(val) => {
-                      if (filterType === "week") {
-                        return new Date(val).toLocaleDateString("id-ID", {
-                          weekday: "short",
-                          day: "2-digit",
-                          month: "short",
-                        });
-                      }
-
-                      return new Date(val).toLocaleDateString("id-ID", {
+                    tickFormatter={(val) =>
+                      new Date(val).toLocaleDateString("id-ID", {
                         day: filterType === "year" ? undefined : "2-digit",
                         month: filterType !== "day" ? "short" : undefined,
                         year: "numeric",
-                      });
-                    }}
+                      })
+                    }
                   />
                   <YAxis />
                   <Tooltip
@@ -272,7 +317,9 @@ export default function CustomGrafik() {
                   <Line
                     type="monotone"
                     dataKey="speed"
-                    stroke="#ef4444"
+                    stroke={
+                      filterSpeedType === "overspeed" ? "#ef4444" : "#3b82f6"
+                    }
                     strokeWidth={2}
                     dot={false}
                     activeDot={{ r: 5 }}
@@ -281,7 +328,7 @@ export default function CustomGrafik() {
               </ResponsiveContainer>
             ) : (
               <div className="flex justify-center items-center h-full text-gray-500">
-                No data available
+                Tidak ada data
               </div>
             )}
           </div>
