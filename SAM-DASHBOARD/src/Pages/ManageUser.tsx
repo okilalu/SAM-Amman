@@ -412,7 +412,7 @@ export default function ManageUser() {
                       />
                       {username.length > 0 && !isValid && (
                         <span className="text-xs text-red-500 ml-1">
-                          Username harus memiliki minimal 8 karakter dan hanya
+                          Username harus memiliki minimal 4 karakter dan hanya
                           boleh berisi huruf, angka, atau dash.
                         </span>
                       )}
@@ -516,7 +516,7 @@ export default function ManageUser() {
                       {/* ALERT ERROR mirip dengan password */}
                       {username.length > 0 && !isValid && (
                         <span className="text-xs text-red-500 ml-1">
-                          Username harus memiliki minimal 8 karakter dan hanya
+                          Username harus memiliki minimal 4 karakter dan hanya
                           boleh berisi huruf, angka, atau dash.
                         </span>
                       )}
