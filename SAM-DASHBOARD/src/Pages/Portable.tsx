@@ -397,7 +397,9 @@ export default function Portable() {
                       <p className="text-gray-800">
                         {new Date(
                           selectedItem.createdAt as string
-                        ).toLocaleDateString()}
+                        ).toLocaleDateString("id-ID", {
+                          timeZone: "UTC",
+                        })}
                       </p>
                     </div>
 
@@ -406,7 +408,9 @@ export default function Portable() {
                       <p className="text-gray-800">
                         {new Date(
                           selectedItem.createdAt as string
-                        ).toLocaleTimeString()}
+                        ).toLocaleTimeString("id-ID", {
+                          timeZone: "UTC",
+                        })}
                       </p>
                     </div>
 
