@@ -30,7 +30,6 @@ export default function ManageDevice() {
   const [deviceIP, setDeviceIP] = useState("");
   const [deviceRootFolder, setDeviceRootFolder] = useState("");
   const [cameraIP, setCameraIP] = useState("");
-  const [cameraRootFolder, setCameraRootFolder] = useState("");
   const [cameraType, setCameraType] = useState("");
   const [location, setLocation] = useState("");
   const [filter, setFilter] = useState("");
@@ -74,7 +73,6 @@ export default function ManageDevice() {
     setDeviceIP("");
     setDeviceRootFolder("");
     setCameraIP("");
-    setCameraRootFolder("");
     setCameraType("");
     setLocation("");
     setSelectedIds([]); // reset pilihan checkbox biar gak keikut
@@ -109,7 +107,6 @@ export default function ManageDevice() {
       !deviceIP ||
       !deviceRootFolder ||
       !cameraIP ||
-      !cameraRootFolder ||
       !cameraType ||
       !location
     ) {
@@ -123,7 +120,6 @@ export default function ManageDevice() {
         deviceIP,
         deviceRootFolder,
         cameraIP,
-        cameraRootFolder,
         cameraType,
         location,
       };
@@ -137,7 +133,6 @@ export default function ManageDevice() {
       setDeviceIP("");
       setDeviceRootFolder("");
       setCameraIP("");
-      setCameraRootFolder("");
       setCameraType("");
       setLocation("");
     } catch (error) {
@@ -168,7 +163,6 @@ export default function ManageDevice() {
         deviceIP,
         deviceRootFolder,
         cameraIP,
-        cameraRootFolder,
         cameraType,
         location,
       });
@@ -248,7 +242,6 @@ export default function ManageDevice() {
     setDeviceIP(selectedDevice.deviceIP || "");
     setDeviceRootFolder(selectedDevice.deviceRootFolder || "");
     setCameraIP(selectedDevice.cameraIP || "");
-    setCameraRootFolder(selectedDevice.cameraRootFolder || "");
     setCameraType(selectedDevice.cameraType || "");
     setLocation(selectedDevice.location || "");
     handleOpenModal("modal_update");
@@ -456,16 +449,6 @@ export default function ManageDevice() {
                     onChange={(e) => setCameraIP(e.target.value)}
                   />
                   <label className="px-1 text-sm font-medium text-gray-600 mb-1">
-                    Camera Root Folder
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Camera Root Folder"
-                    className="mb-2 w-full bg-gray-200 rounded-md p-2"
-                    value={cameraRootFolder}
-                    onChange={(e) => setCameraRootFolder(e.target.value)}
-                  />
-                  <label className="px-1 text-sm font-medium text-gray-600 mb-1">
                     Camera Type
                   </label>
                   <input
@@ -562,16 +545,6 @@ export default function ManageDevice() {
                     className="mb-2 w-full bg-gray-200 rounded-md p-2"
                     value={cameraIP}
                     onChange={(e) => setCameraIP(e.target.value)}
-                  />
-                  <label className="px-1 text-sm font-medium text-gray-600 mb-1">
-                    Camera Root Folder
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Camera Root Folder"
-                    className="mb-2 w-full bg-gray-200 rounded-md p-2"
-                    value={cameraRootFolder}
-                    onChange={(e) => setCameraRootFolder(e.target.value)}
                   />
                   <label className="px-1 text-sm font-medium text-gray-600 mb-1">
                     Camera Type
