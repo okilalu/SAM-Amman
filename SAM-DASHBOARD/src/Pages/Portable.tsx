@@ -356,7 +356,12 @@ export default function Portable() {
                   <div className="flex flex-col">
                     <span className="font-semibold">SAM: {item.samId}</span>
                     <span className="text-sm text-gray-600">
-                      {new Date(item.createdAt as string).toLocaleDateString()}
+                      {new Date(item.createdAt as string).toLocaleDateString(
+                        "id-ID",
+                        {
+                          timeZone: "UTC",
+                        }
+                      )}
                     </span>
                     <span className="text-sm font-medium">
                       Speed: {item.speed} km/h
