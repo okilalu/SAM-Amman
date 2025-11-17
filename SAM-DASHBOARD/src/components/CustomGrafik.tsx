@@ -229,7 +229,7 @@ export default function CustomGrafik() {
 
             {/* Filter All & Overspeed */}
             <div className="flex justify-center sm:justify-end">
-              <div className="flex bg-[#bde1e4] rounded-lg overflow-hidden text-sm font-medium border border-[#63b1bb]">
+              <div className="flex bg-[#bde1e4] rounded-lg overflow-hidden text-xs sm:text-sm font-medium border border-[#63b1bb]">
                 {["all", "overspeed"].map((t) => (
                   <button
                     key={t}
@@ -259,7 +259,7 @@ export default function CustomGrafik() {
     bg-[#bde1e4] 
     rounded-lg 
     overflow-hidden 
-    text-sm font-medium 
+    text-xs sm:text-sm font-medium 
     border border-[#63b1bb]
   "
             >
@@ -269,9 +269,10 @@ export default function CustomGrafik() {
                   onClick={() => handleFilterChange(t as any)}
                   className={`
           flex-1 sm:flex-none 
-          px-4 py-2 
+          sm:px-4 px-3 py-2 
           cursor-pointer 
           transition-all duration-200
+          whitespace-nowrap
           ${
             filterType === t
               ? "bg-[#63b1bb] font-semibold text-white"
