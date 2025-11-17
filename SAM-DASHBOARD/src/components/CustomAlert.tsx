@@ -33,17 +33,36 @@ export const CustomAlert: React.FC<CustomAlertProps> = ({
     <AnimatePresence>
       {visible && (
         <motion.div
-          initial={{ x: 80, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          exit={{ x: 80, opacity: 0 }}
-          transition={{ duration: 0.4, ease: "easeInOut" }}
-          className="fixed bottom-8 right-6 z-50 w-full max-w-md"
+          initial={{ y: 40, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 40, opacity: 0 }}
+          transition={{ duration: 0.35, ease: "easeInOut" }}
+          className="
+            fixed z-50
+            w-full px-4
+            bottom-4 left-1/2
+            -translate-x-1/2
+            sm:left-auto sm:translate-x-0
+            sm:bottom-6 sm:right-6
+            sm:w-full sm:max-w-sm
+          "
         >
-          <div role="alert" className={` alert shadow-lg border ${status}`}>
-            {icon}
+          <div
+            role="alert"
+            className={`alert shadow-lg border ${status} flex items-center gap-3 px-4 py-3`}
+          >
+            {icon && <div className="text-xl sm:text-2xl">{icon}</div>}
 
-            <div className="text-black">{title}</div>
-            {description && <div className="text-black">{description}</div>}
+            <div className="flex flex-col">
+              <span className="font-semibold text-sm sm:text-base text-black">
+                {title}
+              </span>
+              {description && (
+                <span className="text-xs sm:text-sm text-black">
+                  {description}
+                </span>
+              )}
+            </div>
           </div>
         </motion.div>
       )}
